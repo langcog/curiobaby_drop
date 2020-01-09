@@ -1,0 +1,113 @@
+---
+title: "curiobaby_drop OED"
+author: "George Kachergis"
+date: "1/9/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+require(tidyverse)
+```
+
+## Load data
+
+```{r, load-data}
+dirs = list.files("agent-data")
+d = data.frame()
+for(dir in dirs) {
+  filenames <- list.files(paste("agent-data",dir,sep='/'), full.names=TRUE)
+  for(f in filenames) {
+    tmp <- read.csv(f, header=T)
+    d = rbind(d, tmp)
+  }
+}
+```
+
+`r nrow(d)` simulations with `r length(unique(d$dropped_objects))` unique dropped objects, of which we only used a subset of 9 for our behavioral experiments. We filter the simulations with undesired objects (sphere, cylinder, and cube).
+
+```{r, count-unique-subsets}
+names(d) # collision_count
+
+hash_cols <- function(dat, cols) {
+  shapes = c("Bowl", "Cylinder", "Cone", "Cube", "Dumbbell", "Octahedron", 
+             "Pentagon", "Pipe", "Pyramid", "Ring", "Sphere", "TriangularPrism")
+  for(i in 1:length(cols)) {
+    dat[,cols[i]] = as.numeric(factor(dat[,cols[i]], levels=shapes)) #* 10^(i-1)
+  }
+  for(r in 1:nrow(dat)) {
+    dat[r,cols] = sort(dat[,cols])
+  }
+  for(i in 1:length(cols)) {
+    dat[,cols[i]] = dat[,cols[i]] * 10^(i-1)
+  }
+  hash = rowSums(dat[,cols])
+  return(hash)
+}
+
+unwanted = c("Sphere","Cylinder","Cube")
+
+d$drop_set = hash_cols(d, 8:10)
+d$ground_set = hash_cols(d, 5:7)
+
+df <- d %>% 
+  filter(
+    !ground_object_1 %in% unwanted,
+    !ground_object_2 %in% unwanted,
+    !ground_object_3 %in% unwanted,
+    !available_drop_object_1 %in% unwanted,
+    !available_drop_object_2 %in% unwanted,
+    !available_drop_object_3 %in% unwanted
+  )
+
+length(unique(d$drop_set)) # 285 unique drop sets...
+length(unique(d$ground_set)) # 285 unique ground sets..
+
+#d = subset(d, episode>299) # Michael says first 300 are warm-up off-policy
+d = read_csv("agent/20191203-084115/agent_0.csv") # most recent = trained dynamics model
+
+# selected drop object is in collision_object_1 or _2, so target is case where dropped_object!=collision_object
+d <- d %>% mutate(
+  collision_object_1 = ifelse(collision_object_1=="None", NA, collision_object_1),
+  collision_object_2 = ifelse(collision_object_2=="None", NA, collision_object_2),
+  target = ifelse(collision_object_1==dropped_object, collision_object_2, collision_object_1)
+  ) 
+
+```
+
+## Drop Preferences
+
+```{r}
+
+drops = sort(table(d$dropped_object), decr=T) # 13 objects
+
+round(drops / sum(drops), 2)
+
+# should normalize by available_drop_objects_1 _2 and _3
+```
+
+Some changing preference in drop objects: cube, pentagon, torus, and cone > octahedron and bowl
+Thirteen objects here, but we've only printed 9 (though could add a sphere easily, at least)
+
+## Target Preferences
+
+Are objects roughly equally available as targets?
+
+```{r}
+all_ground = c(d$ground_object_1, d$ground_object_2, d$ground_object_3)
+sort(round(table(all_ground) / sum(table(all_ground)), 2), decr=T)
+```
+
+Roughly... 
+
+```{r}
+# sometimes collision_object_1 == collision_object_2 == None ?
+targ = sort(table(d$target), decr=T)
+round(targ / sum(targ), 2)
+```
+
+
+Collision count:
+```{r}
+round(table(d$collision_count) / sum(table(d$collision_count)), 2)
+```
