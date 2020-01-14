@@ -2,20 +2,20 @@ require(here)
 require(tidyverse)
 require(tidyboot)
 
-hdp = read.csv2("human-data/curiobaby_drop-data - drop pilot.csv", sep=',', header=T)
+#hdp = read.csv2("human-data/curiobaby_drop-data - drop pilot.csv", sep=',', header=T)
 hd = read.csv2("human-data/curiobaby_drop-data - drop exp.csv", sep=',', header=T)
 
-length(unique(hdp$SID)) # 8
-length(unique(hd$SID)) # 42
+#length(unique(hdp$SID)) # 8 subjects
+length(unique(hd$SID)) # 53
 
-cols = intersect(names(hdp), names(hd))
+#cols = intersect(names(hdp), names(hd))
+#hum = rbind(hdp[,cols], hd[,cols]) # 609
 
-hum = rbind(hdp[,cols], hd[,cols]) # 609
-hum = subset(hum, Exclude!="Y") # 577 trials
+hum = subset(hd, Exclude!="Y") # 577 trials
 
-length(unique(hum$SID)) # 49 subjects
+length(unique(hum$SID)) # 51 subjects
 
-md <- hum %>% group_by(SID) %>% summarise(max=max(Trial))
+md <- hum %>% group_by(SID) %>% summarise(max=max(Trial)) %>% arrange(max)
 
 
 hum$DropChoice = as.character(hum$DropChoice)
