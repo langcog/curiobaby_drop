@@ -20,6 +20,8 @@ keywords: >
     curiosity; novel objects; object interactions; intuitive physics
     
 output: cogsci2016::cogsci_paper
+#    includes:
+#      in_header: preamble.tex
 #final-submission: \cogscifinalcopy
 ---
 
@@ -52,34 +54,29 @@ age = table(s_tr$Age_Group)
 
 # Introduction 
 
+Curiosity is a fundamental part of our motivation, driving everyday behaviors that we spend a surprising amount of time pursuing, from browsing the internet to reading novels, watching the news, and many other forms of information seeking.
+Curiosity is so strongly linked to learning that William James (1899) considered it to be "the impulse towards better cognition".
+Researchers have credited curiosity for inspiring behaviors ranging from exploration and play to latent learning and neophilia.
+However, there is a major outstanding difficulty in research on curiosity: there is no integrative theory of the mechanisms and basis for curiosity.
+What pairings of stimuli and knowledge states inspire curiosity? 
+How does curiosity motivate and drive action selection, and influence subsequent learning and behavior?
 
-Within the first two years of life, human infants develop a remarkable suite of exploratory behaviors — they begin to direct their own movement through their environ- ment, they can shift their attention to events they find most interesting, and they interact with objects in complex, creative ways [2, 6, 8, 9, 23]. This ability to playfully explore and (re)structure their environment sets infants apart from even the most advanced robots today, which must be taught what to do in every scenario. The goal of this proposal is to develop computationally pre- cise models of exploration and learning that mirror the trajectory of human infant development. Our ongoing strategy is to combine approaches from artificial intelligence, computational cognitive science, and developmental psychology.
+Although several theories of curiosity (surveyed briefly below) partially address these issues, a gold standard for testing these theories would require a fully-instantiated theory of curiosity in an artificial agent whose behavior can be directly compared to that of humans.
+However, a further difficulty of this approach is selecting a task that adequately captures the general nature of curiosity: curiosity-driven human behavior is so wide-ranging that it is difficult to systematically compare to presently limited artificial agents.
+In this paper we propose a new paradigm that allows us to directly compare children's curiosity about physical interactions with that of an aritifical agent implementing a variety of forms of curiosity.
 
-the gap: major outstanding issue in the research on curiosity and exploratory play is the functional form of the intrinsic motivation
-
-gold standard would be direct comparison of human and AI agents, but human behavior is so wide-ranging
-
-we propose a new paradigm that enables 
-
-paragraph 
-
+## Theories of Curiosity
 
 Whence intrinsically-motivated curiosity?
 Novelty, opportunity for learning, etc.
 
-Intuitive physics, play..
+## Related Behavioral Work
 
-Best way to test is to create models instantiating different curiosity policies and then compare model and human behavior.
+Intuitive physics, play
 
-## Model subsection first
+## Model subsection first?
 
-- or joint paradigm section
-- developmental data collection
-- model r
-
-- simple statistical test (per drop / target set): 
-chisq.test 
-Observed vs Expected
+...or joint paradigm section, and then developmental data collection, model description and comparison
 
 # Experiment
 
@@ -87,7 +84,7 @@ Observed vs Expected
 
 ### Participants
 Participants were `r length(unique(raw$SID))` children recruited from the Children's Discovery Museum of San Jose and Bing Nursery School.
-Exclusions were made based on...
+Participant exclusions were made based on cases where i) the participant did not complete more than half of the study play session or ii) the parent did not consent for video recording of study. 
 After exclusions, results from `r length(unique(hum$SID))` were analyzed, including `r age[1]` 2-year-olds, `r age[2]` 3-year-olds, `r age[3]` 4-year-olds, `r age[4]` 5-year-olds, and `r age[5]` 6-year-olds. 
 
 ### Materials
@@ -100,22 +97,116 @@ b = c("cone", "octahedron", "pipe")
 c = c("bowl", "dumbbell", "pentagon")
 ```
 
+Stimuli included 3D-printed objects produced using Blender modeling software. 
+The 9 stimuli objects were bowl, cone, dumbbell, octahedron, pentagon, pipe, pyramid, torus, and triangular prism. 
+The printed objects were all yellow, rigid plastic material and designed to fit comfortably in the child’s hand (dimension range: 3.8-10.1 cm). 
+
+The set of 9 objects were divided into 3 subsets (A = {pyramid, torus, triangular prism}, B = {cone, octahedron, pipe}, and C = {bowl, dumbbell, pentagon}). 
+These subsets served as sets (A, B, C) of target/drop objects in six successive blocks of 2 trials, for a total of 12 trials. 
+For example, in Order 1, in the first block of 2 trials, set A served as the target objects from which the child chose to drop on the target objects (set B).
+
+The target:drop block sequence for Order 1 was A:B, B:C, C:A, A:C, B:A, C:B. Sequence for Order 2 (reverse of Order 1) was C:B, B:A, A:C, C:A, B:C, A:B. Participants were assigned to condition in counterbalanced order.
+
+
 ### Procedure
 
+After the parent provided informed consent, children were assigned to Order 1 or Order 2. Participants were assigned to condition in counterbalanced order.
+
+We introduced children to a set of 3D-printed toy objects ("blocks"). 
+The child played a game where they could pick which of three blocks to drop in a bin containing three other blocks, to see what happens. 
+We then swapped target/drop blocks, based on assigned order sequence, and asked the child to do the same selection and dropping a dozen times. 
+Finally, we asked the child to build a "cool" tower with any of the toy blocks for about one minute.
+
+Based on piloting, we estimated the activity would would only require five minutes to complete. 
+In both conditions, a video camera was used to record the play session from an angle above the bin, to show child's block selection and drop location as well as child's completed tower. 
+After child notified the researcher that they were finished building their tower, the session was completed and camera was turned off. 
+
+### Drop Coding Procedure
+
+Each session's video was manually coded for object drop choice and drop location. Drop choice is defined as the child's single selection of three drop objects to drop into the bin containing three different objects. 
+The bin is divided into three quadrants of equal area. 
+Each target object resides in one of these three areas. 
+Drop location was defined as the site of collision of drop object at the base of the bin. 
+Drop locations include either i) direct collision with one of three target objects, ii) collision in an empty space surrounding select target object, or iii) outside the bin. 
+
+If drop object collided with empty space, we recorded which target object quadrant it landed. 
+We also recorded events where drop object bounced from empty space or a target object then collided with other target object(s). 
+Number of collisions and with which target(s) was also coded.
+
+Trials were excluded if child i) dropped object outside of the bin, ii) touched target object(s) prior to a drop, iii) dropped object during set change, iv) selected more than one object to drop, or iv) dropped (or threw) object from too high (>1.5 m). 
+Trials were also excluded if the experimenter made a mistake (e.g., used the wrong stimulus set or repeated a trial more than twice).
+
 
 ## Results
 
+```{r chance-comparison}
+
+report_chisq <- function(X) {
+  # e.g. X^2 (2, N = 88) = 2.1, p = .35
+  pval = round(X$p.value, 3)
+  if(pval==0) { 
+    pval = ", p<.001" 
+  } else {
+    pval = paste0(", p=",pval)
+  }
+  return(paste0("($X^2$(", X$parameter, ", N=", sum(X$expected), ") = ", round(X$statistic,2), pval, ")"))
+}
+
+# see if children's choices (per subset) are random
+drop_ch = table(hum$StimSet, hum$DropChoice)
+# chisq.test(rbind(colSums(drop_ch[,a]), rep(sum(drop_ch[,a]/3), 3)) )
+
+Xa_drop = chisq.test( colSums(drop_ch[,a]) ) 
+Xb_drop = chisq.test( colSums(drop_ch[,b]) )
+Xc_drop = chisq.test( colSums(drop_ch[,c]) )
 
 
-# Model
 
-## Baseline Curiosity Policy
+target_ch = table(hum$StimSet, hum$DropLocation)
 
-## Antagonistic Curiosity Policy
+Xa_targ = chisq.test( colSums(target_ch[,a]) ) # n.s.
+Xb_targ = chisq.test( colSums(target_ch[,b]) ) # n.s.
+Xc_targ = chisq.test( colSums(target_ch[,c]) ) # n.s.
 
-## Results
+```
 
-We first examine children's choice of drop objects and target objects to see if children had any preference for particular objects.
+We first examine children's choice of drop objects and target objects to determine if children were choosing randomly, or had consistent preferences for some objects. We used a chi-square test of independence on children's choices (drop and target) from each set of objects (A, B, C).
+Children's drop choices from set A significantly differed from chance `r report_chisq(Xa_drop)`.
+Children's drop choices from set B also significantly differed from chance `r report_chisq(Xb_drop)`.
+Children's drop choices from set C did not significantly differ from chance `r report_chisq(Xc_drop)`.
+The 
+Of all the drops, many
+Children's target choices did not significantly differ from chance for set A `r report_chisq(Xa_targ)`, B `r report_chisq(Xb_targ)`, or C `r report_chisq(Xc_targ)`.
+
+```{r table1, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+get_table_string <- function(tableX, set) {
+  tt = sort(colSums(tableX[,set]))
+  tstr = paste(paste0(names(tt), " (", tt, "),"), collapse=' ')
+  tstr = gsub('.{1}$', '', tstr)
+  return(tstr)
+}
+dA = get_table_string(drop_ch, a)
+dB = get_table_string(drop_ch, b)
+dC = get_table_string(drop_ch, c)
+
+tA = get_table_string(target_ch, a)
+tB = get_table_string(target_ch, b)
+tC = get_table_string(target_ch, c)
+
+tabl <- paste0("
+| Set |  Drop Object (N) | Target Object (N) |
+|-----|:----------------:|-----------:|
+|  A  | ", dA,"   | ", tA," |
+|  B  | ", dB,"   | ", tB," |
+|  C  | ", dC,"   | ", tC," |
+")
+#cat(tabl) 
+
+#tab1 <- xtable::xtable(summary(out)$coef, digits=c(0, 2, 2, 1, 2), 
+#                       caption = "This table prints across one column.")
+#print(tab1, type="latex", comment = F, table.placement = "H")
+```
+
 
 ```{r drop-choice, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3.4, fig.height=2.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Relative frequency of drop object choice as a function of stimulus set."}
 ch_cond <- hum %>% 
@@ -170,6 +261,18 @@ ggplot(ch_cond, aes(x=StimSet, y=freq, shape=TargetSpace, color=TargetSpace)) + 
   langcog::scale_fill_solarized() + ggthemes::theme_few() + 
   geom_hline(yintercept=.33, lty='dashed')
 ```
+
+
+
+
+# Model
+
+## Baseline Curiosity Policy
+
+## Antagonistic Curiosity Policy
+
+## Results
+
 
 ## Comparison with Children
 
