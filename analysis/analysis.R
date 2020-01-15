@@ -3,7 +3,7 @@ require(tidyverse)
 require(tidyboot)
 
 #hdp = read.csv2("human-data/curiobaby_drop-data - drop pilot.csv", sep=',', header=T)
-raw = read.csv2("human-data/curiobaby_drop-data - drop exp.csv", sep=',', header=T)
+raw = read.csv2("human-data/curiobaby_drop-data - drop exp.csv", sep=',', header=T, stringsAsFactors = F)
 
 # ab = cone, octahedron, pipe
 # ac = bowl, dumbbell, pentagon
@@ -32,7 +32,7 @@ md <- hum %>% group_by(SID) %>% summarise(max=max(Trial)) %>% arrange(max)
 hum$DropChoice = as.character(hum$DropChoice)
 hum$DropLocation = as.character(hum$DropLocation)
 
-hum$Age = as.numeric(as.character(hum$Age))
+hum$Age_Group = as.numeric(hum$Age_Group)
 
 ch_cond <- hum %>% 
   group_by(StimSet, DropChoice) %>%
@@ -45,7 +45,6 @@ g <- ggplot(ch_cond, aes(x=StimSet, y=freq, shape=DropChoice, color=DropChoice, 
   #geom_linerange(aes(ymin = ci_lower, ymax = ci_upper)) +
   xlab("Stimulus Set") + ylab("Drop Choice") +
   langcog::scale_fill_solarized() + ggthemes::theme_few()
-ggsave("drop_choice_by_trial.pdf", width=4.5, height=4.5)
 
 ch_tr <- hum %>% 
   group_by(Trial, DropChoice) %>%

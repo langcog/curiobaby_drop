@@ -1,5 +1,7 @@
 ---
 #title: "Modeling children's intrinsically-motivated curiosity about object interactions"
+#title: "Drop it like it's hot: Modeling children's curiosity about physical interactions"
+#title: "A drop in the bucket: Modeling children's curiosity about physical interactions"
 title: "What if you drop that? Modeling children's curiosity about physical interactions"
 bibliography: library.bib
 csl: apa6.csl
@@ -39,8 +41,10 @@ require(tidyboot)
 ```
 
 ```{r, load-data}
-raw = read.csv2("../analysis/human-data/curiobaby_drop-data - drop exp.csv", sep=',', header=T)
-hum = subset(raw, Exclude!="Y") # 577 trials
+raw = read.csv2("../analysis/human-data/curiobaby_drop-data - drop exp.csv", sep=',', header=T, stringsAsFactors=F)
+hum = subset(raw, Exclude!="Y")
+
+hum = hum[-which(hum$StimSet=="bc" & hum$DropChoice=="bowl and dumbbell"),] # chose two - exclude
 
 s_tr <- hum %>% group_by(SID, Age_Group) %>% summarise(max=max(Trial)) %>% arrange(max)
 age = table(s_tr$Age_Group)
@@ -80,9 +84,17 @@ Observed vs Expected
 ### Participants
 Participants were `r length(unique(raw$SID))` children recruited from the Children's Discovery Museum of San Jose and Bing Nursery School.
 Exclusions were made based on...
-After exclusions, results from `r length(hum$SID)` were analyzed, including `r age[1]` 2-year-olds, `r age[2]` 3-year-olds, `r age[3]` 4-year-olds, `r age[4]` 5-year-olds, and `r age[5]` 6-year-olds. 
+After exclusions, results from `r length(unique(hum$SID))` were analyzed, including `r age[1]` 2-year-olds, `r age[2]` 3-year-olds, `r age[3]` 4-year-olds, `r age[4]` 5-year-olds, and `r age[5]` 6-year-olds. 
 
 ### Materials
+
+```{r object-sets}
+shapes = c("bowl","cone","dumbbell","octahedron","pentagon","pipe","pyramid","torus","trig prism")
+
+a = c("pyramid", "torus", "trig prism")
+b = c("cone", "octahedron", "pipe")
+c = c("bowl", "dumbbell", "pentagon")
+```
 
 ### Procedure
 
@@ -99,34 +111,65 @@ After exclusions, results from `r length(hum$SID)` were analyzed, including `r a
 
 ## Results
 
-```{r 2-col-image, fig.env = "figure*", fig.pos = "h", fig.width=4, fig.height=2, fig.align = "center", set.cap.width=T, num.cols.cap=2, fig.cap = "This image spans both columns. And the caption text is limited to 0.8 of the width of the document."}
-img <- png::readPNG("figs/walrus.png")
-grid::grid.raster(img)
+We first examine children's choice of drop objects and target objects to see if children had any preference for particular objects.
+
+```{r drop-choice, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3.4, fig.height=2.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Relative frequency of drop object choice as a function of stimulus set."}
+ch_cond <- hum %>% 
+  group_by(StimSet, DropChoice) %>%
+  summarise(n = n()) %>%
+  mutate(freq = n / sum(n)) 
+
+ch_cond$StimSet <- factor(ch_cond$StimSet, levels = c("ba","ca","ab","cb","ac","bc"))
+ggplot(ch_cond, aes(x=StimSet, y=freq, shape=DropChoice, color=DropChoice)) + # , size=n
+  geom_point(alpha=.8) +
+  scale_shape_manual(values=10:19) +
+  #geom_linerange(aes(ymin = ci_lower, ymax = ci_upper)) +
+  xlab("Stimulus Set") + ylab("Rate of Drop Object Choice") + ylim(0,.66) + 
+  langcog::scale_fill_solarized() + ggthemes::theme_few() + 
+  geom_hline(yintercept=.33, lty='dashed')
+```
+
+```{r target-hit, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3.4, fig.height=2.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Relative frequency of targeted object as a function of stimulus set."}
+hum$Target = hum$DropLocation
+ch_cond <- hum %>% 
+  filter(Target!="outside") %>%
+  group_by(StimSet, Target) %>%
+  summarise(n = n()) %>%
+  mutate(freq = n / sum(n)) 
+
+ch_cond$Target <- factor(ch_cond$Target, levels = c(shapes, "space"))
+ggplot(ch_cond, aes(x=StimSet, y=freq, shape=Target, color=Target)) + # , size=n
+  geom_point(alpha=.8) +
+  scale_shape_manual(values=10:20) +
+  #geom_linerange(aes(ymin = ci_lower, ymax = ci_upper)) +
+  xlab("Stimulus Set") + ylab("Rate of Target Object Choice") + ylim(0,.66) + 
+  langcog::scale_fill_solarized() + ggthemes::theme_few() + 
+  geom_hline(yintercept=.33, lty='dashed')
+```
+
+```{r target-space, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3.4, fig.height=2.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Relative frequency of targeted object as a function of stimulus set."}
+
+hum$TargetSpace = ifelse(hum$DropLocation=="space", hum$WhichSpace, hum$DropLocation)
+
+ch_cond <- hum %>% 
+  filter(is.element(TargetSpace, shapes)) %>%
+  group_by(StimSet, TargetSpace) %>%
+  summarise(n = n()) %>%
+  mutate(freq = n / sum(n)) 
+
+ch_cond$TargetSpace <- factor(ch_cond$TargetSpace, levels = shapes)
+ggplot(ch_cond, aes(x=StimSet, y=freq, shape=TargetSpace, color=TargetSpace)) + # , size=n
+  geom_point(alpha=.8) +
+  scale_shape_manual(values=10:19) +
+  #geom_linerange(aes(ymin = ci_lower, ymax = ci_upper)) +
+  xlab("Stimulus Set") + ylab("Rate of Target Location Choice") + ylim(0,.66) + 
+  langcog::scale_fill_solarized() + ggthemes::theme_few() + 
+  geom_hline(yintercept=.33, lty='dashed')
 ```
 
 ## Comparison with Children
 
-Single column is the default option, but if you want set it explicitly, set `fig.env` to `figure`. Notice that the `num.cols` option for the caption width is set to `1`.
 
-```{r image, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=2, fig.height=2, set.cap.width=T, num.cols.cap=1, fig.cap = "One column image."}
-img <- png::readPNG("figs/lab_logo_stanford.png")
-grid::grid.raster(img)
-```
-
-
-You can use the xtable function in the xtable package.
-
-```{r xtable, results="asis"}
-n <- 100
-x <- rnorm(n)
-y <- 2*x + rnorm(n)
-out <- lm(y ~ x)
-
-tab1 <- xtable::xtable(summary(out)$coef, digits=c(0, 2, 2, 1, 2), 
-                       caption = "This table prints across one column.")
-
-print(tab1, type="latex", comment = F, table.placement = "H")
-```
 
 # Discussion 
 
