@@ -1,5 +1,6 @@
 ---
-title: "Modeling children's intrinsically-motivated curiosity about object interactions"
+#title: "Modeling children's intrinsically-motivated curiosity about object interactions"
+title: "What if you drop that? Modeling children's curiosity about physical interactions"
 bibliography: library.bib
 csl: apa6.csl
 document-params: "10pt, letterpaper"
@@ -47,12 +48,30 @@ age = table(s_tr$Age_Group)
 
 # Introduction 
 
+the gap: major outstanding issue in the research on curiosity and exploratory play is the functional form of the intrinsic motivation
+
+gold standard would be direct comparison of human and AI agents, but human behavior is so wide-ranging
+
+we propose a new paradigm that enables 
+
+paragraph 
+
 Whence intrinsically-motivated curiosity?
 Novelty, opportunity for learning, etc.
 
 Intuitive physics, play..
 
 Best way to test is to create models instantiating different curiosity policies and then compare model and human behavior.
+
+## Model subsection first
+
+- or joint paradigm section
+- developmental data collection
+- model r
+
+- simple statistical test (per drop / target set): 
+chisq.test 
+Observed vs Expected
 
 # Experiment
 

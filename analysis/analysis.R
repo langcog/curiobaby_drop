@@ -3,15 +3,26 @@ require(tidyverse)
 require(tidyboot)
 
 #hdp = read.csv2("human-data/curiobaby_drop-data - drop pilot.csv", sep=',', header=T)
-hd = read.csv2("human-data/curiobaby_drop-data - drop exp.csv", sep=',', header=T)
+raw = read.csv2("human-data/curiobaby_drop-data - drop exp.csv", sep=',', header=T)
+
+# ab = cone, octahedron, pipe
+# ac = bowl, dumbbell, pentagon
+# ba = pyramid, torus, trig prism
+# bc = bowl, dumbbell, pentagon
+# ca = pyramid, torus, trig prism
+# cb = cone, octahedron, pipe
+
+# a = pyramid, torus, trig prism
+# b = cone, octahedron, pipe
+# c = bowl, dumbbell, pentagon
 
 #length(unique(hdp$SID)) # 8 subjects
-length(unique(hd$SID)) # 53
+length(unique(raw$SID)) # 53
 
 #cols = intersect(names(hdp), names(hd))
 #hum = rbind(hdp[,cols], hd[,cols]) # 609
 
-hum = subset(hd, Exclude!="Y") # 577 trials
+hum = subset(raw, Exclude!="Y") # 577 trials
 
 length(unique(hum$SID)) # 51 subjects
 
@@ -23,6 +34,18 @@ hum$DropLocation = as.character(hum$DropLocation)
 
 hum$Age = as.numeric(as.character(hum$Age))
 
+ch_cond <- hum %>% 
+  group_by(StimSet, DropChoice) %>%
+  summarise(n = n()) %>%
+  mutate(freq = n / sum(n)) 
+
+ch_cond$DropChoice <- as.factor(ch_cond$DropChoice)
+g <- ggplot(ch_cond, aes(x=StimSet, y=freq, shape=DropChoice, color=DropChoice, size=n)) + geom_point(alpha=.8) +
+  scale_shape_manual(values=10:19) +
+  #geom_linerange(aes(ymin = ci_lower, ymax = ci_upper)) +
+  xlab("Stimulus Set") + ylab("Drop Choice") +
+  langcog::scale_fill_solarized() + ggthemes::theme_few()
+ggsave("drop_choice_by_trial.pdf", width=4.5, height=4.5)
 
 ch_tr <- hum %>% 
   group_by(Trial, DropChoice) %>%
