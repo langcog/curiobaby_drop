@@ -18,7 +18,8 @@ d = data.frame()
 for(dir in dirs) {
   filenames <- list.files(paste("agent-data",dir,sep='/'), full.names=TRUE)
   for(f in filenames) {
-    tmp <- read.csv(f, header=T)
+    #tmp <- read.csv(f, header=T)
+    tmp <- read.table(f, sep=',', header=T, stringsAsFactors = F)
     d = rbind(d, tmp)
   }
 }
@@ -36,7 +37,7 @@ hash_cols <- function(dat, cols) {
     dat[,cols[i]] = as.numeric(factor(dat[,cols[i]], levels=shapes)) #* 10^(i-1)
   }
   for(r in 1:nrow(dat)) {
-    dat[r,cols] = sort(dat[,cols])
+    dat[r,cols] = sort(dat[r,cols])
   }
   for(i in 1:length(cols)) {
     dat[,cols[i]] = dat[,cols[i]] * 10^(i-1)
@@ -58,10 +59,23 @@ df <- d %>%
     !available_drop_object_1 %in% unwanted,
     !available_drop_object_2 %in% unwanted,
     !available_drop_object_3 %in% unwanted
-  )
+  ) # 3200 left
 
 length(unique(d$drop_set)) # 285 unique drop sets...
 length(unique(d$ground_set)) # 285 unique ground sets..
+
+A = c("Pyramid", "Torus", "TriangularPrism")
+B = c("Cone", "Octahedron", "Pipe")
+C = c("Bowl", "Dumbbell", "Pentagon")
+d$DropSet = NA
+for(r in 1:nrow(d)) {
+  model_drop_objs = d[r,paste0("available_drop_object_", 1:3)]
+  d[r,]$DropSet = ifelse(setequal(model_drop_objs, A), "A", 
+                    ifelse(setequal(model_drop_objs, B), "B",
+                      ifelse(setequal(model_drop_objs, C), "C", NA)))
+}
+
+xp = na.omit(d)
 
 #d = subset(d, episode>299) # Michael says first 300 are warm-up off-policy
 d = read_csv("agent/20191203-084115/agent_0.csv") # most recent = trained dynamics model
