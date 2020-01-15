@@ -47,6 +47,8 @@ age = table(s_tr$Age_Group)
 
 # Introduction 
 
+Within the first two years of life, human infants develop a remarkable suite of exploratory behaviors — they begin to direct their own movement through their environ- ment, they can shift their attention to events they find most interesting, and they interact with objects in complex, creative ways [2, 6, 8, 9, 23]. This ability to playfully explore and (re)structure their environment sets infants apart from even the most advanced robots today, which must be taught what to do in every scenario. The goal of this proposal is to develop computationally pre- cise models of exploration and learning that mirror the trajectory of human infant development. Our ongoing strategy is to combine approaches from artificial intelligence, computational cognitive science, and developmental psychology.
+
 Whence intrinsically-motivated curiosity?
 Novelty, opportunity for learning, etc.
 
