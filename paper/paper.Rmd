@@ -1,7 +1,7 @@
 ---
 #title: "Modeling children's intrinsically-motivated curiosity about object interactions"
 #title: "Drop it like it's hot: Modeling children's curiosity about physical interactions"
-#title: "A drop in the bucket: Modeling children's curiosity about physical interactions"
+#title: "A drop in the bucket: Progress towards modeling children's curiosity about physical interactions"
 title: "What if you drop that? Modeling children's curiosity about physical interactions"
 bibliography: library.bib
 csl: apa6.csl
@@ -63,6 +63,7 @@ How does curiosity motivate and drive action selection, and influence subsequent
 
 Although several theories of curiosity (surveyed briefly below) partially address these issues, a gold standard for testing these theories would require a fully-instantiated theory of curiosity in an artificial agent whose behavior can be directly compared to that of humans.
 However, a further difficulty of this approach is selecting a task that adequately captures the general nature of curiosity: curiosity-driven human behavior is so wide-ranging that it is difficult to systematically compare to presently limited artificial agents.
+The places where curiosity is most manifest tend to be those open-ended environments that are hardest to model -- an inviting playground, a surprisingly complex device, or a novel research question. 
 In this paper we propose a new paradigm that allows us to directly compare children's curiosity about physical interactions with that of an aritifical agent implementing a variety of forms of curiosity.
 
 ## Theories of Curiosity
@@ -97,29 +98,41 @@ b = c("cone", "octahedron", "pipe")
 c = c("bowl", "dumbbell", "pentagon")
 ```
 
-Stimuli included 3D-printed objects produced using Blender modeling software. 
-The 9 stimuli objects were bowl, cone, dumbbell, octahedron, pentagon, pipe, pyramid, torus, and triangular prism. 
+Stimuli were 3D-printed plastic objects produced using Blender 3D-modeling software. 
+The nine objects, depicted in Figure 1, were bowl, cone, dumbbell, octahedron, pentagon (pentagonal prism), pipe, pyramid, torus, and triangular prism.
 The printed objects were all yellow, rigid plastic material and designed to fit comfortably in the child’s hand (dimension range: 3.8-10.1 cm). 
 
 The set of 9 objects were divided into 3 subsets (A = {pyramid, torus, triangular prism}, B = {cone, octahedron, pipe}, and C = {bowl, dumbbell, pentagon}). 
-These subsets served as sets (A, B, C) of target/drop objects in six successive blocks of 2 trials, for a total of 12 trials. 
+These subsets served as sets (A, B, C) of target or drop objects in six successive blocks of 2 trials, making a total of 12 trials per participant.
 For example, in Order 1, in the first block of 2 trials, set A served as the target objects from which the child chose to drop on the target objects (set B).
+The target:drop block sequence for Order 1 was A:B, B:C, C:A, A:C, B:A, C:B. The sequence for Order 2 was the reverse of Order 1: C:B, B:A, A:C, C:A, B:C, A:B. Participants were assigned to condition in counterbalanced order.
 
-The target:drop block sequence for Order 1 was A:B, B:C, C:A, A:C, B:A, C:B. Sequence for Order 2 (reverse of Order 1) was C:B, B:A, A:C, C:A, B:C, A:B. Participants were assigned to condition in counterbalanced order.
+Target objects were placed in a circular bin (25 in diameter x 10 in height). 
+The bin was divided with tape into sections of equal area, and one target object from the appropriate set was placed in the center of each third. 
+Drop objects were presented to participants on a table at approximately eye level.
 
+```{r fig1-sets, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3, fig.height=3, set.cap.width=T, num.cols.cap=1, fig.cap = "Sets of 3D objects used for dropping and as targets."}
+img <- png::readPNG("figs/drop_sets.png")
+grid::grid.raster(img)
+```
 
 ### Procedure
 
 After the parent provided informed consent, children were assigned to Order 1 or Order 2. Participants were assigned to condition in counterbalanced order.
-
 We introduced children to a set of 3D-printed toy objects ("blocks"). 
 The child played a game where they could pick which of three blocks to drop in a bin containing three other blocks, to see what happens. 
+An example trial is illustrated in Figure 2.
 We then swapped target/drop blocks, based on assigned order sequence, and asked the child to do the same selection and dropping a dozen times. 
 Finally, we asked the child to build a "cool" tower with any of the toy blocks for about one minute.
 
 Based on piloting, we estimated the activity would would only require five minutes to complete. 
 In both conditions, a video camera was used to record the play session from an angle above the bin, to show child's block selection and drop location as well as child's completed tower. 
 After child notified the researcher that they were finished building their tower, the session was completed and camera was turned off. 
+
+```{r fig2-task, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3, fig.height=2.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Example trial."}
+img <- png::readPNG("figs/DropTaskFigure.png")
+grid::grid.raster(img)
+```
 
 ### Drop Coding Procedure
 
@@ -156,11 +169,9 @@ report_chisq <- function(X) {
 drop_ch = table(hum$StimSet, hum$DropChoice)
 # chisq.test(rbind(colSums(drop_ch[,a]), rep(sum(drop_ch[,a]/3), 3)) )
 
-Xa_drop = chisq.test( colSums(drop_ch[,a]) ) 
-Xb_drop = chisq.test( colSums(drop_ch[,b]) )
-Xc_drop = chisq.test( colSums(drop_ch[,c]) )
-
-
+Xa_drop = chisq.test( colSums(drop_ch[,a]) ) # p<.001
+Xb_drop = chisq.test( colSums(drop_ch[,b]) ) # p=.01
+Xc_drop = chisq.test( colSums(drop_ch[,c]) ) # p=.056
 
 target_ch = table(hum$StimSet, hum$DropLocation)
 
@@ -178,7 +189,7 @@ The
 Of all the drops, many
 Children's target choices did not significantly differ from chance for set A `r report_chisq(Xa_targ)`, B `r report_chisq(Xb_targ)`, or C `r report_chisq(Xc_targ)`.
 
-```{r table1, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+```{r table1-drop, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
 get_table_string <- function(tableX, set) {
   tt = sort(colSums(tableX[,set]))
   tstr = paste(paste0(names(tt), " (", tt, "),"), collapse=' ')
@@ -193,20 +204,26 @@ tA = get_table_string(target_ch, a)
 tB = get_table_string(target_ch, b)
 tC = get_table_string(target_ch, c)
 
-tabl <- paste0("
-| Set |  Drop Object (N) | Target Object (N) |
-|-----|:----------------:|-----------:|
-|  A  | ", dA,"   | ", tA," |
-|  B  | ", dB,"   | ", tB," |
-|  C  | ", dC,"   | ", tC," |
-")
-#cat(tabl) 
-
+tabl <- tribble(~Set, ~`Drop Object (N)`, 
+                "A", dA,
+                "B", dB,
+                "C", dC)
+t1 <- xtable::xtable(tabl, caption="Children's drop object choices by set.")
 #tab1 <- xtable::xtable(summary(out)$coef, digits=c(0, 2, 2, 1, 2), 
 #                       caption = "This table prints across one column.")
-#print(tab1, type="latex", comment = F, table.placement = "H")
+print(t1, type="latex", comment = F, table.placement = "H")
 ```
 
+```{r table2-target, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+tabl2 <- tribble(~Set, ~`Target Object (N)`, 
+                "A", tA,
+                "B", tB,
+                "C", tC)
+t2 <- xtable::xtable(tabl2, caption="Children's target object choices by set.")
+#tab1 <- xtable::xtable(summary(out)$coef, digits=c(0, 2, 2, 1, 2), 
+#                       caption = "This table prints across one column.")
+print(t2, type="latex", comment = F, table.placement = "H")
+```
 
 ```{r drop-choice, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3.4, fig.height=2.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Relative frequency of drop object choice as a function of stimulus set."}
 ch_cond <- hum %>% 
