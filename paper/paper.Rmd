@@ -17,7 +17,11 @@ abstract: >
      to study in a laboratory context. A promising approach to developing and testing theories of 
      curiosity is to instantiate them in artificial agents that are able to act and explore in a 
      simulated environment, and then compare the behavior of these agents to humans exploring the 
-     same stimuli. Here we propose a new paradigm for examining curiosity about physical interact
+     same stimuli. Here we propose a new experimental paradigm for examining children's--and curious
+     AI agents'--curiosity about objects' physical interactions, using a task that is both open-ended
+     enough to allow room for curiosity, but also constrained enough to make detailed behavioral 
+     comparisons. We compare the choices of 51 children (2-6 years of age) to those of agents implementing 
+     different types of curiosity, and find broad exploration, but also systematic preferences ...
     
 keywords: >
     curiosity; novel objects; object interactions; intuitive physics
@@ -43,6 +47,8 @@ library(xtable)
 require(here)
 require(tidyverse)
 require(tidyboot)
+library(apa) # for generating APA-style text to report statistical tests
+library(ggpubr)
 ```
 
 ```{r, load-data}
@@ -92,11 +98,11 @@ One rich domain that young children are in the midst of learning about is the pr
 
 ## Computational Models of Curiosity
 
-[Sentence on other approaches: @Oudeyer2013; @Schmidhuber2010]
+[Sentence or two on other approaches, e.g. @Oudeyer2013; @Schmidhuber2010]
 
 Building on prior work that showed deep neural networks are capable of learning forward and inverse physical dynamics (i.e., "intuitive physics") from images when given the ability to "poke" the objects in the scene [@Agrawal2016], we use and extend a framework for constructing intrinsically-motivated artificial agents introduced in @Haber2018learning, described in the following. 
 
-Model description here?
+(Model description or just teaser here?)
 
 (maybe make the below a joint "Paradigm" section, then human behavior, model behavior and comparison)
 
@@ -132,7 +138,7 @@ Target objects were placed in a circular bin (25 in diameter x 10 in height).
 The bin was divided with tape into sections of equal area, and one target object from the appropriate set was placed in the center of each third. 
 Drop objects were presented to participants on a table at approximately eye level.
 
-```{r fig1-sets, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3, fig.height=3, set.cap.width=T, num.cols.cap=1, fig.cap = "Sets of 3D objects used for dropping and as targets."}
+```{r fig1-sets, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.25, fig.height=3, set.cap.width=T, num.cols.cap=1, fig.cap = "Sets of 3D objects used for dropping and as targets."}
 img <- png::readPNG("figs/drop_sets.png")
 grid::grid.raster(img)
 ```
@@ -150,7 +156,7 @@ Based on piloting, we estimated the activity would would only require five minut
 In both conditions, a video camera was used to record the play session from an angle above the bin, to show child's block selection and drop location as well as child's completed tower. 
 After child notified the researcher that they were finished building their tower, the session was completed and camera was turned off. 
 
-```{r fig2-task, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3, fig.height=2.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Example trial."}
+```{r fig2-task, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3, fig.height=2.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Example trial in which the participant chose to drop the pyramid from set A on the pentagonal prism in the target set (B)."}
 img <- png::readPNG("figs/DropTaskFigure.png")
 grid::grid.raster(img)
 ```
@@ -164,16 +170,16 @@ Drop location was defined as the site of collision of drop object at the base of
 Drop locations include either i) direct collision with one of three target objects, ii) collision in an empty space surrounding select target object, or iii) outside the bin. 
 
 If the dropped object collided with empty space, we recorded the target object it landed closest to. 
-We also recorded events where the dropped object bounced from empty space or a target object then collided with other target object(s). 
-Number of collisions and with which target(s) was also coded.
+We also recorded events where the dropped object bounced from empty space or a target object then collided with other target object(s), including the number of collisions and identity of the target(s) hit.
 
-Trials were excluded if child i) dropped object outside of the bin, ii) touched target object(s) prior to a drop, iii) dropped object during set change, iv) selected more than one object to drop, or iv) dropped (or threw) object from too high (>1.5 m). 
+Trials were excluded if the child i) dropped an object outside the bin, ii) touched target object(s) prior to a drop, iii) dropped an object during set change, iv) selected more than one object to drop, or iv) dropped (or threw) object from too high (>1.5 m). 
 Trials were also excluded if the experimenter made a mistake (e.g., used the wrong stimulus set or repeated a trial more than twice).
 
 
 ## Results
 
 ```{r chance-comparison}
+hum$TargetSpace = ifelse(hum$DropLocation=="space", hum$WhichSpace, hum$DropLocation)
 
 report_chisq <- function(X) {
   # e.g. X^2 (2, N = 88) = 2.1, p = .35
@@ -200,15 +206,50 @@ Xa_targ = chisq.test( colSums(target_ch[,a]) ) # n.s.
 Xb_targ = chisq.test( colSums(target_ch[,b]) ) # n.s.
 Xc_targ = chisq.test( colSums(target_ch[,c]) ) # n.s.
 
+targetloc_ch = table(hum$StimSet, hum$TargetSpace)
+Xa_tloc = chisq.test( colSums(targetloc_ch[,a]) ) # n.s.
+Xb_tloc = chisq.test( colSums(targetloc_ch[,b]) ) # n.s.
+Xc_tloc = chisq.test( colSums(targetloc_ch[,c]) ) # n.s.
+
+# 'misses' by age
+space_age = table(subset(hum, DropLocation=="space")$Age_Group)
+all_age = table(hum$Age_Group)
+#Xmiss_age = chisq.test(space_age, p=all_age / sum(all_age)) # n.s.
+prop_space = sum(space_age) / sum(all_age)
+
+age_s <- hum %>% 
+  group_by(SID, Age_Exact) %>%
+  summarise(miss=sum(DropLocation=="space"), N=n()) %>%
+  mutate(prop_miss = miss / N)
+age_miss = cor.test(age_s$prop_miss, as.numeric(age_s$Age_Exact))
 ```
 
-We first examine children's choice of drop objects and target objects to determine if children were choosing randomly, or had consistent preferences for some objects. We used a chi-square test of independence on children's choices (drop and target) from each set of objects (A, B, C).
-Children's drop choices from set A significantly differed from chance `r report_chisq(Xa_drop)`.
-Children's drop choices from set B also significantly differed from chance `r report_chisq(Xb_drop)`.
-Children's drop choices from set C did not significantly differ from chance `r report_chisq(Xc_drop)`.
-The 
-Of all the drops, many
-Children's target choices did not significantly differ from chance for set A `r report_chisq(Xa_targ)`, B `r report_chisq(Xb_targ)`, or C `r report_chisq(Xc_targ)`.
+We first examine children's choice of drop objects and target objects to determine if children were choosing randomly, or had consistent preferences for some objects. 
+We used chi-square test of independence on participants' drop choices from each set of objects (A, B, C).
+Participants' drop choices from set A significantly differed from chance `r report_chisq(Xa_drop)`, as did drop choices from set B `r report_chisq(Xb_drop)`.
+Participants' drop choices from set C did not significantly differ from chance `r report_chisq(Xc_drop)`.
+Table 1 shows a summary of participants' choice of drop objects per set.
+It is apparent that from set A, participants preferentially chose to drop the torus rather than the triangular prism (trig prism) or pyramid. 
+For set B, children more often avoided the octahedron, and instead chose the pipe or cone.
+Set C showed more equal rates of drop choice, but the dumbbell was somewhat more popular than the pentagonal prism (pentagon).
+
+What objects did children target with their drops?
+First, we noted that children very often did not hit any target object: on `r round(prop_space, 2)*100`% of trials, participants' dropped over empty space.
+It is not possible to determine whether children intentionally missed the available target objects, or whether their misses were errors due to noise in fine motor control.
+If the misses were just due to poor motor control, one might expect the number of misses by age to decrease, as older children should have better motor control.
+However, there was no significant correlation between children's individual proportion of "missed" targets and their age (`r cor_apa(age_miss, format="rmarkdown", print=F)`), which may suggest that dropping objects on empty space may be of interest to children of all ages, and not solely determined by a lack of fine motor control.
+Thus, we first analyze drops where participants' dropped objects directly hit the target objects.
+Chi-square tests of children's target collisions revealed that they did not significantly differ from chance for set A `r report_chisq(Xa_targ)`, B `r report_chisq(Xb_targ)`, or C `r report_chisq(Xc_targ)`.
+Table 2 shows a summary of participants' choice of target objects per set.
+
+Finally, we examine a more lenient analysis children's choice of target location (i.e., the identity of the closest target), regardless of whether there was a collision of drop and target objects.
+Chi-square tests of children's target collisions once more found that they did not significantly differ from chance for set A `r report_chisq(Xa_tloc)`, B `r report_chisq(Xb_tloc)`, or C `r report_chisq(Xc_tloc)`.
+Table 3 shows a summary of participants' choice of target locations per set.
+
+In summary, children showed some consistent preferences in their choice of objects to drop from each set, but no systematic preference for targeting particular objects.
+We now investigate whether there were interactions of drop objects and targets that children found particularly appealing. [ToDo: big chisq test?]
+
+Finally, we analyze how exploratory children were in their responses: across the 12 trials, what proportion of the 9 available objects did each child utilize as drop objects? What proportion of the objects were targeted?
 
 ```{r table1-drop, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
 get_table_string <- function(tableX, set) {
@@ -221,10 +262,6 @@ dA = get_table_string(drop_ch, a)
 dB = get_table_string(drop_ch, b)
 dC = get_table_string(drop_ch, c)
 
-tA = get_table_string(target_ch, a)
-tB = get_table_string(target_ch, b)
-tC = get_table_string(target_ch, c)
-
 tabl <- tribble(~Set, ~`Drop Object (N)`, 
                 "A", dA,
                 "B", dB,
@@ -236,14 +273,29 @@ print(t1, type="latex", comment = F, table.placement = "H")
 ```
 
 ```{r table2-target, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+tA = get_table_string(target_ch, a)
+tB = get_table_string(target_ch, b)
+tC = get_table_string(target_ch, c)
+
 tabl2 <- tribble(~Set, ~`Target Object (N)`, 
                 "A", tA,
                 "B", tB,
                 "C", tC)
 t2 <- xtable::xtable(tabl2, caption="Children's target object choices by set.")
-#tab1 <- xtable::xtable(summary(out)$coef, digits=c(0, 2, 2, 1, 2), 
-#                       caption = "This table prints across one column.")
 print(t2, type="latex", comment = F, table.placement = "H")
+```
+
+```{r table3-targetloc, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
+tA = get_table_string(targetloc_ch, a)
+tB = get_table_string(targetloc_ch, b)
+tC = get_table_string(targetloc_ch, c)
+
+tabl3 <- tribble(~Set, ~`Target Location (N)`, 
+                "A", tA,
+                "B", tB,
+                "C", tC)
+t3 <- xtable::xtable(tabl3, caption="Children's target location choices by set.")
+print(t3, type="latex", comment = F, table.placement = "H")
 ```
 
 ```{r drop-choice, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3.4, fig.height=2.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Relative frequency of drop object choice as a function of stimulus set."}
@@ -253,13 +305,14 @@ ch_cond <- hum %>%
   mutate(freq = n / sum(n)) 
 
 ch_cond$StimSet <- factor(ch_cond$StimSet, levels = c("ba","ca","ab","cb","ac","bc"))
-ggplot(ch_cond, aes(x=StimSet, y=freq, shape=DropChoice, color=DropChoice)) + # , size=n
+fig_drop <- ggplot(ch_cond, aes(x=StimSet, y=freq, shape=DropChoice, color=DropChoice)) + # , size=n
   geom_point(alpha=.8) +
   scale_shape_manual(values=10:19) +
   #geom_linerange(aes(ymin = ci_lower, ymax = ci_upper)) +
   xlab("Stimulus Set") + ylab("Rate of Drop Object Choice") + ylim(0,.66) + 
   langcog::scale_fill_solarized() + ggthemes::theme_few() + 
-  geom_hline(yintercept=.33, lty='dashed')
+  geom_hline(yintercept=.33, lty='dashed') + labs(shape="Object", color="Object")
+#print(fig_drop)
 ```
 
 ```{r target-hit, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3.4, fig.height=2.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Relative frequency of targeted object as a function of stimulus set."}
@@ -271,18 +324,17 @@ ch_cond <- hum %>%
   mutate(freq = n / sum(n)) 
 
 ch_cond$Target <- factor(ch_cond$Target, levels = c(shapes, "space"))
-ggplot(ch_cond, aes(x=StimSet, y=freq, shape=Target, color=Target)) + # , size=n
+fig_targ_hit <- ggplot(ch_cond, aes(x=StimSet, y=freq, shape=Target, color=Target)) + # , size=n
   geom_point(alpha=.8) +
   scale_shape_manual(values=10:20) +
   #geom_linerange(aes(ymin = ci_lower, ymax = ci_upper)) +
-  xlab("Stimulus Set") + ylab("Rate of Target Object Choice") + ylim(0,.66) + 
+  xlab("Stimulus Set") + ylab("Rate of Target Object Hit") + ylim(0,.66) + 
   langcog::scale_fill_solarized() + ggthemes::theme_few() + 
   geom_hline(yintercept=.33, lty='dashed')
+#print(fig_targ_hit)
 ```
 
 ```{r target-space, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3.4, fig.height=2.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Relative frequency of targeted object as a function of stimulus set."}
-
-hum$TargetSpace = ifelse(hum$DropLocation=="space", hum$WhichSpace, hum$DropLocation)
 
 ch_cond <- hum %>% 
   filter(is.element(TargetSpace, shapes)) %>%
@@ -291,17 +343,27 @@ ch_cond <- hum %>%
   mutate(freq = n / sum(n)) 
 
 ch_cond$TargetSpace <- factor(ch_cond$TargetSpace, levels = shapes)
-ggplot(ch_cond, aes(x=StimSet, y=freq, shape=TargetSpace, color=TargetSpace)) + # , size=n
+fig_targ_space <- ggplot(ch_cond, aes(x=StimSet, y=freq, shape=TargetSpace, color=TargetSpace)) + # , size=n
   geom_point(alpha=.8) +
   scale_shape_manual(values=10:19) +
   #geom_linerange(aes(ymin = ci_lower, ymax = ci_upper)) +
-  xlab("Stimulus Set") + ylab("Rate of Target Location Choice") + ylim(0,.66) + 
+  xlab("Stimulus Set") + ylab("Rate of Targeted Location") + ylim(0,.66) + 
   langcog::scale_fill_solarized() + ggthemes::theme_few() + 
   geom_hline(yintercept=.33, lty='dashed')
+#print(fig_targ_space)
 ```
 
 
-Figure 6 shows participants' mean proportion of unique objects dropped as a function of age.
+
+```{r combined-fig, fig.env = "figure*", fig.pos = "h", fig.align="center", fig.width=7, fig.height=3.2, set.cap.width=T, num.cols.cap=2, fig.cap = "Relative frequency of objects 1) chosen as objects for dropping, 2) hit as targets, and 3) whose drop location was closest to a target object, as a function of target/drop set pairing."}
+
+ggarrange(fig_drop, fig_targ_hit, fig_targ_space, nrow=1, 
+          #labels = c("Drop Choice", "Targeted Object Hit", "Targeted Location"),
+          common.legend=T, legend="bottom")
+```
+
+
+Figure 4 shows participants' mean proportion of unique objects dropped as a function of age.
 Children of all ages sampled approximately equal proportions of the objects for dropping--roughly 70%, which is close to the 75% that would be expected if they were selected by chance (9 unique object occurring across 12 trials).
 
 ```{r unique-drop-objects, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3, fig.height=2.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Proportion of unique objects selected by participants. Error bars show boostrapped 95\\% confidence intervals."}
