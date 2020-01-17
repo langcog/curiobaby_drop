@@ -12,9 +12,12 @@ author-information: >
     \AND {\large \bf Sharon J.~Derry (SDJ@Macc.Wisc.Edu)} \\ Department of Educational Psychology, 1025 W. Johnson Street \\ Madison, WI 53706 USA}
 
 abstract: >
-    Although the question of what inspires a child's curiosity is difficult to determine,
-    it's generally agreed that curiosity indicates awareness of a knowledge gap that the 
-    learner is interested in filling. A promising approach to teasing apart 
+     Curiosity is a fundamental driver of human behavior, and yet because of its open-ended nature 
+     and the wide variety of behaviors it inspires in different contexts, it is remarkably difficult 
+     to study in a laboratory context. A promising approach to developing and testing theories of 
+     curiosity is to instantiate them in artificial agents that are able to act and explore in a 
+     simulated environment, and then compare the behavior of these agents to humans exploring the 
+     same stimuli. Here we propose a new paradigm for examining curiosity about physical interact
     
 keywords: >
     curiosity; novel objects; object interactions; intuitive physics
@@ -55,29 +58,47 @@ age = table(s_tr$Age_Group)
 # Introduction 
 
 Curiosity is a fundamental part of our motivation, driving everyday behaviors that we spend a surprising amount of time pursuing, from browsing the internet to reading novels, watching the news, and many other forms of information seeking.
-Curiosity is so strongly linked to learning that William James (1899) considered it to be "the impulse towards better cognition".
-Researchers have credited curiosity for inspiring behaviors ranging from exploration and play to latent learning and neophilia.
-However, there is a major outstanding difficulty in research on curiosity: there is no integrative theory of the mechanisms and basis for curiosity.
-What pairings of stimuli and knowledge states inspire curiosity? 
-How does curiosity motivate and drive action selection, and influence subsequent learning and behavior?
+Curiosity is so strongly linked to learning that William James (1899) considered it to be "the impulse towards better cognition", a description that is echoed in Piaget's [-@Piaget1952] theory of development, which holds that children actively construct their knowledge through physical exploration of the world.
+Taking this view of children [even infants: @Gopnik2009] as "little scientists", researchers have credited curiosity for inspiring behaviors ranging from novelty-seeking to exploration and play, and yet there is a major outstanding difficulty in curiosity research: there is no integrative theory of the mechanisms and basis for curiosity [@Kidd2015].
+What combinations of stimuli and knowledge states inspire curiosity? 
+By what mechanism does curiosity motivate and drive action selection, and influence subsequent learning and behavior?
 
 Although several theories of curiosity (surveyed briefly below) partially address these issues, a gold standard for testing these theories would require a fully-instantiated theory of curiosity in an artificial agent whose behavior can be directly compared to that of humans.
 However, a further difficulty of this approach is selecting a task that adequately captures the general nature of curiosity: curiosity-driven human behavior is so wide-ranging that it is difficult to systematically compare to presently limited artificial agents.
+Behavioral investigations of children's exploratory play have often offered a single complex toy with a number of functions that can be discovered [e.g., @Cook2011; @Bonawitz2012; @Gweon2014], but the real world offers many more degrees of freedom.
 The places where curiosity is most manifest tend to be those open-ended environments that are hardest to model -- an inviting playground, a surprisingly complex device, or a novel research question. 
-In this paper we propose a new paradigm that allows us to directly compare children's curiosity about physical interactions with that of an aritifical agent implementing a variety of forms of curiosity.
+In this paper we propose a new paradigm that allows us to directly compare children's curiosity about physical interactions with that of an aritifical agent implementing different functional forms of curiosity.
+Below, we give a brief overview of theories of curiosity, relevant developmental empirical findings, and computational models instantiating curiosity.
 
 ## Theories of Curiosity
 
-Whence intrinsically-motivated curiosity?
-Novelty, opportunity for learning, etc.
+@Berlyne1954's influential theory of curiosity distinguished between perceptual curiosity, a desire to seek out novel stimuli (that decreases with familiarity), and epistemic curiosity, a desire to acquire knowledge. 
+Berlyne additionally distinguished specific versus diversive curiosity, where the former is a drive for a particular piece of information, and the latter is a general motivation for stimulation.
+More recent views of curiosity further limit the definition to information-seeking that is intrinsically-motivated, not linked to any obvious external reward [@Loewenstein1994; @Oudeyer2007].
+However, it is often difficult for observers to determine whether any given decision is intrinsically- or extrinsically-motivated.
+Modern theories also hold that the function of curiosity is inspired by awareness of a knowledge gap, and functions to drive behaviors that will result in learning [@Loewenstein1994].
+Similar to other drives (e.g., hunger), curiosity is sated as relevant information is gained and the knowledge gap is closed.
+Although these theories give us some sense of which situations and knowledge states should engender curiosity, both the mechanism and how actions are selected 
 
 ## Related Behavioral Work
 
-Intuitive physics, play
+Although the question of what inspires a child's curiosity is difficult to determine, it's generally agreed that curiosity indicates awareness of a knowledge gap that the learner is interested in filling [@Loewenstein1994].
+Even young infants exhibit a preference to attend to novel stimuli over more familiar stimuli [e.g., @Fantz1964], and when surprising events do occur it has been shown to stimulate infants' exploration and subsequent learning [@Stahl2015].
+Moreover, infants are sensitive to the level of complexity of stimuli, preferring to attend to those of intermediate complexity (rather than simple or overly-complex)--a bias which may help them optimize their information gain [@Kidd2012; @Kidd2014].
+As theorized [@Piaget1952], exploratory play has been shown to be an opportunity for young children to learn [e.g., generalization: @Sim2017, causal structure: @Schulz2007; @Gweon2014].
 
-## Model subsection first?
+One rich domain that young children are in the midst of learning about is the properties and affordances of physical objects.
 
-...or joint paradigm section, and then developmental data collection, model description and comparison
+
+## Computational Models of Curiosity
+
+[Sentence on other approaches: @Oudeyer2013; @Schmidhuber2010]
+
+Building on prior work that showed deep neural networks are capable of learning forward and inverse physical dynamics (i.e., "intuitive physics") from images when given the ability to "poke" the objects in the scene [@Agrawal2016], we use and extend a framework for constructing intrinsically-motivated artificial agents introduced in @Haber2018learning, described in the following. 
+
+Model description here?
+
+(maybe make the below a joint "Paradigm" section, then human behavior, model behavior and comparison)
 
 # Experiment
 
@@ -137,13 +158,13 @@ grid::grid.raster(img)
 ### Drop Coding Procedure
 
 Each session's video was manually coded for object drop choice and drop location. Drop choice is defined as the child's single selection of three drop objects to drop into the bin containing three different objects. 
-The bin is divided into three quadrants of equal area. 
+The bin is divided into three sections of equal area. 
 Each target object resides in one of these three areas. 
 Drop location was defined as the site of collision of drop object at the base of the bin. 
 Drop locations include either i) direct collision with one of three target objects, ii) collision in an empty space surrounding select target object, or iii) outside the bin. 
 
-If drop object collided with empty space, we recorded which target object quadrant it landed. 
-We also recorded events where drop object bounced from empty space or a target object then collided with other target object(s). 
+If the dropped object collided with empty space, we recorded the target object it landed closest to. 
+We also recorded events where the dropped object bounced from empty space or a target object then collided with other target object(s). 
 Number of collisions and with which target(s) was also coded.
 
 Trials were excluded if child i) dropped object outside of the bin, ii) touched target object(s) prior to a drop, iii) dropped object during set change, iv) selected more than one object to drop, or iv) dropped (or threw) object from too high (>1.5 m). 
@@ -280,7 +301,23 @@ ggplot(ch_cond, aes(x=StimSet, y=freq, shape=TargetSpace, color=TargetSpace)) + 
 ```
 
 
+Figure 6 shows participants' mean proportion of unique objects dropped as a function of age.
+Children of all ages sampled approximately equal proportions of the objects for dropping--roughly 70%, which is close to the 75% that would be expected if they were selected by chance (9 unique object occurring across 12 trials).
 
+```{r unique-drop-objects, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3, fig.height=2.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Proportion of unique objects selected by participants. Error bars show boostrapped 95\\% confidence intervals."}
+# 12 trials, 9 objects; random selection would be 9/12 = 75%...
+uniq_s <- hum %>% group_by(SID, Age_Group) %>%
+  summarise(DropObjs = n_distinct(DropChoice), N=n(), prop=DropObjs/N) 
+
+uniq <- uniq_s %>% group_by(Age_Group) %>%
+  tidyboot_mean(prop) 
+  
+ggplot(uniq, aes(x=Age_Group, y=mean)) + geom_point() +
+  geom_linerange(aes(ymin = ci_lower, ymax = ci_upper)) +
+  xlab("Age (years)") + ylab("Unique Objects Chosen") + ylim(0,1) + 
+  langcog::scale_fill_solarized() + ggthemes::theme_few() +
+  geom_hline(yintercept=.75, lty='dashed')
+```
 
 # Model
 
