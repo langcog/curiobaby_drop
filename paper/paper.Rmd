@@ -113,7 +113,9 @@ Building on prior work that showed deep neural networks are capable of learning 
 ### Participants
 Participants were `r length(unique(raw$SID))` children recruited from the Children's Discovery Museum of San Jose and Bing Nursery School.
 Participant exclusions were made based on cases where i) the participant did not complete more than half of the study play session or ii) the parent did not consent for video recording of study. 
-After exclusions, results from `r length(unique(hum$SID))` were analyzed, including `r age[1]` 2-year-olds, `r age[2]` 3-year-olds, `r age[3]` 4-year-olds, `r age[4]` 5-year-olds, and `r age[5]` 6-year-olds. 
+After exclusions, results from `r length(unique(hum$SID))` were analyzed, including `r age[1]` 2-year-olds, `r age[2]` 3-year-olds, `r age[3]` 4-year-olds, `r age[4]` 5-year-olds, and `r age[5]` 6-year-olds.^[1]
+
+[1]: The collected sample differed from our planned sample size of 16 each of 3-, 4-, and 5-year-olds due to availability of participants (see preregistration: https://osf.io/37qvb/).
 
 ### Materials
 
