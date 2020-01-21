@@ -52,6 +52,7 @@ library(ggpubr)
 ```
 
 ```{r, load-data}
+tower = read.csv2("../analysis/human-data/curiobaby_drop-data - cool tower.csv", sep=',', header=T, stringsAsFactors=F)
 raw = read.csv2("../analysis/human-data/curiobaby_drop-data - drop exp.csv", sep=',', header=T, stringsAsFactors=F)
 hum = subset(raw, Exclude!="Y")
 
@@ -84,7 +85,8 @@ More recent views of curiosity further limit the definition to information-seeki
 However, it is often difficult for observers to determine whether any given decision is intrinsically- or extrinsically-motivated.
 Modern theories also hold that the function of curiosity is inspired by awareness of a knowledge gap, and functions to drive behaviors that will result in learning [@Loewenstein1994].
 Similar to other drives (e.g., hunger), curiosity is sated as relevant information is gained and the knowledge gap is closed.
-Although these theories give us some sense of which situations and knowledge states should engender curiosity, both the mechanism and how actions are selected 
+Although these theories give us some sense of which situations and knowledge states should engender curiosity, both the mechanism and how actions are selected are not fully specified.
+
 
 ## Related Behavioral Work
 
@@ -115,7 +117,7 @@ Participants were `r length(unique(raw$SID))` children recruited from the Childr
 Participant exclusions were made based on cases where i) the participant did not complete more than half of the study play session or ii) the parent did not consent for video recording of study. 
 After exclusions, results from `r length(unique(hum$SID))` were analyzed, including `r age[1]` 2-year-olds, `r age[2]` 3-year-olds, `r age[3]` 4-year-olds, `r age[4]` 5-year-olds, and `r age[5]` 6-year-olds.^[1]
 
-[1]: The collected sample differed from our planned sample size of 16 each of 3-, 4-, and 5-year-olds due to availability of participants (see preregistration: https://osf.io/37qvb/).
+^[1]: The collected sample differed from our planned sample size of 16 each of 3-, 4-, and 5-year-olds due to availability of participants (see preregistration: https://osf.io/37qvb/).
 
 ### Materials
 
@@ -165,13 +167,12 @@ grid::grid.raster(img)
 
 ### Drop Coding Procedure
 
-Each session's video was manually coded for object drop choice and drop location. Drop choice is defined as the child's single selection of three drop objects to drop into the bin containing three different objects. 
-The bin is divided into three sections of equal area. 
-Each target object resides in one of these three areas. 
-Drop location was defined as the site of collision of drop object at the base of the bin. 
-Drop locations include either i) direct collision with one of three target objects, ii) collision in an empty space surrounding select target object, or iii) outside the bin. 
-
-If the dropped object collided with empty space, we recorded the target object it landed closest to. 
+Each session's video was manually coded for drop object choice and target location per trial.
+Drop choice was defined as the participant's selection of one of the three available drop set objects, to be dropped into the bin containing the set of the three potential target objects. 
+The bin was divided into three wedge-shaped sections of equal area, demarcated with a thin black line.
+One of the target set's objects was placed in the middle of each section of the bin. 
+Target location was defined as either i) the object the dropped object collided with, ii) a collision with empty space inside the bin, or iii) falling outside the bin.
+If the dropped object collided with empty space, we also recorded the target object it landed closest to. 
 We also recorded events where the dropped object bounced from empty space or a target object then collided with other target object(s), including the number of collisions and identity of the target(s) hit.
 
 Trials were excluded if the child i) dropped an object outside the bin, ii) touched target object(s) prior to a drop, iii) dropped an object during set change, iv) selected more than one object to drop, or iv) dropped (or threw) object from too high (>1.5 m). 
@@ -224,6 +225,11 @@ age_s <- hum %>%
   summarise(miss=sum(DropLocation=="space"), N=n()) %>%
   mutate(prop_miss = miss / N)
 age_miss = cor.test(age_s$prop_miss, as.numeric(age_s$Age_Exact))
+
+# now check DropChoice x TargetLocation interactions
+dto = table(hum$DropChoice, hum$DropLocation)[,c(1:4,6:8,10:11)] # drop 'outside' and 'space'
+Xdto = chisq.test(dto)
+
 ```
 
 We first examine children's choice of drop objects and target objects to determine if children were choosing randomly, or had consistent preferences for some objects. 
@@ -300,7 +306,7 @@ t3 <- xtable::xtable(tabl3, caption="Children's target location choices by set."
 print(t3, type="latex", comment = F, table.placement = "H")
 ```
 
-```{r drop-choice, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3.4, fig.height=2.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Relative frequency of drop object choice as a function of stimulus set."}
+```{r drop-choice, include=F, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3.4, fig.height=2.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Relative frequency of drop object choice as a function of stimulus set."}
 ch_cond <- hum %>% 
   group_by(StimSet, DropChoice) %>%
   summarise(n = n()) %>%
@@ -357,7 +363,7 @@ fig_targ_space <- ggplot(ch_cond, aes(x=StimSet, y=freq, shape=TargetSpace, colo
 
 
 
-```{r combined-fig, fig.env = "figure*", fig.pos = "h", fig.align="center", fig.width=7, fig.height=3.2, set.cap.width=T, num.cols.cap=2, fig.cap = "Relative frequency of objects 1) chosen as objects for dropping, 2) hit as targets, and 3) whose drop location was closest to a target object, as a function of target/drop set pairing."}
+```{r combined-fig, fig.env = "figure*", fig.pos = "h", fig.align="center", fig.width=7, fig.height=3.2, set.cap.width=T, num.cols.cap=2, fig.cap = "Relative frequency of objects 1) chosen as objects for dropping, 2) hit as targets (pink dots represent hitting empty space), and 3) whose drop location was closest to a target object, as a function of target/drop set pairing."}
 
 ggarrange(fig_drop, fig_targ_hit, fig_targ_space, nrow=1, 
           #labels = c("Drop Choice", "Targeted Object Hit", "Targeted Location"),
@@ -381,6 +387,18 @@ ggplot(uniq, aes(x=Age_Group, y=mean)) + geom_point() +
   xlab("Age (years)") + ylab("Unique Objects Chosen") + ylim(0,1) + 
   langcog::scale_fill_solarized() + ggthemes::theme_few() +
   geom_hline(yintercept=.75, lty='dashed')
+```
+
+```{r drop-by-target, include=F, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3, fig.height=3, set.cap.width=T, num.cols.cap=1, fig.cap = "Heatmap of participants' drop object choices by target location."}
+ch_loc <- hum %>% filter(DropLocation!="outside" & DropLocation!="space") %>%
+  group_by(DropChoice, DropLocation) %>% 
+  summarise(n = n()) %>%
+  mutate(freq = n / sum(n))
+
+ggplot(ch_loc, aes(x=DropLocation, y=DropChoice)) + geom_tile(aes(fill=freq)) + 
+  scale_fill_gradient(low = "white", high = "steelblue") +
+  xlab("Target Location") + ylab("Drop Object") +
+  ggthemes::theme_few()
 ```
 
 # Model
