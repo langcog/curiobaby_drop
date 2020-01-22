@@ -66,16 +66,16 @@ age = table(s_tr$Age_Group)
 
 Curiosity is a fundamental part of our motivation, driving everyday behaviors that we spend a surprising amount of time pursuing, from browsing the internet to reading novels, watching the news, and many other forms of information seeking.
 Curiosity is so strongly linked to learning that William James (1899) considered it to be "the impulse towards better cognition", a description that is echoed in Piaget's [-@Piaget1952] theory of development, which holds that children actively construct their knowledge through physical exploration of the world.
-Taking this view of children [even infants: @Gopnik2009] as "little scientists", researchers have credited curiosity for inspiring behaviors ranging from novelty-seeking to exploration and play, and yet there is a major outstanding difficulty in curiosity research: there is no integrative theory of the mechanisms and basis for curiosity [@Kidd2015].
+Taking this view of children [even infants: @Gopnik2009] as "little scientists", researchers have credited curiosity for inspiring behaviors ranging from novelty-seeking to exploration and play, and yet there is a major outstanding difficulty in curiosity research: there is no integrative theory of the mechanisms and basis for curiosity [@Kidd2015].\footnote{Following @Kidd2015 we adopt a broad definition of curiosity as any mechanism that guides an organism to gain new information.}
 What combinations of stimuli and knowledge states inspire curiosity? 
-By what mechanism does curiosity motivate and drive action selection, and influence subsequent learning and behavior?
+By what mechanism(s) does curiosity motivate and drive action selection, and influence subsequent learning and behavior?
 
 Although several theories of curiosity (surveyed briefly below) partially address these issues, a gold standard for testing these theories would require a fully-instantiated theory of curiosity in an artificial agent whose behavior can be directly compared to that of humans.
 However, a further difficulty of this approach is selecting a task that adequately captures the general nature of curiosity: curiosity-driven human behavior is so wide-ranging that it is difficult to systematically compare to presently limited artificial agents.
 Behavioral investigations of children's exploratory play have often offered a single complex toy with a number of functions that can be discovered [e.g., @Cook2011; @Bonawitz2012; @Gweon2014], but the real world offers many more degrees of freedom.
 The places where curiosity is most manifest tend to be those open-ended environments that are hardest to model -- an inviting playground, a surprisingly complex device, or a novel research question. 
 In this paper we propose a new paradigm that allows us to directly compare children's curiosity about physical interactions with that of an aritifical agent implementing different functional forms of curiosity.
-Below, we give a brief overview of theories of curiosity, relevant developmental empirical findings, and computational models instantiating curiosity.
+Below, we give a brief overview of theories of curiosity, relevant developmental empirical findings, and computational models instantiating curiosity in agents that are able to interact with the world in realistic simulated 3D environments.
 
 ## Theories of Curiosity
 
@@ -85,18 +85,21 @@ More recent views of curiosity further limit the definition to information-seeki
 However, it is often difficult for observers to determine whether any given decision is intrinsically- or extrinsically-motivated.
 Modern theories also hold that the function of curiosity is inspired by awareness of a knowledge gap, and functions to drive behaviors that will result in learning [@Loewenstein1994].
 Similar to other drives (e.g., hunger), curiosity is sated as relevant information is gained and the knowledge gap is closed.
+One theory developed to explain the discrepancy between infants' frequent preference for novel stimuli [e.g., @Fantz1964], as well as their occasional preference for familiar stimuli (e.g., faces), is the idea that infants prefer to attend to stimuli that are "moderately discrepant", i.e. that are only somewhat different than the infants' mental representations [@Kinney1976].
+Thus, as infants gain experience with various classes of stimuli, they will seek increasingly complex stimuli as their mental representations become more sophisticated [@Dember1957].
 Although these theories give us some sense of which situations and knowledge states should engender curiosity, both the mechanism and how actions are selected are not fully specified.
-
 
 ## Related Behavioral Work
 
 Although the question of what inspires a child's curiosity is difficult to determine, it's generally agreed that curiosity indicates awareness of a knowledge gap that the learner is interested in filling [@Loewenstein1994].
-Even young infants exhibit a preference to attend to novel stimuli over more familiar stimuli [e.g., @Fantz1964], and when surprising events do occur it has been shown to stimulate infants' exploration and subsequent learning [@Stahl2015].
+Even young infants often exhibit a preference to attend to novel stimuli over more familiar stimuli [e.g., @Fantz1964], and when surprising physical events do occur (e.g., an object appearing to have passed through a wall) it has been shown to stimulate infants' exploration and subsequent learning [@Stahl2015].
 Moreover, infants are sensitive to the level of complexity of stimuli, preferring to attend to those of intermediate complexity (rather than simple or overly-complex)--a bias which may help them optimize their information gain [@Kidd2012; @Kidd2014].
 As theorized [@Piaget1952], exploratory play has been shown to be an opportunity for young children to learn [e.g., generalization: @Sim2017, causal structure: @Schulz2007; @Gweon2014].
 
-One rich domain that young children are in the midst of learning about is the properties and affordances of physical objects.
-
+One rich domain that young children are in the midst of learning about is the properties and affordances of physical objects. 
+Many studies of young infants' reasoning about physical objects have focused on occlusion, containment, and covering events, using surprisal (indexed via looking time) as a measure of knowledge [@Baillargeon2007].
+A study of 9- to 16-month-olds found that infants' violation of expectations about a novel toy's hidden properties (e.g., making a sound) drives them to explore similar toys for longer [@Baldwin1993].
+Here, we investigate toddlers' choices in a more complex
 
 ## Computational Models of Curiosity
 
@@ -115,9 +118,7 @@ Building on prior work that showed deep neural networks are capable of learning 
 ### Participants
 Participants were `r length(unique(raw$SID))` children recruited from the Children's Discovery Museum of San Jose and Bing Nursery School.
 Participant exclusions were made based on cases where i) the participant did not complete more than half of the study play session or ii) the parent did not consent for video recording of study. 
-After exclusions, results from `r length(unique(hum$SID))` were analyzed, including `r age[1]` 2-year-olds, `r age[2]` 3-year-olds, `r age[3]` 4-year-olds, `r age[4]` 5-year-olds, and `r age[5]` 6-year-olds.^[1]
-
-^[1]: The collected sample differed from our planned sample size of 16 each of 3-, 4-, and 5-year-olds due to availability of participants (see preregistration: https://osf.io/37qvb/).
+After exclusions, results from `r length(unique(hum$SID))` were analyzed, including `r age[1]` 2-year-olds, `r age[2]` 3-year-olds, `r age[3]` 4-year-olds, `r age[4]` 5-year-olds, and `r age[5]` 6-year-olds.\footnote{The collected sample differed from our planned sample size of 16 each of 3-, 4-, and 5-year-olds due to availability of participants (see preregistration: https://osf.io/37qvb/).}
 
 ### Materials
 
@@ -127,11 +128,15 @@ shapes = c("bowl","cone","dumbbell","octahedron","pentagon","pipe","pyramid","to
 a = c("pyramid", "torus", "trig prism")
 b = c("cone", "octahedron", "pipe")
 c = c("bowl", "dumbbell", "pentagon")
+
+hum <- hum %>% 
+  mutate(DropSet=ifelse(StimSet %in% c("ba","ca"), "A", ifelse(StimSet %in% c("ab","cb"), "B", "C")),
+         TargetSet=ifelse(StimSet %in% c("ab","ac"), "A", ifelse(StimSet %in% c("ba","bc"), "B", "C")))
 ```
 
 Stimuli were 3D-printed plastic objects produced using Blender 3D-modeling software. 
 The nine objects, depicted in Figure 1, were bowl, cone, dumbbell, octahedron, pentagon (pentagonal prism), pipe, pyramid, torus, and triangular prism.
-The printed objects were all yellow, rigid plastic material and designed to fit comfortably in the child’s hand (dimension range: 3.8-10.1 cm). 
+The printed objects were all yellow, rigid plastic material and designed to fit comfortably in a child's hand (dimension range: 3.8-10.1 cm). 
 
 The set of 9 objects were divided into 3 subsets (A = {pyramid, torus, triangular prism}, B = {cone, octahedron, pipe}, and C = {bowl, dumbbell, pentagon}). 
 These subsets served as sets (A, B, C) of target or drop objects in six successive blocks of 2 trials, making a total of 12 trials per participant.
@@ -227,7 +232,10 @@ age_s <- hum %>%
 age_miss = cor.test(age_s$prop_miss, as.numeric(age_s$Age_Exact))
 
 # now check DropChoice x TargetLocation interactions
-dto = table(hum$DropChoice, hum$DropLocation)[,c(1:4,6:8,10:11)] # drop 'outside' and 'space'
+# maybe we do chisq.test on particular combinations? e.g., for DropSet A and TargetSet B?
+dA = subset(hum, DropSet=="A" & TargetSet=="B")
+dto = table(dA$DropChoice, dA$DropLocation)[,1:3]
+#dto = table(hum$DropChoice, hum$DropLocation)[,c(1:4,6:8,10:11)] # drop 'outside' and 'space'
 Xdto = chisq.test(dto)
 
 ```
