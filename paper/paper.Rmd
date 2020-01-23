@@ -65,30 +65,37 @@ age = table(s_tr$Age_Group)
 # Introduction 
 
 <!-- Curiosity is important... end with core question about what gives rise to curiosity. -->
-Curiosity is a key driver of everyday behaviors, from children's exploratory play with a new toy to adults browsing the internet, we spend a surprising amount of time actively pursuing information about our world. 
-Curiosity may even serve as the impetus for all learning: William James (1899) considered it to be "the impulse towards better cognition", a belief that is echoed in Piaget's [-@Piaget1952] theory of development, which holds that children actively construct their knowledge through physical exploration of the world.
-From this view, children and even infants [@Gopnik2009] can be seen as "little scientists" who use curiosity to select causal interventions that help them learn about the physical world.
-However, a major outstanding difficulty in curiosity research: there is no integrative, testable theory of the mechanisms and basis for curiosity [@Kidd2015].
-More concretely, what relationship between stimuli and a learner's knowledge states engender curiosity, and how does this motivate a learner's choice of actions?
+Curiosity is a key driver of everyday behaviors. From children's exploratory play with a new toy to adults browsing the internet, we spend a surprising amount of time actively pursuing information about our world. 
+Curiosity may even serve as the impetus for all learning: William James (1899) considered it to be "the impulse towards better cognition." This belief is echoed in Piaget's [-@Piaget1952] theory of development, which holds that children actively construct their knowledge through physical exploration of the world.
+From this perspective, children and even infants [@Gopnik2009] can be seen as "little scientists" whose curiosity  selects causal interventions that help them learn about the physical world.
+However, there is no integrative, testable theory of the mechanisms and basis of curiosity [@Kidd2015].
+More concretely, how does a learner's knowledge state interact with their perception to engender curiosity, and how does curiosity motivate action?
 
 <!-- desiderata for advancing theories of curiosity -->
 
 A fully-specified, testable theory of curiosity would minimally require three components.
-First, it is necessary to have a precise mechanism specifying how stimuli inspire curiosity. 
-Although some early verbal theories of curiosity acknowledge that novel stimuli demand our (and other animals') attention [e.g., @Berlyne1954], borne out in empirical data [e.g., @Fantz1964], but modern theories hold that learners may prefer to attend to stimuli that are "moderately discrepant" in comparison to our mental representations [@Kinney1976].
-These theories hold that curiosity is inspired by awareness of a knowledge gap [@Loewenstein1994], and that as we gain experience with classes of stimuli our preferences will tend toward more complex stimuli as our mental representations mature [@Dember1957].
-Empirical work has verified that infants are sensitive to the level of complexity of stimuli and prefer to attend to stimuli of intermediate complexity [rather than simple or overly-complex; @Kidd2012; @Kidd2014].
-Thus, similar to other drives (e.g., hunger), curiosity is sated as relevant information is gained and the knowledge gap is closed, but defining the perceptual and knowledge-based representations and how they are compared is an open question.
+First, we need a precise mechanism that specifies how stimuli inspire curiosity. 
+Although some early verbal theories of curiosity acknowledge that novel stimuli capture our (and other animals') attention [e.g., @Berlyne1954,@Fantz1964], modern theories hold that learners prefer to attend to stimuli that provide optimal learning opportunities--that are "moderately discrepant" in comparison to our mental representations [@Kinney1976]. Empirical work has verified that infants are indeed sensitive to the level of complexity of stimuli and prefer to attend to stimuli of intermediate complexity [rather than simple or overly-complex; @Kidd2012; @Kidd2014].
+Thus, these theories hold that curiosity is inspired by awareness of a knowledge gap [@Loewenstein1994], and that as our mental representations mature our preferences will tend toward more complex stimuli [@Dember1957].
+On these accounts, similar to other drives (e.g., hunger), curiosity is sated as relevant information is gained and the knowledge gap is closed. However, these theories have yet to define these perceptual and knowledge-based representations or specify how they are compared.
 
-Second, a testable theory of curiosity requires a detailed measure of curious behavior that records which interventions learners select in order to gain information about the properties of objects and laws that govern the physical world. 
-People's curiosity-driven behavior comes in such a variety of contexts and utilizing such a wide repertoire of actions that it is quite difficult to choose an appropriate paradigm, particularly because the places where curiosity is most manifest tend to be those open-ended environments that are hardest to model -- an inviting playground, a surprisingly complex device, or a novel research question. 
+<!-- The places where curiosity is most manifest tend to be those open-ended environments that are hardest to model--an inviting playground or a surprisingly complex device. -->
+<!-- Curiosity-driven behavior comes in a variety of contexts and consists of a wide repertoire of actions.  -->
+
+<!-- While open-ended environments tend to inspire curiosity, choosing an appropriate paradigm, one in which learners both become curious and are able to choose a variety of actions to explore -->
+
+
+Second, we need finer-grained measures of curiosity-driven behaviors.
+What actions do learners select in order to gain information about the properties of objects and laws that govern the physical world? 
 Past studies of infant's physical reasoning ability have used looking time to measure their knowledge about physical events, given that infant's attend longer to surprising events [e.g., objects appearing to pass through a wall; @Stahl2015].
-Behavioral investigations of older children's exploratory play have also used simple attention duration measures to measure curiosity, for example offering children a single complex toy with a number of functions that can be discovered [e.g., @Cook2011; @Bonawitz2012; @Gweon2014], and additionally tally the number of discovered functions.
-However, these attention and discovery measures do not quantify the overt actions that children choose, and typically do not offer more than one or two target objects for exploration.
+Behavioral investigations of older children's exploratory play have also used simple attention duration measures to measure curiosity, for example offering children a single complex toy with a number of functions that can be discovered [e.g., @Cook2011; @Bonawitz2012; @Gweon2014], and tallying the number of discovered functions.
+However, these attention and discovery measures do not quantify the overt actions that children choose, and typically do not offer more than one or two target objects for exploration. 
+Further, most environments that inspire curiosity tend to be more open-ended and afford a much wider variety of action choices.
 
-A third desiderata for a testable theory of curiosity is a linking function for evaluating the correspondence between the predictions of our computational theory and the observed patterns of action selection that people show in the same physical task. 
+A third desiderata for a testable theory of curiosity is a linking function for evaluating the correspondence between the predictions of our computational theory and the observed patterns of action selection that infants and children show in the same physical task. 
 Although behavioral studies of young children have found that they preferentially play with toys in order to learn the causal structure [@Schulz2007; @Gweon2014], there has been no detailed formal account of what their play actions are, or how they are selected in a given situation.
 Infant studies of surprisal to various physical events involving occlusion, containment, and covering of objects has revealed that even very young infants are unsurprised by many physical interactions [see @Baillargeon2007], but these studies do not specify or predict what physical interventions infants may make in order to learn more about the properties of objects and the laws of physics.
+
 On the computational modeling side, reinforcement learning (RL) researchers have long realized the value of mechanisms that encourage actions that explore the state space in the absence of an apparent reward (which are often sparse), as actions with uncertain outcomes can result in the discovery of new policies with high expected values [@Schmidhuber2010].
 Others have built robot models that utilize a form of curiosity to help build predictive and control models of the world [@Oudeyer2007; @Oudeyer2013], although this work pre-trained models on a separate prediction task before implementing curosity-driven learning.
 These models' behavior has not yet been directly compared to human behavior in the same task to reveal whether the curiosity driving their behavior mimics people's selection of causal interventions. 
