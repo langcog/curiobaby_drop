@@ -64,46 +64,55 @@ age = table(s_tr$Age_Group)
 
 # Introduction 
 
-Curiosity is a fundamental part of our motivation, driving everyday behaviors that we spend a surprising amount of time pursuing, from browsing the internet to reading novels, watching the news, and many other forms of information seeking.
-Curiosity is so strongly linked to learning that William James (1899) considered it to be "the impulse towards better cognition", a description that is echoed in Piaget's [-@Piaget1952] theory of development, which holds that children actively construct their knowledge through physical exploration of the world.
-Taking this view of children [even infants: @Gopnik2009] as "little scientists", researchers have credited curiosity for inspiring behaviors ranging from novelty-seeking to exploration and play, and yet there is a major outstanding difficulty in curiosity research: there is no integrative theory of the mechanisms and basis for curiosity [@Kidd2015].\footnote{Following @Kidd2015 we adopt a broad definition of curiosity as any mechanism that guides an organism to gain new information.}
-What combinations of stimuli and knowledge states inspire curiosity? 
-By what mechanism(s) does curiosity motivate and drive action selection, and influence subsequent learning and behavior?
+<!-- Curiosity is important... end with core question about what gives rise to curiosity. -->
+Curiosity is a key driver of everyday behaviors, from children's exploratory play with a new toy to adults browsing the internet, we spend a surprising amount of time actively pursuing information about our world. 
+Curiosity may even serve as the impetus for all learning: William James (1899) considered it to be "the impulse towards better cognition", a belief that is echoed in Piaget's [-@Piaget1952] theory of development, which holds that children actively construct their knowledge through physical exploration of the world.
+From this view, children and even infants [@Gopnik2009] can be seen as "little scientists" who use curiosity to select causal interventions that help them learn about the physical world.
+However, a major outstanding difficulty in curiosity research: there is no integrative, testable theory of the mechanisms and basis for curiosity [@Kidd2015].
+More concretely, what relationship between stimuli and a learner's knowledge states engender curiosity, and how does this motivate a learner's choice of actions?
 
-Although several theories of curiosity (surveyed briefly below) partially address these issues, a gold standard for testing these theories would require a fully-instantiated theory of curiosity in an artificial agent whose behavior can be directly compared to that of humans.
-However, a further difficulty of this approach is selecting a task that adequately captures the general nature of curiosity: curiosity-driven human behavior is so wide-ranging that it is difficult to systematically compare to presently limited artificial agents.
-Behavioral investigations of children's exploratory play have often offered a single complex toy with a number of functions that can be discovered [e.g., @Cook2011; @Bonawitz2012; @Gweon2014], but the real world offers many more degrees of freedom.
-The places where curiosity is most manifest tend to be those open-ended environments that are hardest to model -- an inviting playground, a surprisingly complex device, or a novel research question. 
+<!-- desiderata for advancing theories of curiosity -->
+
+A fully-specified, testable theory of curiosity would minimally require three components.
+First, it is necessary to have a precise mechanism specifying how stimuli inspire curiosity. 
+Although some early verbal theories of curiosity acknowledge that novel stimuli demand our (and other animals') attention [e.g., @Berlyne1954], borne out in empirical data [e.g., @Fantz1964], but modern theories hold that learners may prefer to attend to stimuli that are "moderately discrepant" in comparison to our mental representations [@Kinney1976].
+These theories hold that curiosity is inspired by awareness of a knowledge gap [@Loewenstein1994], and that as we gain experience with classes of stimuli our preferences will tend toward more complex stimuli as our mental representations mature [@Dember1957].
+Empirical work has verified that infants are sensitive to the level of complexity of stimuli and prefer to attend to stimuli of intermediate complexity [rather than simple or overly-complex; @Kidd2012; @Kidd2014].
+Thus, similar to other drives (e.g., hunger), curiosity is sated as relevant information is gained and the knowledge gap is closed, but defining the perceptual and knowledge-based representations and how they are compared is an open question.
+
+Second, a testable theory of curiosity requires a detailed measure of curious behavior that records which interventions learners select in order to gain information about the properties of objects and laws that govern the physical world. 
+People's curiosity-driven behavior comes in such a variety of contexts and utilizing such a wide repertoire of actions that it is quite difficult to choose an appropriate paradigm, particularly because the places where curiosity is most manifest tend to be those open-ended environments that are hardest to model -- an inviting playground, a surprisingly complex device, or a novel research question. 
+Past studies of infant's physical reasoning ability have used looking time to measure their knowledge about physical events, given that infant's attend longer to surprising events [e.g., objects appearing to pass through a wall; @Stahl2015].
+Behavioral investigations of older children's exploratory play have also used simple attention duration measures to measure curiosity, for example offering children a single complex toy with a number of functions that can be discovered [e.g., @Cook2011; @Bonawitz2012; @Gweon2014], and additionally tally the number of discovered functions.
+However, these attention and discovery measures do not quantify the overt actions that children choose, and typically do not offer more than one or two target objects for exploration.
+
+A third desiderata for a testable theory of curiosity is a linking function for evaluating the correspondence between the predictions of our computational theory and the observed patterns of action selection that people show in the same physical task. 
+Although behavioral studies of young children have found that they preferentially play with toys in order to learn the causal structure [@Schulz2007; @Gweon2014], there has been no detailed formal account of what their play actions are, or how they are selected in a given situation.
+Infant studies of surprisal to various physical events involving occlusion, containment, and covering of objects has revealed that infants are unsurprised by many physical interactions [@Baillargeon2007], but do not specify or predict what physical interventions infants may make in order to learn more about the properties of objects and the laws of physics.
+Recent computational models have proposed linking functions relating.. in simulation [@Schmidhuber2010; @Oudeyer2013], but the predictions of these models have not yet been directly compared to human behavior in the same task to reveal how curiosity drives people's choice of causal interventions. 
+
+<!-- High-level statement of our approach -->
 In this paper we propose a new paradigm that allows us to directly compare children's curiosity about physical interactions with that of an aritifical agent implementing different functional forms of curiosity.
-Below, we give a brief overview of theories of curiosity, relevant developmental empirical findings, and computational models instantiating curiosity in agents that are able to interact with the world in realistic simulated 3D environments.
+Our approach is to coordinate detailed measurement of stimulus and action selection with the construction of task-performing computational models evaluated on the same task and using the same metric, with the goal of developing a more robust, unified, and testable theory of curiosity's role in cognitive development.
 
-## Theories of Curiosity
+<!-- What we've learned from prior theoretical work, and how it falls short -->
 
-@Berlyne1954's influential theory of curiosity distinguished between perceptual curiosity, a desire to seek out novel stimuli (that decreases with familiarity), and epistemic curiosity, a desire to acquire knowledge. 
-Berlyne additionally distinguished specific versus diversive curiosity, where the former is a drive for a particular piece of information, and the latter is a general motivation for stimulation.
-More recent views of curiosity further limit the definition to information-seeking that is intrinsically-motivated, not linked to any obvious external reward [@Loewenstein1994; @Oudeyer2007].
-However, it is often difficult for observers to determine whether any given decision is intrinsically- or extrinsically-motivated.
-Modern theories also hold that the function of curiosity is inspired by awareness of a knowledge gap, and functions to drive behaviors that will result in learning [@Loewenstein1994].
-Similar to other drives (e.g., hunger), curiosity is sated as relevant information is gained and the knowledge gap is closed.
-One theory developed to explain the discrepancy between infants' frequent preference for novel stimuli [e.g., @Fantz1964], as well as their occasional preference for familiar stimuli (e.g., faces), is the idea that infants prefer to attend to stimuli that are "moderately discrepant", i.e. that are only somewhat different than the infants' mental representations [@Kinney1976].
-Thus, as infants gain experience with various classes of stimuli, they will seek increasingly complex stimuli as their mental representations become more sophisticated [@Dember1957].
-Although these theories give us some sense of which situations and knowledge states should engender curiosity, both the mechanism and how actions are selected are not fully specified.
+<!-- A limitation of past theories of curiosity is that they are large part verbal descriptions, without formal, testable, mechanisms. -->
+<!-- An exception to this: @Schmidhuber2010 and @Oudeyer2013 --similar but different, and critically not evaluated against same children's behavior in the same situations -->
 
-## Related Behavioral Work
+<!-- What we've learned from prior behavioral work, and how our approach is different -->
 
-Although the question of what inspires a child's curiosity is difficult to determine, it's generally agreed that curiosity indicates awareness of a knowledge gap that the learner is interested in filling [@Loewenstein1994].
-Even young infants often exhibit a preference to attend to novel stimuli over more familiar stimuli [e.g., @Fantz1964], and when surprising physical events do occur (e.g., an object appearing to have passed through a wall) it has been shown to stimulate infants' exploration and subsequent learning [@Stahl2015].
-Moreover, infants are sensitive to the level of complexity of stimuli, preferring to attend to those of intermediate complexity (rather than simple or overly-complex)--a bias which may help them optimize their information gain [@Kidd2012; @Kidd2014].
-As theorized [@Piaget1952], exploratory play has been shown to be an opportunity for young children to learn [e.g., generalization: @Sim2017, causal structure: @Schulz2007; @Gweon2014].
+<!-- Looking time people: @Baillargeon2007 and other studies of infants' surprisal at physical events (occlusion, containment,  -->
+<!-- Ullman -- not about curiosity, but about intuitive physics learning from observation in simplified 2D domains (e.g., colliding hockey pucks) --  -->
 
-One rich domain that young children are in the midst of learning about is the properties and affordances of physical objects. 
-Many studies of young infants' reasoning about physical objects have focused on occlusion, containment, and covering events, using surprisal (indexed via looking time) as a measure of knowledge [@Baillargeon2007].
-A study of 9- to 16-month-olds found that infants' violation of expectations about a novel toy's hidden properties (e.g., making a sound) drives them to explore similar toys for longer [@Baldwin1993].
-Here, we investigate toddlers' choices in a more complex
+
+<!-- Highlight main contributions of the paper -->
+
+
+<!-- One rich domain that young children are in the midst of learning about is the properties and affordances of physical objects.  -->
+<!-- A study of 9- to 16-month-olds found that infants' violation of expectations about a novel toy's hidden properties (e.g., making a sound) drives them to explore similar toys for longer [@Baldwin1993]. -->
 
 ## Computational Models of Curiosity
-
-[Sentence or two on other approaches, e.g. @Oudeyer2013; @Schmidhuber2010]
 
 Building on prior work that showed deep neural networks are capable of learning forward and inverse physical dynamics (i.e., "intuitive physics") from images when given the ability to "poke" the objects in the scene [@Agrawal2016], we use and extend a framework for constructing intrinsically-motivated artificial agents introduced in @Haber2018learning, described in the following. 
 
