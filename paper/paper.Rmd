@@ -88,12 +88,17 @@ However, these attention and discovery measures do not quantify the overt action
 
 A third desiderata for a testable theory of curiosity is a linking function for evaluating the correspondence between the predictions of our computational theory and the observed patterns of action selection that people show in the same physical task. 
 Although behavioral studies of young children have found that they preferentially play with toys in order to learn the causal structure [@Schulz2007; @Gweon2014], there has been no detailed formal account of what their play actions are, or how they are selected in a given situation.
-Infant studies of surprisal to various physical events involving occlusion, containment, and covering of objects has revealed that infants are unsurprised by many physical interactions [@Baillargeon2007], but do not specify or predict what physical interventions infants may make in order to learn more about the properties of objects and the laws of physics.
-Recent computational models have proposed linking functions relating.. in simulation [@Schmidhuber2010; @Oudeyer2013], but the predictions of these models have not yet been directly compared to human behavior in the same task to reveal how curiosity drives people's choice of causal interventions. 
+Infant studies of surprisal to various physical events involving occlusion, containment, and covering of objects has revealed that even very young infants are unsurprised by many physical interactions [see @Baillargeon2007], but these studies do not specify or predict what physical interventions infants may make in order to learn more about the properties of objects and the laws of physics.
+On the computational modeling side, reinforcement learning (RL) researchers have long realized the value of mechanisms that encourage actions that explore the state space in the absence of an apparent reward (which are often sparse), as actions with uncertain outcomes can result in the discovery of new policies with high expected values [@Schmidhuber2010].
+Others have built robot models that utilize a form of curiosity to help build predictive and control models of the world [@Oudeyer2007; @Oudeyer2013], although this work pre-trained models on a separate prediction task before implementing curosity-driven learning.
+These models' behavior has not yet been directly compared to human behavior in the same task to reveal whether the curiosity driving their behavior mimics people's selection of causal interventions. 
 
 <!-- High-level statement of our approach -->
-In this paper we propose a new paradigm that allows us to directly compare children's curiosity about physical interactions with that of an aritifical agent implementing different functional forms of curiosity.
+In this paper we propose a new paradigm that allows us to directly compare children's curiosity about physical interactions with that of an aritifical agent implementing different functional forms of curiosity in a simulated 3D environment, carrying out the same task.
+The proposed task, described in detail below, presents learners (children or the agent) with a set of objects from which they can select one to drop in a bin containing a set of target objects, with the potential to create one or more collisions during the drop.
 Our approach is to coordinate detailed measurement of stimulus and action selection with the construction of task-performing computational models evaluated on the same task and using the same metric, with the goal of developing a more robust, unified, and testable theory of curiosity's role in cognitive development.
+
+
 
 <!-- What we've learned from prior theoretical work, and how it falls short -->
 
@@ -103,22 +108,23 @@ Our approach is to coordinate detailed measurement of stimulus and action select
 <!-- What we've learned from prior behavioral work, and how our approach is different -->
 
 <!-- Looking time people: @Baillargeon2007 and other studies of infants' surprisal at physical events (occlusion, containment,  -->
-<!-- Ullman -- not about curiosity, but about intuitive physics learning from observation in simplified 2D domains (e.g., colliding hockey pucks) --  -->
+<!-- Ullman -- not about curiosity, but about intuitive physics learning from observation in simplified 2D domains (e.g., colliding hockey pucks)  -->
 
 
 <!-- Highlight main contributions of the paper -->
-
 
 <!-- One rich domain that young children are in the midst of learning about is the properties and affordances of physical objects.  -->
 <!-- A study of 9- to 16-month-olds found that infants' violation of expectations about a novel toy's hidden properties (e.g., making a sound) drives them to explore similar toys for longer [@Baldwin1993]. -->
 
 ## Computational Models of Curiosity
 
-Building on prior work that showed deep neural networks are capable of learning forward and inverse physical dynamics (i.e., "intuitive physics") from images when given the ability to "poke" the objects in the scene [@Agrawal2016], we use and extend a framework for constructing intrinsically-motivated artificial agents introduced in @Haber2018learning, described in the following. 
+Building on prior work that showed deep neural networks are capable of learning forward and inverse physical dynamics (i.e., "intuitive physics") from images when given the ability to "poke" the objects in the scene [@Agrawal2016], we use and extend a deep RL architecture for constructing intrinsically-motivated artificial agents introduced in @Haber2018learning.
+This agent's behavior is driven by two interacting neural networks: a *world-model* and a *self-model*, which are trained simultaneously. 
+The problem of the world-model is to predict the consequences of the agent's actions, through estimation of either the forward or inverse dynamics. 
+The self-model attempts to learn to predict the errors of the world-model. 
+The agent can use the predictions of the self-model to implement a variety of curiosity policies for choosing actions, for example to pick actions that it believes will adversarially challenge the state of its world-model.
 
-(Model description or just teaser here?)
-
-(maybe make the below a joint "Paradigm" section, then human behavior, model behavior and comparison)
+(Full model description here, or just a teaser? Maybe also make the below a joint "Paradigm" section, then human behavior, model behavior and comparison)
 
 # Experiment
 
