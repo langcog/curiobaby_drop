@@ -65,13 +65,9 @@ age = table(s_tr$Age_Group)
 # Introduction 
 
 <!-- Curiosity is important... end with core question about what gives rise to curiosity. -->
-Curiosity is a key driver of everyday behaviors. From children's exploratory play with a new toy to adults browsing the internet, we spend a surprising amount of time actively pursuing information about our world. 
-Curiosity may even serve as the impetus for all learning: William James (1899) considered it to be "the impulse towards better cognition." This belief is echoed in Piaget's [-@Piaget1952] theory of development, which holds that children actively construct their knowledge through physical exploration of the world.
-From this perspective, children and even infants [@Gopnik2009] can be seen as "little scientists" whose curiosity  selects causal interventions that help them learn about the physical world.
-However, there is no integrative, testable theory of the mechanisms and basis of curiosity [@Kidd2015].
-More concretely, how does a learner's knowledge state interact with their perception to engender curiosity, and how does curiosity motivate action?
+Curiosity is a hallmark aspect of human intelligence. From infants exploring the objects in their environment to scientists exploring the frontiers of our solar system, humans are highly motivated to seek out new knowledge and experiences. However, although such exploratory behavior has long been recognized as a critical component of human learning [@james1983talks] and cognitive development [@Gopnik2009,@Piaget1952], formal theories that explain human curiosity and how it drives exploratory behavior have remained elusive [@Kidd2015]. Moreover, extant theories have rarely provided quantitatively precise enough predictions to be directly compared to empirical measurements of curiosity-driven behavior in humans.
 
-<!-- desiderata for advancing theories of curiosity -->
+The goal of the current paper is to help close this gap by proposing a framework for advancing our theoretical understanding of curiosity that combines three key ingredients: _first_, we present a computational model of how a learner's knowledge state interacts with ongoing perceptual experiences to give rise to curiosity-driven exploratory behavior; _second_, we present an empirical investigation of the pattern of actions taken by children in a novel physical exploration task; and _third_, we evaluate the quantitative correspondence between the exploratory actions taken by our computational model and those taken by children on the same set of tasks. 
 
 A fully-specified, testable theory of curiosity would minimally require three components.
 First, we need a precise mechanism that specifies how stimuli inspire curiosity. 
@@ -437,22 +433,22 @@ ggplot(ch_loc, aes(x=DropLocation, y=DropChoice)) + geom_tile(aes(fill=freq)) +
 
 
 
-1. height x continuous age
-First we examine tower height as a function of age. Y/N we find tower height increases with age.
+<!-- 1. height x continuous age -->
+<!-- First we examine tower height as a function of age. Y/N we find tower height increases with age. -->
 ```{r}
-cor.test(hum$height_tallest, hum$age_rounded)
+# cor.test(hum$height_tallest, hum$age_rounded)
 ```
 
 ```{r, include=F} 
-ch_height <- hum %>% group_by(age_group, height_tallest) %>% 
-  summarise(n = n()) %>%
-  mutate(freq = n / sum(n)) 
-
-ggplot(ch_height, aes(x=age_group, y=height_tallest)) + 
-  geom_smooth(method="lm", level=0.90) + geom_point(alpha=.8, aes(size=n)) +
-  scale_shape_manual(values=10:19) +
-  xlab("Age") + ylab("Height_Tallest") + ylim(0,10) +
-  langcog::scale_fill_solarized() + ggthemes::theme_few()
+# ch_height <- hum %>% group_by(Age_Group, height_tallest) %>% 
+#   summarise(n = n()) %>%
+#   mutate(freq = n / sum(n)) 
+# 
+# ggplot(ch_height, aes(x=age_group, y=height_tallest)) + 
+#   geom_smooth(method="lm", level=0.90) + geom_point(alpha=.8, aes(size=n)) +
+#   scale_shape_manual(values=10:19) +
+#   xlab("Age") + ylab("Height_Tallest") + ylim(0,10) +
+#   langcog::scale_fill_solarized() + ggthemes::theme_few()
 ```
 
 <!-- We find that towers vary in i) height, ii) stacks, and iii) components.  -->
