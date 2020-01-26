@@ -1,4 +1,7 @@
-
+*.aux
+*fdb_latexmk
+*.fls
+*.out
 .DS_Store
 .Rproj.user
 .Rhistory
