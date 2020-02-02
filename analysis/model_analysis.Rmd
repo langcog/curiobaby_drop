@@ -1,0 +1,114 @@
+---
+title: "curiobaby_drop model analysis"
+author: "George Kachergis"
+date: "1/31/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F)
+require(tidyverse)
+```
+
+## Load data
+
+```{r, load-data}
+load_model_data <- function(data_dir, policy_name) {
+  dirs = paste("../analysis/agent-data", data_dir, sep='/')
+  d = data.frame()
+  for(dir in dirs) {
+    subdirs <- list.files(dir, full.names=TRUE)
+    for(sub in subdirs) {
+      filenames <- list.files(sub, full.names=TRUE)
+      for(f in filenames) {
+        #tmp <- read.csv(f, header=T)
+        tmp <- read.table(f, sep=',', header=T, stringsAsFactors = F)
+        d = rbind(d, tmp)
+      }
+    }
+  }
+  d$policy = policy_name
+  return(d)
+}
+
+
+cur = load_model_data("curiodrop_01_curious", "curious")
+noncur = load_model_data("curiodrop_01_noncurious", "noncurious")
+rand = load_model_data("random_policy", "random")
+all = rbind(cur, noncur, rand)
+names(all) # collision_count drop_target 
+
+drop_loc_cols = c("ground_object_1_distance_on_floor_contact",
+                  "ground_object_2_distance_on_floor_contact",
+                  "ground_object_3_distance_on_floor_contact")
+all$ClosestObjDistance = apply(all[,drop_loc_cols], 1, min) # distance of closest object
+
+# TargetSpace is object that is closest
+md <- all %>% mutate(TargetSpace = case_when(
+        ClosestObjDistance==ground_object_1_distance_on_floor_contact ~ ground_object_1,
+        ClosestObjDistance==ground_object_2_distance_on_floor_contact ~ ground_object_2,
+        ClosestObjDistance==ground_object_3_distance_on_floor_contact ~ ground_object_3
+      )) %>% mutate(TargetSpace = case_when(
+        TargetSpace=="RDumbbell" ~ "Dumbbell",
+        TRUE ~ TargetSpace
+      )) %>% mutate(DropChoice = case_when(
+        dropped_object=="RDumbbell" ~ "Dumbbell",
+        TRUE ~ dropped_object
+      )) %>% mutate(DropLocation = case_when(
+        drop_target=="floor" ~ "space",
+        drop_target=="RDumbbell" ~ "Dumbbell",
+        TRUE ~ drop_target
+      )) 
+
+# create StimSet column 
+md <- md %>% mutate(DropSet = case_when(
+        drop_object_partitioning=="Bowl_Pentagon_RDumbbell" ~ "c",
+        drop_object_partitioning=="Pyramid_Torus_TriangularPrism" ~ "a",
+        drop_object_partitioning=="Cone_Octahedron_Pipe" ~ "b"
+      )) %>% mutate(TargetSet = case_when(
+        ground_object_partitioning=="Bowl_Pentagon_RDumbbell" ~ "c",
+        ground_object_partitioning=="Pyramid_Torus_TriangularPrism" ~ "a",
+        ground_object_partitioning=="Cone_Octahedron_Pipe" ~ "b"
+      )) %>% mutate(StimSet = paste0(TargetSet, DropSet))
+
+
+table(md$policy)
+
+md <- md %>% select("episode", "policy", "StimSet", "DropChoice", "DropLocation", "TargetSpace", "DropSet", "TargetSet")
+
+# episodes with same drop and target sets (does model show pref to drop objs on same objs like pilot children?)
+same_dt = subset(md, DropSet==TargetSet)
+
+# don't want these due to our pilot results (kids show same pref)
+md <- md %>% filter(DropSet!=TargetSet)
+save(md, file="agent-data/model_data.RData")
+```
+
+`r nrow(all)` simulations with the 9 desired objects. We filter the `r nrow(same_dt)` episodes that had the same drop set and target set, as this trial type was not used in the behavioral experiment.
+
+```{r, collisions-and-distance}
+
+hist(all$collision_count)
+hist(all$ClosestObjDistance)
+weird = subset(all, ClosestObjDistance<0) # 1715 episodes where the distance to closest object is -1 
+table(weird$hit_object_before_ground) # FALSE for all 
+table(weird$drop_target) # mostly floor, but some not
+```
+
+## Drop Preferences
+
+```{r}
+
+drops = table(md$policy, md$DropChoice)
+
+round(drops / rowSums(drops), 2)
+
+```
+
+
+
+
+Collision count:
+```{r}
+round(table(all$collision_count) / sum(table(all$collision_count)), 2)
+```
