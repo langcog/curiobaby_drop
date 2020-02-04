@@ -426,8 +426,8 @@ ggplot(ch_loc, aes(x=DropLocation, y=DropChoice)) + geom_tile(aes(fill=freq)) +
 tower = read.csv2("../analysis/human-data/curiobaby_drop-data - cool tower.csv", sep=',', header=T, stringsAsFactors=F)
 hum = subset(tower, exclude!="Y")
 
-length(unique(tower$SID)) #61
-length(unique(hum$SID)) # 51 subjects
+#length(unique(tower$SID)) #61
+Nsubj_tower = length(unique(hum$SID)) # 51 subjects
 
 hum$age_group = as.numeric(hum$age_group)
 hum$age_rounded = as.numeric(hum$age_rounded)
@@ -438,9 +438,10 @@ hum$base_tallest = as.character(hum$base_tallest)
 ht_age = cor.test(hum$age_rounded, hum$height_tallest)
 ```
 
-First we examine tower height as a function of age, finding that older children tend to build higher towers `r cor_apa(ht_age, format="rmarkdown", print=F)`.
+The average height of the constructed towers was `r round(mean(na.omit(hum$height_tallest)), 1)` blocks.
+We examined tower height as a function of age, and found that older children tend to build higher towers (`r cor_apa(ht_age, format="rmarkdown", print=F)`).
 
-```{r plot-height-by-age, include=F}
+```{r plot-height-by-age, include=F, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3, fig.height=3, set.cap.width=T, num.cols.cap=1, fig.cap = "Tower height by age."}
 ch_height <- hum %>% group_by(age_rounded, height_tallest) %>%
   summarise(n = n()) %>%
   mutate(freq = n / sum(n))
@@ -452,13 +453,13 @@ ggplot(ch_height, aes(x=age_rounded, y=height_tallest)) +
   langcog::scale_fill_solarized() + ggthemes::theme_few()
 ```
 
-2. support x supported (counts)
-```{r heatmap-support-by-supported-counts}
+Next we examine the number of times participants supported each object with each other object. 
+```{r heatmap-support-by-supported-counts, include=T, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3, fig.height=3, set.cap.width=T, num.cols.cap=1, fig.cap = "Counts of support and supported object relations in participants' towers."}
 tower = subset(tower, tallest_objects!="" & tallest_objects!="pentagon+octahedron, trig prism") # 5 kids who arranged horizontally and 1 kid chose 2 - exclude
 df = data.frame(support=NA, supported=NA, n=NA)
 for(s in 1:nrow(tower)) {
   objs = unlist(str_split(tower[s,]$tallest_objects, ", "))
-  print(objs)
+  #print(objs)
   for(i in 2:length(objs)) {
     df = rbind(df, cbind(support=objs[i-1], supported=objs[i], n=1))
   }
@@ -469,9 +470,8 @@ hm %>% ggplot(aes(x=support, y=supported)) + geom_tile(aes(fill=N)) + geom_text(
   scale_fill_gradient(low = "white", high = "steelblue") + ggthemes::theme_few()
 ```
 
-3. support x supported (probabilities)
-pr (supported object | support object)
-```{r heatmap-support-by-supported-probs}
+(Could instead show P(supported object | support object).)
+```{r heatmap-support-by-supported-probs, include=F, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3, fig.height=3, set.cap.width=T, num.cols.cap=1, fig.cap = "Conditional probabilities of supported object given support object in participants' towers."}
 tower = subset(tower, tallest_objects!="" & tallest_objects!="pentagon+octahedron, trig prism") # 5 kids who arranged horizontally and 1 kid chose 2 - exclude
 df = data.frame(support=NA, supported=NA, n=NA)
 for(s in 1:nrow(tower)) {
@@ -491,8 +491,9 @@ hm1 %>% ggplot(aes(x=support, y=supported)) + geom_tile(aes(fill=freq)) + geom_t
   scale_fill_gradient(low = "white", high = "steelblue") + ggthemes::theme_few()
 ```
 
-4. base and top distribution
-```{r base-and-top-objects}
+<!-- Finally, we look at the distribution of tower heights as a function of the objects chosen as the base of the tower. -->
+
+```{r base-and-top-objects, include=F, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3, fig.height=3, set.cap.width=T, num.cols.cap=1, fig.cap = "Distribution of base and top objects in participants' towers."}
 ch_extremes <- hum %>% 
   group_by(base_tallest) %>% 
   count(N=n()) %>%
@@ -505,8 +506,6 @@ ch_extremes %>%
 
 <!-- We find that towers vary in i) height, ii) stacks, and iii) components. -->
 
-<!-- 1. height x age -->
-<!-- -First we examine tower height, of the tallest stack, as a function of age. We find tower height increases with age (cor.test). -->
 
 <!-- 2a. number stacks x age -->
 <!-- -Number of stacks y/ n correlate with age. -->
@@ -542,22 +541,21 @@ load("../analysis/agent-data/model_data.RData") # md
 
 Shapes = c(sort(unique(md$DropChoice)), "space")
 
-rand_drop <- drop_choice_plot(subset(md, policy=="random"), Shapes)
-curio_drop <- drop_choice_plot(subset(md, policy=="curious"), Shapes)
-noncurio_drop <- drop_choice_plot(subset(md, policy=="noncurious"), Shapes)
+rand_drop <- drop_choice_plot(subset(md, policy=="random"), ymax=1, Shapes) + ggtitle("Random")
+curio_drop <- drop_choice_plot(subset(md, policy=="curious"), ymax=1, Shapes) + ggtitle("Curious")
+noncurio_drop <- drop_choice_plot(subset(md, policy=="noncurious"), ymax=1, Shapes) + ggtitle("Noncurious")
 
 md$Target = md$DropLocation
 
-rand_targ <- target_hit_plot(subset(md, policy=="random"), ymax=1, Shapes)
+rand_targ <- target_hit_plot(subset(md, policy=="random"), ymax=1, Shapes) 
 curio_targ <- target_hit_plot(subset(md, policy=="curious"), ymax=1, Shapes)
 noncurio_targ <- target_hit_plot(subset(md, policy=="noncurious"), ymax=1, Shapes)
 ```
 
-```{r combined-model-fig, fig.env = "figure*", fig.pos = "h", fig.align="center", fig.width=7, fig.height=3.2, set.cap.width=T, num.cols.cap=2, fig.cap = "Relative frequency of objects chosen by each model as objects for dropping (first row), and objects hit as targets (second row; pink dots represent hitting empty space), as a function of target/drop set pairing."}
+```{r combined-model-fig, fig.env = "figure*", fig.pos = "h", fig.align="center", fig.width=7, fig.height=5.5, set.cap.width=T, num.cols.cap=2, fig.cap = "Relative frequency of objects chosen by each model as objects for dropping (first row), and objects hit as targets (second row; pink dots represent hitting empty space), as a function of target/drop set pairing."}
 
 ggarrange(rand_drop, curio_drop, noncurio_drop, 
-          rand_targ, curio_targ, noncurio_targ, ncol=3, nrow=2, 
-          labels = c("Random", "Curious", "Noncurious"),
+          rand_targ, curio_targ, noncurio_targ, ncol=3, nrow=2, #labels = c("A", "B", "C"),
           common.legend=T, legend="bottom")
 ```
 
