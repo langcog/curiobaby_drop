@@ -32,35 +32,11 @@ output: cogsci2016::cogsci_paper
 #final-submission: \cogscifinalcopy
 ---
 
-```{r global_options, include=FALSE}
-knitr::opts_chunk$set(fig.width=3, fig.height=3, fig.crop = F, 
-                      fig.pos = "tb", fig.path='figs/',
-                      echo=F, warning=F, cache=F, 
-                      message=F, sanitize = T)
-```
 
-```{r, libraries}
-library(png)
-library(grid)
-library(ggplot2)
-library(xtable)
-require(here)
-require(tidyverse)
-require(tidyboot)
-library(apa) # for generating APA-style text to report statistical tests
-library(ggpubr)
-```
 
-```{r, load-data}
-tower = read.csv2("../analysis/human-data/curiobaby_drop-data - cool tower.csv", sep=',', header=T, stringsAsFactors=F)
-raw = read.csv2("../analysis/human-data/curiobaby_drop-data - drop exp.csv", sep=',', header=T, stringsAsFactors=F)
-hum = subset(raw, Exclude!="Y")
 
-hum = hum[-which(hum$StimSet=="bc" & hum$DropChoice=="bowl and dumbbell"),] # chose two - exclude
 
-s_tr <- hum %>% group_by(SID, Age_Group) %>% summarise(max=max(Trial)) %>% arrange(max)
-age = table(s_tr$Age_Group)
-```
+
 
 # Introduction 
 
@@ -113,23 +89,13 @@ The agent can use the predictions of the self-model to implement a variety of cu
 ## Method
 
 ### Participants
-Participants were `r length(unique(raw$SID))` children recruited from the Children's Discovery Museum of San Jose and Bing Nursery School.
+Participants were 53 children recruited from the Children's Discovery Museum of San Jose and Bing Nursery School.
 Participant exclusions were made based on cases where i) the participant did not complete more than half of the study play session or ii) the parent did not consent for video recording of study. 
-After exclusions, results from `r length(unique(hum$SID))` were analyzed, including `r age[1]` 2-year-olds, `r age[2]` 3-year-olds, `r age[3]` 4-year-olds, `r age[4]` 5-year-olds, and `r age[5]` 6-year-olds.\footnote{The collected sample differed from our planned sample size of 16 each of 3-, 4-, and 5-year-olds due to availability of participants (see preregistration: https://osf.io/37qvb/).}
+After exclusions, results from 51 were analyzed, including 6 2-year-olds, 18 3-year-olds, 14 4-year-olds, 12 5-year-olds, and 2 6-year-olds.\footnote{The collected sample differed from our planned sample size of 16 each of 3-, 4-, and 5-year-olds due to availability of participants (see preregistration: https://osf.io/37qvb/).}
 
 ### Materials
 
-```{r object-sets}
-shapes = c("bowl","cone","dumbbell","octahedron","pentagon","pipe","pyramid","torus","trig prism", "space")
 
-a = c("pyramid", "torus", "trig prism")
-b = c("cone", "octahedron", "pipe")
-c = c("bowl", "dumbbell", "pentagon")
-
-hum <- hum %>% 
-  mutate(DropSet=ifelse(StimSet %in% c("ba","ca"), "A", ifelse(StimSet %in% c("ab","cb"), "B", "C")),
-         TargetSet=ifelse(StimSet %in% c("ab","ac"), "A", ifelse(StimSet %in% c("ba","bc"), "B", "C")))
-```
 
 Stimuli were 3D-printed plastic objects produced using Blender 3D-modeling software. 
 The nine objects, depicted in Figure 1, were bowl, cone, dumbbell, octahedron, pentagon (pentagonal prism), pipe, pyramid, torus, and triangular prism.
@@ -144,10 +110,16 @@ Target objects were placed in a circular bin (25 in diameter x 10 in height).
 The bin was divided with tape into sections of equal area, and one target object from the appropriate set was placed in the center of each third. 
 Drop objects were presented to participants on a table at approximately eye level.
 
-```{r fig1-sets, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.25, fig.height=3, set.cap.width=T, num.cols.cap=1, fig.cap = "Sets of 3D objects used for dropping and as targets."}
-img <- png::readPNG("figs/drop_sets.png")
-grid::grid.raster(img)
-```
+\begin{CodeChunk}
+\begin{figure}[h]
+
+{\centering \includegraphics{figs/fig1-sets-1} 
+
+}
+
+\caption[Sets of 3D objects used for dropping and as targets]{Sets of 3D objects used for dropping and as targets.}\label{fig:fig1-sets}
+\end{figure}
+\end{CodeChunk}
 
 ### Procedure
 
@@ -162,10 +134,16 @@ Based on piloting, we estimated the activity would would only require five minut
 In both conditions, a video camera was used to record the play session from an angle above the bin, to show child's block selection and drop location as well as child's completed tower. 
 After child notified the researcher that they were finished building their tower, the session was completed and camera was turned off. 
 
-```{r fig2-task, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3, fig.height=2.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Example trial in which the participant chose to drop the pyramid from set A on the pentagonal prism in the target set (B)."}
-img <- png::readPNG("figs/DropTaskFigure.png")
-grid::grid.raster(img)
-```
+\begin{CodeChunk}
+\begin{figure}[h]
+
+{\centering \includegraphics{figs/fig2-task-1} 
+
+}
+
+\caption[Example trial in which the participant chose to drop the pyramid from set A on the pentagonal prism in the target set (B)]{Example trial in which the participant chose to drop the pyramid from set A on the pentagonal prism in the target set (B).}\label{fig:fig2-task}
+\end{figure}
+\end{CodeChunk}
 
 ### Drop Coding Procedure
 
@@ -183,80 +161,28 @@ Trials were also excluded if the experimenter made a mistake (e.g., used the wro
 
 ## Results
 
-```{r chance-comparison}
-hum$TargetSpace = ifelse(hum$DropLocation=="space", hum$WhichSpace, hum$DropLocation)
 
-report_chisq <- function(X) {
-  # e.g. X^2 (2, N = 88) = 2.1, p = .35
-  pval = round(X$p.value, 3)
-  if(pval==0) { 
-    pval = ", p<.001" 
-  } else {
-    pval = paste0(", p=",pval)
-  }
-  return(paste0("($X^2$(", X$parameter, ", N=", sum(X$expected), ") = ", round(X$statistic,2), pval, ")"))
-}
-
-# see if children's choices (per subset) are random
-drop_ch = table(hum$StimSet, hum$DropChoice)
-# chisq.test(rbind(colSums(drop_ch[,a]), rep(sum(drop_ch[,a]/3), 3)) )
-
-Xa_drop = chisq.test( colSums(drop_ch[,a]) ) # p<.001
-Xb_drop = chisq.test( colSums(drop_ch[,b]) ) # p=.01
-Xc_drop = chisq.test( colSums(drop_ch[,c]) ) # p=.056
-
-target_ch = table(hum$StimSet, hum$DropLocation)
-
-Xa_targ = chisq.test( colSums(target_ch[,a]) ) # n.s.
-Xb_targ = chisq.test( colSums(target_ch[,b]) ) # n.s.
-Xc_targ = chisq.test( colSums(target_ch[,c]) ) # n.s.
-
-targetloc_ch = table(hum$StimSet, hum$TargetSpace)
-Xa_tloc = chisq.test( colSums(targetloc_ch[,a]) ) # n.s.
-Xb_tloc = chisq.test( colSums(targetloc_ch[,b]) ) # n.s.
-Xc_tloc = chisq.test( colSums(targetloc_ch[,c]) ) # n.s.
-
-# 'misses' by age
-space_age = table(subset(hum, DropLocation=="space")$Age_Group)
-all_age = table(hum$Age_Group)
-#Xmiss_age = chisq.test(space_age, p=all_age / sum(all_age)) # n.s.
-prop_space = sum(space_age) / sum(all_age)
-
-age_s <- hum %>% 
-  group_by(SID, Age_Exact) %>%
-  summarise(miss=sum(DropLocation=="space"), N=n()) %>%
-  mutate(prop_miss = miss / N)
-age_miss = cor.test(age_s$prop_miss, as.numeric(age_s$Age_Exact))
-
-# now check DropChoice x TargetLocation interactions
-# maybe we do chisq.test on particular combinations? e.g., for DropSet A and TargetSet B?
-dA = subset(hum, DropSet=="A" & TargetSet=="B")
-dto = table(dA$DropChoice, dA$DropLocation)[,1:3]
-#dto = table(hum$DropChoice, hum$DropLocation)[,c(1:4,6:8,10:11)] # drop 'outside' and 'space'
-Xdto = chisq.test(dto)
-
-```
 
 We first examine children's choice of drop objects and target objects to determine if children were choosing randomly, or had consistent preferences for some objects. 
 We used chi-square test of independence on participants' drop choices from each set of objects (A, B, C).
-Participants' drop choices from set A significantly differed from chance `r report_chisq(Xa_drop)`, as did drop choices from set B `r report_chisq(Xb_drop)`.
-Participants' drop choices from set C did not significantly differ from chance `r report_chisq(Xc_drop)`.
+Participants' drop choices from set A significantly differed from chance ($X^2$(2, N=189) = 19.17, p<.001), as did drop choices from set B ($X^2$(2, N=201) = 8.27, p=0.016).
+Participants' drop choices from set C did not significantly differ from chance ($X^2$(2, N=194) = 5.76, p=0.056).
 Table 1 shows a summary of participants' choice of drop objects per set.
 It is apparent that from set A, participants preferentially chose to drop the torus rather than the triangular prism (trig prism) or pyramid. 
 For set B, children more often avoided the octahedron, and instead chose the pipe or cone.
 Set C showed more equal rates of drop choice, but the dumbbell was somewhat more popular than the pentagonal prism (pentagon).
 
 What objects did children target with their drops?
-First, we noted that children very often did not hit any target object: on `r round(prop_space, 2)*100`% of trials, participants' dropped over empty space.
+First, we noted that children very often did not hit any target object: on 57% of trials, participants' dropped over empty space.
 It is not possible to determine whether children intentionally missed the available target objects, or whether their misses were errors due to noise in fine motor control.
 If the misses were just due to poor motor control, one might expect the number of misses by age to decrease, as older children should have better motor control.
-However, there was no significant correlation between children's individual proportion of "missed" targets and their age (`r cor_apa(age_miss, format="rmarkdown", print=F)`), which may suggest that dropping objects on empty space may be of interest to children of all ages, and not solely determined by a lack of fine motor control.
+However, there was no significant correlation between children's individual proportion of "missed" targets and their age (*r*(51) = .20, *p* = .141), which may suggest that dropping objects on empty space may be of interest to children of all ages, and not solely determined by a lack of fine motor control.
 Thus, we first analyze drops where participants' dropped objects directly hit the target objects.
-Chi-square tests of children's target collisions revealed that they did not significantly differ from chance for set A `r report_chisq(Xa_targ)`, B `r report_chisq(Xb_targ)`, or C `r report_chisq(Xc_targ)`.
+Chi-square tests of children's target collisions revealed that they did not significantly differ from chance for set A ($X^2$(2, N=76) = 0.34, p=0.843), B ($X^2$(2, N=84) = 1.14, p=0.565), or C ($X^2$(2, N=92) = 1.98, p=0.372).
 Table 2 shows a summary of participants' choice of target objects per set.
 
 Finally, we examine a more lenient analysis children's choice of target location (i.e., the identity of the closest target), regardless of whether there was a collision of drop and target objects.
-Chi-square tests of children's target collisions once more found that they did not significantly differ from chance for set A `r report_chisq(Xa_tloc)`, B `r report_chisq(Xb_tloc)`, or C `r report_chisq(Xc_tloc)`.
+Chi-square tests of children's target collisions once more found that they did not significantly differ from chance for set A ($X^2$(2, N=194) = 2.3, p=0.317), B ($X^2$(2, N=186) = 0.23, p=0.893), or C ($X^2$(2, N=193) = 2, p=0.368).
 Table 3 shows a summary of participants' choice of target locations per set.
 
 In summary, children showed some consistent preferences in their choice of objects to drop from each set, but no systematic preference for targeting particular objects.
@@ -264,248 +190,257 @@ We now investigate whether there were interactions of drop objects and targets t
 
 Finally, we analyze how exploratory children were in their responses: across the 12 trials, what proportion of the 9 available objects did each child utilize as drop objects? What proportion of the objects were targeted?
 
-```{r table1-drop, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
-get_table_string <- function(tableX, set) {
-  tt = sort(colSums(tableX[,set]))
-  tstr = paste(paste0(names(tt), " (", tt, "),"), collapse=' ')
-  tstr = gsub('.{1}$', '', tstr)
-  return(tstr)
-}
-dA = get_table_string(drop_ch, a)
-dB = get_table_string(drop_ch, b)
-dC = get_table_string(drop_ch, c)
+\begin{table}[H]
+\centering
+\begin{tabular}{rll}
+  \hline
+ & Set & Drop Object (N) \\ 
+  \hline
+1 & A & trig prism (45), pyramid (53), torus (91) \\ 
+  2 & B & octahedron (48), pipe (74), cone (79) \\ 
+  3 & C & pentagon (50), bowl (67), dumbbell (77) \\ 
+   \hline
+\end{tabular}
+\caption{Children's drop object choices by set.} 
+\end{table}
 
-tabl <- tribble(~Set, ~`Drop Object (N)`, 
-                "A", dA,
-                "B", dB,
-                "C", dC)
-t1 <- xtable::xtable(tabl, caption="Children's drop object choices by set.")
-#tab1 <- xtable::xtable(summary(out)$coef, digits=c(0, 2, 2, 1, 2), 
-#                       caption = "This table prints across one column.")
-print(t1, type="latex", comment = F, table.placement = "H")
-```
 
-```{r table2-target, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
-tA = get_table_string(target_ch, a)
-tB = get_table_string(target_ch, b)
-tC = get_table_string(target_ch, c)
+\begin{table}[H]
+\centering
+\begin{tabular}{rll}
+  \hline
+ & Set & Target Object (N) \\ 
+  \hline
+1 & A & pyramid (23), trig prism (26), torus (27) \\ 
+  2 & B & cone (24), octahedron (28), pipe (32) \\ 
+  3 & C & pentagon (27), dumbbell (28), bowl (37) \\ 
+   \hline
+\end{tabular}
+\caption{Children's target object choices by set.} 
+\end{table}
 
-tabl2 <- tribble(~Set, ~`Target Object (N)`, 
-                "A", tA,
-                "B", tB,
-                "C", tC)
-t2 <- xtable::xtable(tabl2, caption="Children's target object choices by set.")
-print(t2, type="latex", comment = F, table.placement = "H")
-```
 
-```{r table3-targetloc, echo=FALSE, message=FALSE, warnings=FALSE, results='asis'}
-tA = get_table_string(targetloc_ch, a)
-tB = get_table_string(targetloc_ch, b)
-tC = get_table_string(targetloc_ch, c)
+\begin{table}[H]
+\centering
+\begin{tabular}{rll}
+  \hline
+ & Set & Target Location (N) \\ 
+  \hline
+1 & A & trig prism (57), torus (63), pyramid (74) \\ 
+  2 & B & octahedron (60), pipe (61), cone (65) \\ 
+  3 & C & dumbbell (56), bowl (65), pentagon (72) \\ 
+   \hline
+\end{tabular}
+\caption{Children's target location choices by set.} 
+\end{table}
 
-tabl3 <- tribble(~Set, ~`Target Location (N)`, 
-                "A", tA,
-                "B", tB,
-                "C", tC)
-t3 <- xtable::xtable(tabl3, caption="Children's target location choices by set.")
-print(t3, type="latex", comment = F, table.placement = "H")
-```
 
-```{r drop-choice, include=F, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3.4, fig.height=2.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Relative frequency of drop object choice as a function of stimulus set."}
-drop_choice_plot <- function(dat, ymax=.66, shapes_vec) {
-  ch_cond <- dat %>% 
-    group_by(StimSet, DropChoice) %>%
-    summarise(n = n()) %>%
-    mutate(freq = n / sum(n)) 
 
-  ch_cond$StimSet <- factor(ch_cond$StimSet, levels = c("ba","ca","ab","cb","ac","bc"))
-  ch_cond$DropChoice <- factor(ch_cond$DropChoice, levels=shapes_vec)
-  fig_drop <- ggplot(ch_cond, aes(x=StimSet, y=freq, shape=DropChoice, color=DropChoice)) + # , size=n
-    geom_point(alpha=.8) +
-    scale_shape_manual(values=10:19) +
-    #geom_linerange(aes(ymin = ci_lower, ymax = ci_upper)) +
-    xlab("Stimulus Set") + ylab("Rate of Drop Object Choice") + ylim(0,ymax) + 
-    langcog::scale_fill_solarized() + ggthemes::theme_few() + 
-    geom_hline(yintercept=.33, lty='dashed') + labs(shape="Object", color="Object")
-  return(fig_drop)
+
+
+
+
+
+
+
+\begin{CodeChunk}
+\begin{figure*}[h]
+
+{\centering \includegraphics{figs/combined-fig-1} 
+
 }
 
-fig_drop <- drop_choice_plot(hum, shapes)
-#print(fig_drop)
-```
-
-```{r target-hit, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3.4, fig.height=2.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Relative frequency of targeted object as a function of stimulus set."}
-hum$Target = hum$DropLocation
-
-target_hit_plot <- function(dat, ymax=.66, shapes_vec) {
-  ch_cond <- dat %>% 
-    filter(Target!="outside") %>%
-    group_by(StimSet, Target) %>%
-    summarise(n = n()) %>%
-    mutate(freq = n / sum(n)) 
-
-  # need to add "space" as level of Target in human data
-  ch_cond$Target <- factor(ch_cond$Target, levels = c(shapes_vec))
-  fig_targ_hit <- ggplot(ch_cond, aes(x=StimSet, y=freq, shape=Target, color=Target)) + # , size=n
-    geom_point(alpha=.8) +
-    scale_shape_manual(values=10:20) +
-    #geom_linerange(aes(ymin = ci_lower, ymax = ci_upper)) +
-    xlab("Stimulus Set") + ylab("Rate of Target Object Hit") + ylim(0,ymax) + 
-    langcog::scale_fill_solarized() + ggthemes::theme_few() + 
-    geom_hline(yintercept=.33, lty='dashed')
-}
-#print(fig_targ_hit)
-fig_targ_hit <- target_hit_plot(hum, ymax=.66, shapes)
-```
-
-```{r target-space, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3.4, fig.height=2.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Relative frequency of targeted object as a function of stimulus set."}
-
-ch_cond <- hum %>% 
-  filter(is.element(TargetSpace, shapes)) %>%
-  group_by(StimSet, TargetSpace) %>%
-  summarise(n = n()) %>%
-  mutate(freq = n / sum(n)) 
-
-ch_cond$TargetSpace <- factor(ch_cond$TargetSpace, levels = shapes)
-fig_targ_space <- ggplot(ch_cond, aes(x=StimSet, y=freq, shape=TargetSpace, color=TargetSpace)) + # , size=n
-  geom_point(alpha=.8) +
-  scale_shape_manual(values=10:19) +
-  #geom_linerange(aes(ymin = ci_lower, ymax = ci_upper)) +
-  xlab("Stimulus Set") + ylab("Rate of Targeted Location") + ylim(0,.66) + 
-  langcog::scale_fill_solarized() + ggthemes::theme_few() + 
-  geom_hline(yintercept=.33, lty='dashed')
-#print(fig_targ_space)
-```
-
-
-
-```{r combined-fig, fig.env = "figure*", fig.pos = "h", fig.align="center", fig.width=7, fig.height=3.2, set.cap.width=T, num.cols.cap=2, fig.cap = "Relative frequency of objects 1) chosen as objects for dropping, 2) hit as targets (pink dots represent hitting empty space), and 3) whose drop location was closest to a target object, as a function of target/drop set pairing."}
-
-ggarrange(fig_drop, fig_targ_hit, fig_targ_space, nrow=1, 
-          #labels = c("Drop Choice", "Targeted Object Hit", "Targeted Location"),
-          common.legend=T, legend="bottom")
-```
+\caption[Relative frequency of objects 1) chosen as objects for dropping, 2) hit as targets (pink dots represent hitting empty space), and 3) whose drop location was closest to a target object, as a function of target/drop set pairing]{Relative frequency of objects 1) chosen as objects for dropping, 2) hit as targets (pink dots represent hitting empty space), and 3) whose drop location was closest to a target object, as a function of target/drop set pairing.}\label{fig:combined-fig}
+\end{figure*}
+\end{CodeChunk}
 
 
 Figure 4 shows participants' mean proportion of unique objects dropped as a function of age.
 Children of all ages sampled approximately equal proportions of the objects for dropping--roughly 70%, which is close to the 75% that would be expected if they were selected by chance (9 unique object occurring across 12 trials).
 
-```{r unique-drop-objects, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3, fig.height=2.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Proportion of unique objects selected by participants. Error bars show boostrapped 95\\% confidence intervals."}
-# 12 trials, 9 objects; random selection would be 9/12 = 75%...
-uniq_s <- hum %>% group_by(SID, Age_Group) %>%
-  summarise(DropObjs = n_distinct(DropChoice), N=n(), prop=DropObjs/N) 
+\begin{CodeChunk}
+\begin{figure}[H]
 
-uniq <- uniq_s %>% group_by(Age_Group) %>%
-  tidyboot_mean(prop) 
-  
-ggplot(uniq, aes(x=Age_Group, y=mean)) + geom_point() +
-  geom_linerange(aes(ymin = ci_lower, ymax = ci_upper)) +
-  xlab("Age (years)") + ylab("Unique Objects Chosen") + ylim(0,1) + 
-  langcog::scale_fill_solarized() + ggthemes::theme_few() +
-  geom_hline(yintercept=.75, lty='dashed')
-```
+{\centering \includegraphics{figs/unique-drop-objects-1} 
 
-```{r drop-by-target, include=F, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3, fig.height=3, set.cap.width=T, num.cols.cap=1, fig.cap = "Heatmap of participants' drop object choices by target location."}
-ch_loc <- hum %>% filter(DropLocation!="outside" & DropLocation!="space") %>%
-  group_by(DropChoice, DropLocation) %>% 
-  summarise(n = n()) %>%
-  mutate(freq = n / sum(n))
+}
 
-ggplot(ch_loc, aes(x=DropLocation, y=DropChoice)) + geom_tile(aes(fill=freq)) + 
-  scale_fill_gradient(low = "white", high = "steelblue") +
-  xlab("Target Location") + ylab("Drop Object") +
-  ggthemes::theme_few()
-```
+\caption[Proportion of unique objects selected by participants]{Proportion of unique objects selected by participants. Error bars show boostrapped 95\% confidence intervals.}\label{fig:unique-drop-objects}
+\end{figure}
+\end{CodeChunk}
+
+
 
 
 
 ### Tower Task Results
 
-```{r load-tower-data}
-
-tower = read.csv2("../analysis/human-data/curiobaby_drop-data - cool tower.csv", sep=',', header=T, stringsAsFactors=F)
-hum = subset(tower, exclude!="Y")
-
-
-length(unique(tower$SID)) #61
-length(unique(hum$SID)) # 51 subjects
-
-hum$age_group = as.numeric(hum$age_group)
-hum$age_rounded = as.numeric(hum$age_rounded)
-hum$height_tallest = as.numeric(hum$height_tallest)
-hum$tallest_objects = as.character(hum$tallest_objects)
-hum$base_tallest = as.character(hum$base_tallest)                             
-
-```
+\begin{CodeChunk}
+\begin{CodeOutput}
+[1] 61
+\end{CodeOutput}
+\begin{CodeOutput}
+[1] 51
+\end{CodeOutput}
+\end{CodeChunk}
 
 1. height x continuous age
 First we examine tower height as a function of age. Yes we find tower height increases with age.
-```{r}
-cor.test(hum$height_tallest, hum$age_rounded)
-```
+\begin{CodeChunk}
+\begin{CodeOutput}
 
-```{r}
-ch_height <- hum %>% group_by(age_rounded, height_tallest) %>%
-  summarise(n = n()) %>%
-  mutate(freq = n / sum(n))
+	Pearson's product-moment correlation
 
-ggplot(ch_height, aes(x=age_rounded, y=height_tallest)) +
-  geom_smooth(method="lm", level=0.90) + geom_point(alpha=.8) +
-  scale_shape_manual(values=10:19) +
-  xlab("Age") + ylab("Height_Tallest") + ylim(0,10) +
-  langcog::scale_fill_solarized() + ggthemes::theme_few()
-```
+data:  hum$height_tallest and hum$age_rounded
+t = 2.2751, df = 44, p-value = 0.02783
+alternative hypothesis: true correlation is not equal to 0
+95 percent confidence interval:
+ 0.03768535 0.56181861
+sample estimates:
+      cor 
+0.3244341 
+\end{CodeOutput}
+\end{CodeChunk}
+
+\begin{CodeChunk}
+
+\includegraphics{figs/unnamed-chunk-2-1} \end{CodeChunk}
 
 2. support x supported (counts)
-```{r}
-tower = subset(tower, tallest_objects!="" & tallest_objects!="pentagon+octahedron, trig prism") # 5 kids who arranged horizontally and 1 kid chose 2 - exclude
-df = data.frame(support=NA, supported=NA, n=NA)
-for(s in 1:nrow(tower)) {
-  objs = unlist(str_split(tower[s,]$tallest_objects, ", "))
-  print(objs)
-  for(i in 2:length(objs)) {
-    df = rbind(df, cbind(support=objs[i-1], supported=objs[i], n=1))
-  }
-}
-df = na.omit(df)
-hm <- df %>% group_by(support, supported) %>% count(N=n()) 
-hm %>% ggplot(aes(x=support, y=supported)) + geom_tile(aes(fill=N)) + geom_text(aes(label = N)) +
-  scale_fill_gradient(low = "white", high = "steelblue") + ggthemes::theme_few()
-```
+\begin{CodeChunk}
+\begin{CodeOutput}
+[1] "bowl"       "octahedron"
+[1] "pipe"     "pentagon" "cone"    
+[1] "octahedron" "pentagon"   "bowl"      
+[1] "bowl"     "torus"    "dumbbell"
+[1] "bowl"       "torus"      "cone"       "pipe"       "trig prism"
+[1] "torus"    "pentagon"
+[1] "pentagon"   "pipe"       "pyramid"    "trig prism" "cone"      
+[1] "torus"      "pipe"       "trig prism"
+[1] "pipe"    "torus"   "pyramid" "bowl"   
+[1] "pentagon" "pyramid" 
+[1] "pipe"       "octahedron" "cone"       "torus"      "bowl"      
+[1] "octahedron" "torus"      "bowl"      
+[1] "torus" "pipe"  "cone" 
+[1] "cone" "pipe" "bowl"
+[1] "bowl"    "pyramid" "cone"   
+[1] "pipe"     "pentagon" "cone"     "torus"    "bowl"     "pyramid" 
+[1] "torus"      "cone"       "pipe"       "pentagon"   "trig prism"
+[1] "pipe"     "pentagon" "cone"     "torus"    "bowl"     "pyramid" 
+[1] "pentagon" "cone"     "bowl"     "torus"    "dumbbell"
+[1] "pentagon"   "trig prism" "torus"      "pyramid"   
+[1] "pipe"       "octahedron"
+[1] "pentagon" "pipe"     "cone"    
+[1] "pentagon" "pipe"     "torus"    "bowl"     "cone"    
+[1] "torus" "bowl" 
+[1] "pipe"    "torus"   "bowl"    "pyramid"
+[1] "pipe"     "pentagon" "torus"    "bowl"    
+[1] "pipe"     "torus"    "bowl"     "dumbbell"
+[1] "torus"    "pipe"     "dumbbell"
+[1] "pentagon" "cone"    
+[1] "torus" "bowl" 
+[1] "pipe"       "torus"      "bowl"       "pentagon"   "octahedron"
+[6] "pyramid"   
+[1] "pentagon" "pipe"     "torus"   
+[1] "pentagon"   "torus"      "pipe"       "trig prism"
+[1] "torus"      "trig prism" "pentagon"   "pyramid"    "torus"     
+[6] "octahedron" "bowl"      
+[1] "torus" "cone"  "bowl" 
+[1] "cone"     "torus"    "bowl"     "pentagon"
+[1] "pipe"     "torus"    "dumbbell"
+[1] "bowl"  "pipe"  "torus" "cone" 
+[1] "pipe"       "torus"      "pentagon"   "trig prism"
+[1] "pentagon" "bowl"     "pipe"     "torus"    "pyramid" 
+[1] "trig prism" "pyramid"   
+[1] "pipe"     "torus"    "cone"     "pentagon"
+[1] "torus"    "pipe"     "pentagon" "bowl"     "cone"    
+[1] "octahedron" "pipe"       "dumbbell"  
+[1] "torus"    "pipe"     "dumbbell"
+[1] "cone"       "torus"      "pipe"       "octahedron"
+[1] "pipe" "bowl" "cone"
+[1] "pipe"       "trig prism"
+[1] "pipe" "cone"
+[1] "torus" "pipe"  "cone"  "bowl" 
+[1] "torus"      "bowl"       "pipe"       "pentagon"   "trig prism"
+[6] "cone"      
+[1] "bowl" "cone"
+[1] "trig prism" "pentagon"  
+[1] "octahedron" "bowl"       "dumbbell"  
+[1] "pentagon"   "pipe"       "trig prism"
+\end{CodeOutput}
+
+\includegraphics{figs/unnamed-chunk-3-1} \end{CodeChunk}
 
 3. support x supported (probabilities)
 pr (supported object | support object)
-```{r}
-tower = subset(tower, tallest_objects!="" & tallest_objects!="pentagon+octahedron, trig prism") # 5 kids who arranged horizontally and 1 kid chose 2 - exclude
-df = data.frame(support=NA, supported=NA, n=NA)
-for(s in 1:nrow(tower)) {
-  objs = unlist(str_split(tower[s,]$tallest_objects, ", "))
-  print(objs)
-  for(i in 2:length(objs)) {
-    df = rbind(df, cbind(support=objs[i-1], supported=objs[i], n=1))
-  }
-}
-df = na.omit(df)
-hm1 <- df %>% 
-  group_by(support, supported) %>% 
-  summarise(n = n()) %>% 
-  group_by(support) %>%
-  mutate(freq = n / sum(n))
-hm1 %>% ggplot(aes(x=support, y=supported)) + geom_tile(aes(fill=freq)) + geom_text(aes(label = round(freq, 2))) +
-  scale_fill_gradient(low = "white", high = "steelblue") + ggthemes::theme_few()
-```
+\begin{CodeChunk}
+\begin{CodeOutput}
+[1] "bowl"       "octahedron"
+[1] "pipe"     "pentagon" "cone"    
+[1] "octahedron" "pentagon"   "bowl"      
+[1] "bowl"     "torus"    "dumbbell"
+[1] "bowl"       "torus"      "cone"       "pipe"       "trig prism"
+[1] "torus"    "pentagon"
+[1] "pentagon"   "pipe"       "pyramid"    "trig prism" "cone"      
+[1] "torus"      "pipe"       "trig prism"
+[1] "pipe"    "torus"   "pyramid" "bowl"   
+[1] "pentagon" "pyramid" 
+[1] "pipe"       "octahedron" "cone"       "torus"      "bowl"      
+[1] "octahedron" "torus"      "bowl"      
+[1] "torus" "pipe"  "cone" 
+[1] "cone" "pipe" "bowl"
+[1] "bowl"    "pyramid" "cone"   
+[1] "pipe"     "pentagon" "cone"     "torus"    "bowl"     "pyramid" 
+[1] "torus"      "cone"       "pipe"       "pentagon"   "trig prism"
+[1] "pipe"     "pentagon" "cone"     "torus"    "bowl"     "pyramid" 
+[1] "pentagon" "cone"     "bowl"     "torus"    "dumbbell"
+[1] "pentagon"   "trig prism" "torus"      "pyramid"   
+[1] "pipe"       "octahedron"
+[1] "pentagon" "pipe"     "cone"    
+[1] "pentagon" "pipe"     "torus"    "bowl"     "cone"    
+[1] "torus" "bowl" 
+[1] "pipe"    "torus"   "bowl"    "pyramid"
+[1] "pipe"     "pentagon" "torus"    "bowl"    
+[1] "pipe"     "torus"    "bowl"     "dumbbell"
+[1] "torus"    "pipe"     "dumbbell"
+[1] "pentagon" "cone"    
+[1] "torus" "bowl" 
+[1] "pipe"       "torus"      "bowl"       "pentagon"   "octahedron"
+[6] "pyramid"   
+[1] "pentagon" "pipe"     "torus"   
+[1] "pentagon"   "torus"      "pipe"       "trig prism"
+[1] "torus"      "trig prism" "pentagon"   "pyramid"    "torus"     
+[6] "octahedron" "bowl"      
+[1] "torus" "cone"  "bowl" 
+[1] "cone"     "torus"    "bowl"     "pentagon"
+[1] "pipe"     "torus"    "dumbbell"
+[1] "bowl"  "pipe"  "torus" "cone" 
+[1] "pipe"       "torus"      "pentagon"   "trig prism"
+[1] "pentagon" "bowl"     "pipe"     "torus"    "pyramid" 
+[1] "trig prism" "pyramid"   
+[1] "pipe"     "torus"    "cone"     "pentagon"
+[1] "torus"    "pipe"     "pentagon" "bowl"     "cone"    
+[1] "octahedron" "pipe"       "dumbbell"  
+[1] "torus"    "pipe"     "dumbbell"
+[1] "cone"       "torus"      "pipe"       "octahedron"
+[1] "pipe" "bowl" "cone"
+[1] "pipe"       "trig prism"
+[1] "pipe" "cone"
+[1] "torus" "pipe"  "cone"  "bowl" 
+[1] "torus"      "bowl"       "pipe"       "pentagon"   "trig prism"
+[6] "cone"      
+[1] "bowl" "cone"
+[1] "trig prism" "pentagon"  
+[1] "octahedron" "bowl"       "dumbbell"  
+[1] "pentagon"   "pipe"       "trig prism"
+\end{CodeOutput}
+
+\includegraphics{figs/unnamed-chunk-4-1} \end{CodeChunk}
 
 4. base and top distribution
-```{r}
-ch_extremes <- hum %>% 
-  group_by(base_tallest) %>% 
-  count(N=n()) %>%
-  filter(base_tallest!="" & base_tallest!="pentagon+octahedron")
+\begin{CodeChunk}
 
-ch_extremes %>% 
-  ggplot(aes(x = base_tallest, y = N)) + geom_bar(stat = "identity")
-
-```
+\includegraphics{figs/unnamed-chunk-5-1} \end{CodeChunk}
 
 <!-- We find that towers vary in i) height, ii) stacks, and iii) components. -->
 
@@ -541,29 +476,18 @@ ch_extremes %>%
 
 
 ## Results
-```{r load-model-data}
-load("../analysis/agent-data/model_data.RData") # md
 
-Shapes = c(sort(unique(md$DropChoice)), "space")
 
-rand_drop <- drop_choice_plot(subset(md, policy=="random"), Shapes)
-curio_drop <- drop_choice_plot(subset(md, policy=="curious"), Shapes)
-noncurio_drop <- drop_choice_plot(subset(md, policy=="noncurious"), Shapes)
+\begin{CodeChunk}
+\begin{figure*}[h]
 
-md$Target = md$DropLocation
+{\centering \includegraphics{figs/combined-model-fig-1} 
 
-rand_targ <- target_hit_plot(subset(md, policy=="random"), ymax=1, Shapes)
-curio_targ <- target_hit_plot(subset(md, policy=="curious"), ymax=1, Shapes)
-noncurio_targ <- target_hit_plot(subset(md, policy=="noncurious"), ymax=1, Shapes)
-```
+}
 
-```{r combined-model-fig, fig.env = "figure*", fig.pos = "h", fig.align="center", fig.width=7, fig.height=3.2, set.cap.width=T, num.cols.cap=2, fig.cap = "Relative frequency of objects chosen by each model as objects for dropping (first row), and objects hit as targets (second row; pink dots represent hitting empty space), as a function of target/drop set pairing."}
-
-ggarrange(rand_drop, curio_drop, noncurio_drop, 
-          rand_targ, curio_targ, noncurio_targ, ncol=3, nrow=2, 
-          labels = c("Random", "Curious", "Noncurious"),
-          common.legend=T, legend="bottom")
-```
+\caption[Relative frequency of objects chosen by each model as objects for dropping (first row), and objects hit as targets (second row]{Relative frequency of objects chosen by each model as objects for dropping (first row), and objects hit as targets (second row; pink dots represent hitting empty space), as a function of target/drop set pairing.}\label{fig:combined-model-fig}
+\end{figure*}
+\end{CodeChunk}
 
 ## Comparison with Children
 
@@ -580,10 +504,7 @@ We thank X and Y for helpful comments.
 
 # References 
 
-```{r}
-# References will be generated automatically by Pandoc and included here.
-# The following code is some latex to format the bibliography. Do not remove it.
-```
+
 
 \setlength{\parindent}{-0.1in} 
 \setlength{\leftskip}{0.125in}
