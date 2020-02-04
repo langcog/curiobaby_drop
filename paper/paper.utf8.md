@@ -284,27 +284,9 @@ Children of all ages sampled approximately equal proportions of the objects for 
 \end{CodeOutput}
 \end{CodeChunk}
 
-1. height x continuous age
-First we examine tower height as a function of age. Yes we find tower height increases with age.
-\begin{CodeChunk}
-\begin{CodeOutput}
+First we examine tower height as a function of age, finding that older children tend to build higher towers *r*(44) = .32, *p* = .028.
 
-	Pearson's product-moment correlation
 
-data:  hum$height_tallest and hum$age_rounded
-t = 2.2751, df = 44, p-value = 0.02783
-alternative hypothesis: true correlation is not equal to 0
-95 percent confidence interval:
- 0.03768535 0.56181861
-sample estimates:
-      cor 
-0.3244341 
-\end{CodeOutput}
-\end{CodeChunk}
-
-\begin{CodeChunk}
-
-\includegraphics{figs/unnamed-chunk-2-1} \end{CodeChunk}
 
 2. support x supported (counts)
 \begin{CodeChunk}
@@ -369,7 +351,7 @@ sample estimates:
 [1] "pentagon"   "pipe"       "trig prism"
 \end{CodeOutput}
 
-\includegraphics{figs/unnamed-chunk-3-1} \end{CodeChunk}
+\includegraphics{figs/heatmap-support-by-supported-counts-1} \end{CodeChunk}
 
 3. support x supported (probabilities)
 pr (supported object | support object)
@@ -435,12 +417,12 @@ pr (supported object | support object)
 [1] "pentagon"   "pipe"       "trig prism"
 \end{CodeOutput}
 
-\includegraphics{figs/unnamed-chunk-4-1} \end{CodeChunk}
+\includegraphics{figs/heatmap-support-by-supported-probs-1} \end{CodeChunk}
 
 4. base and top distribution
 \begin{CodeChunk}
 
-\includegraphics{figs/unnamed-chunk-5-1} \end{CodeChunk}
+\includegraphics{figs/base-and-top-objects-1} \end{CodeChunk}
 
 <!-- We find that towers vary in i) height, ii) stacks, and iii) components. -->
 

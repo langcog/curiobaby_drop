@@ -426,7 +426,6 @@ ggplot(ch_loc, aes(x=DropLocation, y=DropChoice)) + geom_tile(aes(fill=freq)) +
 tower = read.csv2("../analysis/human-data/curiobaby_drop-data - cool tower.csv", sep=',', header=T, stringsAsFactors=F)
 hum = subset(tower, exclude!="Y")
 
-
 length(unique(tower$SID)) #61
 length(unique(hum$SID)) # 51 subjects
 
@@ -436,15 +435,12 @@ hum$height_tallest = as.numeric(hum$height_tallest)
 hum$tallest_objects = as.character(hum$tallest_objects)
 hum$base_tallest = as.character(hum$base_tallest)                             
 
+ht_age = cor.test(hum$age_rounded, hum$height_tallest)
 ```
 
-1. height x continuous age
-First we examine tower height as a function of age. Yes we find tower height increases with age.
-```{r}
-cor.test(hum$height_tallest, hum$age_rounded)
-```
+First we examine tower height as a function of age, finding that older children tend to build higher towers `r cor_apa(ht_age, format="rmarkdown", print=F)`.
 
-```{r}
+```{r plot-height-by-age, include=F}
 ch_height <- hum %>% group_by(age_rounded, height_tallest) %>%
   summarise(n = n()) %>%
   mutate(freq = n / sum(n))
@@ -457,7 +453,7 @@ ggplot(ch_height, aes(x=age_rounded, y=height_tallest)) +
 ```
 
 2. support x supported (counts)
-```{r}
+```{r heatmap-support-by-supported-counts}
 tower = subset(tower, tallest_objects!="" & tallest_objects!="pentagon+octahedron, trig prism") # 5 kids who arranged horizontally and 1 kid chose 2 - exclude
 df = data.frame(support=NA, supported=NA, n=NA)
 for(s in 1:nrow(tower)) {
@@ -475,7 +471,7 @@ hm %>% ggplot(aes(x=support, y=supported)) + geom_tile(aes(fill=N)) + geom_text(
 
 3. support x supported (probabilities)
 pr (supported object | support object)
-```{r}
+```{r heatmap-support-by-supported-probs}
 tower = subset(tower, tallest_objects!="" & tallest_objects!="pentagon+octahedron, trig prism") # 5 kids who arranged horizontally and 1 kid chose 2 - exclude
 df = data.frame(support=NA, supported=NA, n=NA)
 for(s in 1:nrow(tower)) {
@@ -496,7 +492,7 @@ hm1 %>% ggplot(aes(x=support, y=supported)) + geom_tile(aes(fill=freq)) + geom_t
 ```
 
 4. base and top distribution
-```{r}
+```{r base-and-top-objects}
 ch_extremes <- hum %>% 
   group_by(base_tallest) %>% 
   count(N=n()) %>%
