@@ -1,0 +1,40 @@
+---
+title: "Drop Exp. 2 Analysis"
+author: "George"
+date: "7/20/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+require(here)
+require(tidyverse)
+require(tidyboot)
+
+raw = read.csv2("exp2-mturk-data/MturkAdultDrop-Data-Combined.csv", sep=',', header=F, stringsAsFactors = F)
+# row 1 is empty, row 2 should be header
+d = raw[4:nrow(raw),]
+names(d) = raw[2,]
+d[,"NA"] = NULL
+# duplicate column names
+#names(d)[13]
+#names(d)[21]
+
+# "Why did you make that choice?"
+explanations = d %>% select(Q42, Q43) # should also select relevant trials
+
+# Q38-Q41 = which toy did you just drop? (catch trials)
+#d = d %>% select(-Q38, -Q39, -Q40, -Q41, -Q42, -Q43) # duplicate column names
+d$Q11 = NULL
+d$Q38 = NULL
+d$Q39 = NULL
+d$Q40 = NULL
+d$Q41 = NULL
+d$Q42 = NULL
+d$Q43 = NULL
+d$`Random ID` = NULL
+d$`Duration (in seconds)` = "Duration"
+#write.csv(d, file="exp2_cleaned.csv")
+```
+
