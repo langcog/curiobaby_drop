@@ -1,7 +1,7 @@
 ---
-title: "Drop Exp. 2 Analysis"
+title: "Exp. 2 Analysis: 2AFC, adults vs. children"
 author: "George"
-date: "7/20/2020"
+date: Sys.Date()
 output: html_document
 ---
 
@@ -36,5 +36,18 @@ d$Q43 = NULL
 d$`Random ID` = NULL
 d$`Duration (in seconds)` = "Duration"
 #write.csv(d, file="exp2_cleaned.csv")
+```
+
+```{r}
+rawch <- read_csv("human-data/DevoDrop_data_raw - Combined.csv") # children data
+View(rawch)
+
+# finish formatting
+```
+
+Mimic Dan's split-half correlation analysis.
+
+```{r}
+
 ```
 
