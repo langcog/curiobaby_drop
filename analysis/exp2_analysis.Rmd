@@ -40,12 +40,30 @@ d$`Duration (in seconds)` = "Duration"
 
 ```{r}
 rawch <- read_csv("human-data/DevoDrop_data_raw - Combined.csv") # children data
-View(rawch)
+rawch[which(is.na(rawch$Exclude)),]$Exclude = 'N'
 
-# finish formatting
+cd <- rawch %>% filter(Exclude!="Y") %>% 
+  dplyr::select(-Version, -Torus0, -Exclude, -Qual1, -Qual2, -Notes)
+
+# make long
+#cdl <- cd %>% pivot_longer()
+
+# first 10 columns are
+
+for(i in 3:ncol(cd)) {
+  tt = table(cd[,i])
+  bt = binom.test(tt, p=.5, alternative="two.sided")
+  cat(names(cd)[i], ' ', sum(tt), ' p=', round(bt$p.value,3))
+  print(round(tt / sum(tt), 2))
+}
+
+
 ```
 
-Mimic Dan's split-half correlation analysis.
+
+```{r}
+hist(cd$Age)
+```
 
 ```{r}
 
