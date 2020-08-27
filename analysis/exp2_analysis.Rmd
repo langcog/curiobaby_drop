@@ -5,13 +5,36 @@ date: Sys.Date()
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r libraries}
 knitr::opts_chunk$set(echo = TRUE)
 
 require(here)
 require(tidyverse)
 require(tidyboot)
+```
 
+
+
+```{r load-model-data, include=F}
+mdat <- read_csv("agent-data/curiodrop-model-8-23-20.csv")
+
+names(mdat)
+mdat <- mdat %>% mutate(
+    train_stage = cut_number(model_train_steps, 2),
+    chose_target = ifelse(choice==target, 1, 0)
+  ) 
+  
+mdat %>% group_by(drop, target, train_stage) %>% # alt, 
+  summarize(chose_target=mean(chose_target), n=n()) %>%
+  ggplot(aes(x=train_stage, y=chose_target, group=target, color=target)) + 
+  facet_wrap(.~ drop) + 
+  geom_point(aes(size=n)) + geom_line() + theme_bw() + ylim(0,1)
+
+mdat %>% distinct(drop, target, alt)
+```
+
+
+```{r load-human-data, include=FALSE}
 raw = read.csv2("exp2-mturk-data/MturkAdultDrop-Data-Combined.csv", sep=',', header=F, stringsAsFactors = F)
 # row 1 is empty, row 2 should be header
 d = raw[4:nrow(raw),]
