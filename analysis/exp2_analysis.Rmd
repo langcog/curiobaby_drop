@@ -1,21 +1,23 @@
 ---
 title: "Exp. 2 Analysis: 2AFC, adults vs. children"
-author: "George"
-date: Sys.Date()
+author: "George & Sama"
+date: "`r Sys.Date()`"
 output: html_document
 ---
 
-```{r libraries}
-knitr::opts_chunk$set(echo = TRUE)
+```{r libraries, echo=F}
+knitr::opts_chunk$set(echo = F, warning=F)
 
 require(here)
 require(tidyverse)
 require(tidyboot)
 ```
 
+# Load Model Data
 
+This is preliminary, not final model data.
 
-```{r load-model-data, include=F}
+```{r load-model-data}
 mdat <- read_csv("agent-data/curiodrop-model-8-23-20.csv")
 mdat <- read_csv("agent-data/curiodrop_0.csv") # most trials close to chance
 mdat <- read_csv("agent-data/curiodrop_1.csv")
@@ -27,7 +29,7 @@ mdat <- mdat %>% mutate(
     chose_target = ifelse(choice==target, 1, 0)
   ) 
 
-mdat %>% group_by(drop, target) %>% # alt, 
+model_trial_agg <- mdat %>% group_by(drop, target) %>% # alt, 
   summarize(chose_target=mean(chose_target), n=n())
 
 mdat %>% group_by(drop, target, train_stage) %>% # alt, 
@@ -40,35 +42,73 @@ mdat %>% group_by(drop, target, train_stage) %>% # alt,
 #mdat %>% distinct(drop, target, alt)
 ```
 
+# Load Adult Data
 
-```{r load-human-data, include=FALSE}
-raw = read.csv2("exp2-mturk-data/MturkAdultDrop-Data-Combined.csv", sep=',', header=F, stringsAsFactors = F)
+```{r load-human-data, include=F, echo=FALSE}
+raw = read_csv("exp2-mturk-data/MturkAdultDrop-Data-Combined.csv")
 # row 1 is empty, row 2 should be header
-d = raw[4:nrow(raw),]
-names(d) = raw[2,]
+d = raw[3:nrow(raw),]
+names(d) = raw[1,]
 d[,"NA"] = NULL
-# duplicate column names
-#names(d)[13]
-#names(d)[21]
+names(d) <- make.unique(names(d))
+d[which(is.na(d$Exclude)),]$Exclude = 'N'
 
 # "Why did you make that choice?"
 explanations = d %>% select(Q42, Q43) # should also select relevant trials
 
 # Q38-Q41 = which toy did you just drop? (catch trials)
-#d = d %>% select(-Q38, -Q39, -Q40, -Q41, -Q42, -Q43) # duplicate column names
-d$Q11 = NULL
-d$Q38 = NULL
-d$Q39 = NULL
-d$Q40 = NULL
-d$Q41 = NULL
-d$Q42 = NULL
-d$Q43 = NULL
-d$`Random ID` = NULL
-d$`Duration (in seconds)` = "Duration"
+d = d %>% 
+  dplyr::select(-Q11, -Q38, -Q39, -Q40, -Q41, -Q42, -Q43, -`Random ID`) %>%
+  rename(Duration = `Duration (in seconds)`)
 #write.csv(d, file="exp2_cleaned.csv")
+
+Nsubj = length(unique(d$ResponseId))
+# shown 1 object to drop, choose which target
+adult_long <- d %>%
+  pivot_longer(cols = 9:29,
+                   names_to = "drop",
+                   values_to = "choice",
+                   values_drop_na = FALSE) %>%
+    mutate(drop = tolower(drop)) %>%
+    mutate(drop = case_when(
+      drop=="torus.1" ~ "torus",
+      drop=="cone.1" ~ "cone",
+      drop=="pyramid.1" ~ "pyramid",
+      drop=="dumbbell.1" ~ "dumbbell",
+      drop=="octahedron.1" ~ "octahedron",
+      drop=="pipe.1" ~ "pipe",
+      drop=="trig prism.1" ~ "trig prism",
+      drop=="pentagon.1" ~ "pentagon",
+      drop=="sphere.1" ~ "sphere",
+      drop=="bowl.1" ~ "bowl",
+      drop=="torus.2" ~ "torus",
+      TRUE ~ drop
+    )) %>% mutate(Trial = rep(1:21, Nsubj)) %>% 
+  mutate(
+    target = rep(c("pentagon", "pipe", "cone", "cone", "pyramid", "pipe", "bowl", "bowl", "bowl", "torus", "torus",
+               "bowl", "pentagon", "trig prism", "torus", "pentagon", "pipe", "trig prism", "pentagon", "pipe", "torus"), Nsubj), # matches relation (containment/support)
+    relation = rep(c("support", rep("contain", 10), rep("support", 10)), Nsubj) #c(rep(, 10), rep( , 10))
+  ) %>% 
+  mutate(chose_target = ifelse(choice == target, 1, 0)) %>%
+  filter(Trial!=1, Exclude!='Y') # remove training trial
+
+
+adult_trial_agg <- adult_long %>% group_by(drop, target) %>% # alt, 
+  summarize(chose_target=mean(chose_target, na.rm=T), n=n())
+
+# maybe look at Duration distribution at some point
+```
+At a trial level, are the adults' and model's choices correlated?
+
+```{r adult-model-correlation}
+# model vs. adult (trial level)
+cor.test(adult_trial_agg$chose_target, model_trial_agg$chose_target)
 ```
 
-```{r}
+
+# Load Child Data
+
+```{r load-child-data}
 rawch <- read_csv("human-data/DevoDrop_data_raw - Combined.csv") # children data
 rawch[which(is.na(rawch$Exclude)),]$Exclude = 'N'
 
@@ -76,16 +116,52 @@ cd <- rawch %>% filter(Exclude!="Y") %>%
   dplyr::select(-Version, -Torus0, -Exclude, -Qual1, -Qual2, -Notes, -Note)
 
 # make long
-#cdl <- cd %>% pivot_longer()
+Nsubj_ch = length(unique(cd$ID))
+# shown 1 object to drop, choose which target
+ch_long <- cd %>%
+  pivot_longer(cols = 4:23,
+                   names_to = "drop",
+                   values_to = "choice",
+                   values_drop_na = FALSE) %>%
+    mutate(drop = tolower(drop)) %>%
+    mutate(drop = case_when(
+      drop=="torus_1" ~ "torus",
+      drop=="cone_1" ~ "cone",
+      drop=="pyramid_1" ~ "pyramid",
+      drop=="dumbbell_1" ~ "dumbbell",
+      drop=="octahedron_1" ~ "octahedron",
+      drop=="pipe_1" ~ "pipe",
+      drop=="trig prism_1" ~ "trig prism",
+      drop=="pentagon_1" ~ "pentagon",
+      drop=="sphere_1" ~ "sphere",
+      drop=="bowl_1" ~ "bowl",
+      TRUE ~ drop
+    )) %>% mutate(Trial = rep(1:20, Nsubj_ch)) %>% 
+  mutate(
+    target = rep(c("pipe", "cone", "cone", "pyramid", "pipe", "bowl", "bowl", "bowl", "torus", "torus",
+               "bowl", "pentagon", "trig prism", "torus", "pentagon", "pipe", "trig prism", "pentagon", "pipe", "torus"), Nsubj_ch), # matches relation (containment/support)
+    relation = rep(c(rep("contain", 10), rep("support", 10)), Nsubj_ch) #c(rep(, 10), rep( , 10))
+  ) %>% 
+  mutate(chose_target = ifelse(choice == target, 1, 0))
 
-# first 10 columns are
 
-for(i in 3:ncol(cd)) {
-  tt = table(cd[,i])
-  bt = binom.test(tt, p=.5, alternative="two.sided")
-  cat(names(cd)[i], ' ', sum(tt), ' p=', round(bt$p.value,3))
-  print(round(tt / sum(tt), 2))
-}
+child_trial_agg <- ch_long %>% group_by(relation, drop, target) %>% # alt, 
+  summarize(chose_target=mean(chose_target, na.rm=T), n=n())
+
+cor.test(child_trial_agg$chose_target, adult_trial_agg$chose_target)
+
+trial_tab <- child_trial_agg %>% select(-n) %>% 
+  bind_cols(adult_target_choice = adult_trial_agg$chose_target) %>% 
+  rename(child_target_choice = chose_target) %>%
+  bind_cols(model_target_choice = model_trial_agg$chose_target)
+# t(18) = 2.42 p=.03 r=.50
+
+#for(i in 3:ncol(cd)) {
+#  tt = table(cd[,i])
+#  bt = binom.test(tt, p=.5, alternative="two.sided")
+#  cat(names(cd)[i], ' ', sum(tt), ' p=', round(bt$p.value,3))
+#  print(round(tt / sum(tt), 2))
+#}
 
 # Octahedron   39  p= 0.003
 #   pyramid trig prism 
@@ -99,14 +175,37 @@ for(i in 3:ncol(cd)) {
 # Dumbbell_1   42  p= 0.02
 #      bowl octahedron 
 #      0.69       0.31 
+knitr::kable(trial_tab %>% arrange(relation, desc(adult_target_choice)), digits=2)
 ```
 
+## Compare Children's and Adults' Relational Choices
+
+```{r compare-children-and-adults}
+pos = position_dodge(width = .9)
+
+adult_long <- adult_long %>% rename(ID = ResponseId) %>%
+  mutate(Age = "adult") %>%
+  select(ID, Age, Trial, choice, drop, target, relation, chose_target)
+
+combo_dat <- ch_long %>% mutate(ID = as.character(ID),
+                                Age = as.character(Age)) %>%
+  select(ID, Age, Trial, choice, drop, target, relation, chose_target) %>%
+  bind_rows(adult_long) %>% 
+  mutate(AgeGroup = ifelse(Age!="adult", "child", "adult"))
+
+combo_dat %>% group_by(ID, AgeGroup, relation) %>% # alt, 
+  summarize(chose_target=mean(chose_target, na.rm=T)) %>%
+  group_by(relation, AgeGroup) %>%
+  tidyboot_mean(chose_target) %>%
+  ggplot(aes(x=relation, y=mean, fill=AgeGroup)) + geom_bar(stat="identity", position=pos) + 
+  geom_linerange(aes(ymin = ci_lower, ymax = ci_upper), position = pos) + 
+  geom_hline(aes(yintercept=.5), linetype="dashed") + theme_classic()
+```
+
+Still collecting data:
 
 ```{r}
-hist(cd$Age)
+hist(cd$Age, main="")
 ```
 
-```{r}
-
-```
 
