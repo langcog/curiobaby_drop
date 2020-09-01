@@ -17,20 +17,27 @@ require(tidyboot)
 
 ```{r load-model-data, include=F}
 mdat <- read_csv("agent-data/curiodrop-model-8-23-20.csv")
+mdat <- read_csv("agent-data/curiodrop_0.csv") # most trials close to chance
+mdat <- read_csv("agent-data/curiodrop_1.csv")
+mdat <- read_csv("agent-data/curiodrop_2.csv")
 
 names(mdat)
 mdat <- mdat %>% mutate(
     train_stage = cut_number(model_train_steps, 2),
     chose_target = ifelse(choice==target, 1, 0)
   ) 
-  
+
+mdat %>% group_by(drop, target) %>% # alt, 
+  summarize(chose_target=mean(chose_target), n=n())
+
 mdat %>% group_by(drop, target, train_stage) %>% # alt, 
-  summarize(chose_target=mean(chose_target), n=n()) %>%
+  summarize(chose_target=mean(chose_target), n=n()) %>% 
   ggplot(aes(x=train_stage, y=chose_target, group=target, color=target)) + 
   facet_wrap(.~ drop) + 
-  geom_point(aes(size=n)) + geom_line() + theme_bw() + ylim(0,1)
+  geom_point(aes(size=n)) + geom_line() + theme_bw() + ylim(0,1) + 
+  geom_hline(aes(yintercept=.5), linetype="dashed")
 
-mdat %>% distinct(drop, target, alt)
+#mdat %>% distinct(drop, target, alt)
 ```
 
 
@@ -66,7 +73,7 @@ rawch <- read_csv("human-data/DevoDrop_data_raw - Combined.csv") # children data
 rawch[which(is.na(rawch$Exclude)),]$Exclude = 'N'
 
 cd <- rawch %>% filter(Exclude!="Y") %>% 
-  dplyr::select(-Version, -Torus0, -Exclude, -Qual1, -Qual2, -Notes)
+  dplyr::select(-Version, -Torus0, -Exclude, -Qual1, -Qual2, -Notes, -Note)
 
 # make long
 #cdl <- cd %>% pivot_longer()
@@ -80,7 +87,18 @@ for(i in 3:ncol(cd)) {
   print(round(tt / sum(tt), 2))
 }
 
-
+# Octahedron   39  p= 0.003
+#   pyramid trig prism 
+#      0.74       0.26 
+# Pentagon   41  p= 0.001
+#    bowl pentagon 
+#    0.76     0.24 
+# Pyramid   41  p= 0.06
+# octahedron      torus 
+#      0.34       0.66 
+# Dumbbell_1   42  p= 0.02
+#      bowl octahedron 
+#      0.69       0.31 
 ```
 
 
