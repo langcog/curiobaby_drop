@@ -113,7 +113,7 @@ rawch <- read_csv("human-data/DevoDrop_data_raw - Combined.csv") # children data
 rawch[which(is.na(rawch$Exclude)),]$Exclude = 'N'
 
 cd <- rawch %>% filter(Exclude!="Y") %>% 
-  dplyr::select(-Version, -Torus0, -Exclude, -Qual1, -Qual2, -Notes, -Note)
+  dplyr::select(-Version, -Torus0, -Exclude, -Qual1, -Qual2, -Note, -Comments)
 
 # make long
 Nsubj_ch = length(unique(cd$ID))
