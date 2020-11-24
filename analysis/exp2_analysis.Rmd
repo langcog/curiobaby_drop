@@ -11,13 +11,14 @@ knitr::opts_chunk$set(echo = F, warning=F)
 require(here)
 require(tidyverse)
 require(tidyboot)
+require(gridExtra)
 ```
 
 # Load Model Data
 
 This is preliminary, not final model data.
 
-```{r load-model-data}
+```{r load-model-data, include=F}
 mdat <- read_csv("agent-data/curiodrop-model-8-23-20.csv")
 mdat <- read_csv("agent-data/curiodrop_0.csv") # most trials close to chance
 mdat <- read_csv("agent-data/curiodrop_1.csv")
@@ -44,7 +45,7 @@ mdat %>% group_by(drop, target, train_stage) %>% # alt,
 
 # Load Adult Data
 
-```{r load-human-data, include=F, echo=FALSE}
+```{r load-human-data, echo=FALSE}
 raw = read_csv("exp2-mturk-data/MturkAdultDrop-Data-Combined.csv")
 # row 1 is empty, row 2 should be header
 d = raw[3:nrow(raw),]
@@ -100,7 +101,7 @@ adult_trial_agg <- adult_long %>% group_by(drop, target) %>% # alt,
 ```
 At a trial level, are the adults' and model's choices correlated?
 
-```{r adult-model-correlation}
+```{r adult-model-correlation, include=F}
 # model vs. adult (trial level)
 cor.test(adult_trial_agg$chose_target, model_trial_agg$chose_target)
 ```
@@ -108,7 +109,7 @@ cor.test(adult_trial_agg$chose_target, model_trial_agg$chose_target)
 
 # Load Child Data
 
-```{r load-child-data}
+```{r load-child-data, echo=F}
 rawch <- read_csv("human-data/DevoDrop_data_raw - Combined.csv") # children data
 rawch[which(is.na(rawch$Exclude)),]$Exclude = 'N'
 
@@ -180,9 +181,17 @@ knitr::kable(trial_tab %>% arrange(relation, desc(adult_target_choice)), digits=
 langcog::ggcorplot(select(trial_tab, child_target_choice, adult_target_choice, model_target_choice))
 ```
 
+## Can we estimate a single item "interestingness" from the 2AFC data?
+
+```{r}
+table(ch_long$drop, ch_long$choice)
+```
+
+
 ## Compare Children's and Adult's Choices Per Trial
 
-```{r per-trial-comparison}
+```{r per-trial-comparison, fig.width=5, fig.height=5}
+# add vert and horiz error bars 
 adult_long <- adult_long %>% rename(ID = ResponseId) %>%
   mutate(Age = "adult") %>%
   select(ID, Age, Trial, choice, drop, target, relation, chose_target)
@@ -193,13 +202,21 @@ combo_dat <- ch_long %>% mutate(ID = as.character(ID),
   bind_rows(adult_long) %>% 
   mutate(AgeGroup = ifelse(Age!="adult", "child", "adult"))
 
+# 12 NAs somewhere
 
-combo_dat %>% group_by(drop, target, relation, AgeGroup) %>%
-  summarise(chose_target = mean(chose_target, na.rm=T)) %>%
-  pivot_wider(names_from = AgeGroup, values_from = chose_target) %>%
-  ggplot(aes(x=adult, y=child, group=relation, color=relation)) + 
-    geom_point(alpha=.7) + theme_bw() + ylim(0,1) + xlim(0,1) + 
-  geom_abline(xintercept=0, slope=1, linetype="dashed") #+
+combo_dat %>% group_by(drop, target, relation, ID) %>%
+  group_by(drop, target, relation, AgeGroup) %>%
+  tidyboot_mean(chose_target, na.rm=T) %>%
+  select(-n, -empirical_stat) %>%
+  pivot_wider(names_from = AgeGroup, values_from = c(mean, ci_lower, ci_upper)) %>%
+  ggplot(aes(x=mean_adult, y=mean_child, group=relation, color=relation)) + 
+    geom_point(alpha=.6) + 
+    geom_errorbar(aes(ymin=ci_lower_child, ymax=ci_upper_child), alpha=.6) +
+    geom_errorbarh(aes(xmin=ci_lower_adult, xmax=ci_upper_adult), alpha=.6) + 
+    theme_bw() + ylim(0,1) + xlim(0,1) + 
+    xlab("Adults' Choice Proportions") + ylab("Children's Choice Proportions") + 
+    geom_abline(xintercept=0, slope=1, linetype="dashed") +
+    geom_smooth(method = "lm") 
   #geom_text(aes(label=target)) # 
 
 ```
@@ -210,7 +227,18 @@ combo_dat %>% group_by(drop, target, relation, AgeGroup) %>%
 ```{r compare-children-and-adults}
 pos = position_dodge(width = .9)
 
-combo_dat %>% 
+p1 <- combo_dat %>%
+  mutate(AgeGroup = ifelse(Age=="adult", "adult", "child"),
+         AgeGroup = factor(AgeGroup, levels=c("child", "adult"))) %>%
+  group_by(ID, AgeGroup, relation) %>% # alt, 
+  summarize(chose_target=mean(chose_target, na.rm=T)) %>%
+  group_by(relation, AgeGroup) %>%
+  tidyboot_mean(chose_target) %>%
+  ggplot(aes(x=relation, y=mean, fill=AgeGroup)) + geom_bar(stat="identity", position=pos) + 
+  geom_linerange(aes(ymin = ci_lower, ymax = ci_upper), position = pos) + 
+  geom_hline(aes(yintercept=.5), linetype="dashed") + theme_classic() + ylim(0,1)
+
+p2 <- combo_dat %>% 
   mutate(AgeGroup = ifelse(Age=="adult", "adult", 
                            ifelse(Age=="3" | Age=="4", "3-4 yo", "5-7 yo"))) %>%
   group_by(ID, AgeGroup, relation) %>% # alt, 
@@ -220,6 +248,8 @@ combo_dat %>%
   ggplot(aes(x=relation, y=mean, fill=AgeGroup)) + geom_bar(stat="identity", position=pos) + 
   geom_linerange(aes(ymin = ci_lower, ymax = ci_upper), position = pos) + 
   geom_hline(aes(yintercept=.5), linetype="dashed") + theme_classic() + ylim(0,1)
+
+grid.arrange(p1, p2, nrow = 1)
 ```
 
 
@@ -227,7 +257,7 @@ combo_dat %>%
 
 Check reliability of responses within- and across-conditions (support and containment).
 
-```{r}
+```{r, echo=T}
 # library(psych) # has a (Cronbach's) alpha function that takes a covariance matrix
 
 # split subjects in half, check cor between halves
@@ -250,36 +280,23 @@ split_half_subj_cor <- function(dat, nsim=100) {
 
 # overall
 sh_subj = split_half_subj_cor(combo_dat)
-mean(sh_subj) # .736
 
 sh_subj_adult = split_half_subj_cor(subset(combo_dat, AgeGroup=="adult"))
-mean(sh_subj_adult) # .791
 
 sh_subj_child = split_half_subj_cor(subset(combo_dat, AgeGroup=="child"))
-mean(sh_subj_child) # .56
 
 sh_subj_contain = split_half_subj_cor(subset(combo_dat, relation=="contain"))
-mean(sh_subj_contain) # .649
 
 sh_subj_support = split_half_subj_cor(subset(combo_dat, relation=="support"))
-mean(sh_subj_support) # .619
-
-
 
 # split items in half, check cor between halves...GK: I don't think we care about this
-split_half_item_cor <- function(dat, nsim=100) {
-  trials = unique(dat$Trial)
-  cors = rep(NA, nsim)
-  for(i in 1:nsim) {
-    idx1 = sample(trials, size=length(trials)/2)
-    idx2 = setdiff(trials, idx1) # nonsampled items
-    # h1 <- dat %>% filter(is.element(idx1, Trials)) %>% group_by(ID, AgeGroup)
-    
-    cors[i] = cor()
-  }
-  return(cors)
-}
+
 
 ```
+Split-half reliability for all subjects: `r round(mean(sh_subj),2)`.
+Split-half reliability for adults: `r round(mean(sh_subj_adult), 2)`.
+Split-half reliability for children: `r round(mean(sh_subj_child), 2)`.
 
+Split-half reliability for contain relations: `r round(mean(sh_subj_contain), 2)`.
+Split-half reliability for support relations: `r round(mean(sh_subj_support), 2)`.
 
