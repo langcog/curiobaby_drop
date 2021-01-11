@@ -119,7 +119,7 @@ cd <- rawch %>% filter(Exclude!="Y") %>%
 # make long
 Nsubj_ch = length(unique(cd$ID))
 # shown 1 object to drop, choose which target
-ch_long <- cd %>%
+child_long <- cd %>%
   pivot_longer(cols = 4:23,
                    names_to = "drop",
                    values_to = "choice",
@@ -145,8 +145,9 @@ ch_long <- cd %>%
   ) %>% 
   mutate(chose_target = ifelse(choice == target, 1, 0))
 
+save(adult_long, child_long, file=here("paper/processed_data.RData"))
 
-child_trial_agg <- ch_long %>% group_by(relation, drop, target) %>% # alt, 
+child_trial_agg <- child_long %>% group_by(relation, drop, target) %>% # alt, 
   summarize(chose_target=mean(chose_target, na.rm=T), n=n())
 
 cor.test(child_trial_agg$chose_target, adult_trial_agg$chose_target)
@@ -184,7 +185,7 @@ langcog::ggcorplot(select(trial_tab, child_target_choice, adult_target_choice, m
 ## Can we estimate a single item "interestingness" from the 2AFC data?
 
 ```{r}
-table(ch_long$drop, ch_long$choice)
+table(child_long$drop, child_long$choice)
 ```
 
 
@@ -196,7 +197,7 @@ adult_long <- adult_long %>% rename(ID = ResponseId) %>%
   mutate(Age = "adult") %>%
   select(ID, Age, Trial, choice, drop, target, relation, chose_target)
 
-combo_dat <- ch_long %>% mutate(ID = as.character(ID),
+combo_dat <- child_long %>% mutate(ID = as.character(ID),
                                 Age = as.character(Age)) %>%
   select(ID, Age, Trial, choice, drop, target, relation, chose_target) %>%
   bind_rows(adult_long) %>% 
