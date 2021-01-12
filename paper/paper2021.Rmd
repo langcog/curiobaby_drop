@@ -126,6 +126,27 @@ Participants were `r Nad` adults recruited online via Amazon Mechanical Turk.
 
 ### Materials
 
+Stimuli were images of 3D objects produced using Blender 3D-modeling software. 
+The nine objects, depicted in Figure 1, were bowl, cone, dumbbell, octahedron, pentagon (pentagonal prism), pipe, pyramid, torus, and triangular prism.
+The printed objects were all yellow, rigid plastic material and designed to fit comfortably in a child's hand (dimension range: 3.8-10.1 cm). 
+
+```{r fig1-sets, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.25, fig.height=3, set.cap.width=T, num.cols.cap=1, fig.cap = "Set of 3D objects used for dropping and as targets."}
+img <- png::readPNG("figs/fig1-objects.png")
+grid::grid.raster(img)
+```
+
+## Procedure
+
+Participants were told they would be helping choose which toys to include in a new set of children's blocks in order to make them the most interesting.
+An example trial is illustrated in Figure 2.
+
+```{r fig2-task, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.25, fig.height=3.25, set.cap.width=T, num.cols.cap=1, fig.cap = "Example trial from Experiment 1 with adults. Trials in Experiment 2 (for children) were similar, but arranged for Zoom with the experimenter's face in the center."}
+img <- png::readPNG("figs/2AFC_DropTaskFig.png")
+grid::grid.raster(img)
+```
+
+
+
 ## Results
 
 ```{r adult-agg}
@@ -146,31 +167,15 @@ After exclusions, results from `r Nch` were analyzed, including `r age[1,]$N` 3-
 
 ### Materials
 
-Stimuli were 3D-printed plastic objects produced using Blender 3D-modeling software. 
-The nine objects, depicted in Figure 1, were bowl, cone, dumbbell, octahedron, pentagon (pentagonal prism), pipe, pyramid, torus, and triangular prism.
-The printed objects were all yellow, rigid plastic material and designed to fit comfortably in a child's hand (dimension range: 3.8-10.1 cm). 
-
-
-```{r fig1-sets, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.25, fig.height=3, set.cap.width=T, num.cols.cap=1, fig.cap = "Set of 3D objects used for dropping and as targets. [REPLACE]"}
-img <- png::readPNG("figs/drop_sets.png")
-grid::grid.raster(img)
-```
+The materials were the same as those used in Experiment 1.
 
 ### Procedure
 
 After the parent provided informed consent, children were assigned to Order 1 or Order 2. Participants were assigned to condition in counterbalanced order.
-We introduced children to a set of 3D-printed toy objects ("blocks"). 
-
-An example trial is illustrated in Figure 2.
 
 Based on piloting, we estimated the activity would would only require X minutes to complete. 
 In both conditions, a video camera was used to record the play session from an angle above the bin, to show child's block selection and drop location as well as child's completed tower. 
 After child notified the researcher that they were finished building their tower, the session was completed.
-
-```{r fig2-task, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3, fig.height=2.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Example trial in which the participant chose to drop the pyramid on the pentagonal prism. [REPLACE]"}
-img <- png::readPNG("figs/DropTaskFigure.png")
-grid::grid.raster(img)
-```
 
 
 ## Results
