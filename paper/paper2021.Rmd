@@ -123,7 +123,7 @@ To investigate the systematicity of people's preferences for physical interactio
 ## Method
 
 ### Participants
-Participants were `r Nad` adults recruited online via Amazon Mechanical Turk who were paid $X for their participation.
+Participants were 44 adults recruited online via Amazon Mechanical Turk who were paid $X for their participation.
 
 
 ### Materials
@@ -160,7 +160,7 @@ After making their choice on the practice trial, participants were shown a 10-se
 This was done to ensure that they understood the consequences of the choice they made.
 After the video of the torus drop, participants were given a sequence of 20 more drop trials asking them to choose which toy (X or Y) they would like to drop object Z on, but without videos.
 Four catch trials were interspersed among the 20 drop trials, which asked them to indicate which object they had just dropped on the previous trial (4-alternative forced choice).
-The goal of the catch trials was to encourage participants to attend to the objects and the choices they made.
+The goal of the catch trials was to encourage participants to attend to the objects and the choices they made, and to exclude any participants who were incorrect on 2 or more of the catch trials.
 Finally, there were two free response explanation trials mixed among the drop trials, querying participants, "Why did you make that choice?"
 These free responses were examined to determine if participants had particular goals in mind when making a choice, and how prevalent those goals were among participants.
 
@@ -172,6 +172,9 @@ grid::grid.raster(img)
 
 
 ## Results
+
+We analyzed data from the `r Nad` adults who completed the experiment and got more than 50% of the catch trials correct.
+
 
 ```{r adult-agg}
 adult_trial_agg <- adult_long %>% group_by(drop, target) %>% # alt, 
