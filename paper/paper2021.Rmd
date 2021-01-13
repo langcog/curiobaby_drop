@@ -118,27 +118,51 @@ The agent can use the predictions of the self-model to implement a variety of cu
 
 # Experiment 1: Adults
 
+To investigate the systematicity of people's preferences for physical interactions between objects, we began by studying adults, whom we might expect to be less idiosyncratic and thus more consistent than children in their choices.
+
 ## Method
 
 ### Participants
-Participants were `r Nad` adults recruited online via Amazon Mechanical Turk.
+Participants were `r Nad` adults recruited online via Amazon Mechanical Turk who were paid $X for their participation.
 
 
 ### Materials
 
 Stimuli were images of 3D objects produced using Blender 3D-modeling software. 
-The nine objects, depicted in Figure 1, were bowl, cone, dumbbell, octahedron, pentagon (pentagonal prism), pipe, pyramid, torus, and triangular prism.
-The printed objects were all yellow, rigid plastic material and designed to fit comfortably in a child's hand (dimension range: 3.8-10.1 cm). 
+The nine objects, depicted in Figure 1, were bowl, cone, dumbbell, octahedron, pentagon (pentagonal prism), pipe, pyramid, torus, triangular prism, and ball (sphere; not pictured).
 
-```{r fig1-sets, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.25, fig.height=3, set.cap.width=T, num.cols.cap=1, fig.cap = "Set of 3D objects used for dropping and as targets."}
+<!-- GK: possibly re-do this figure to have the proper orientations -->
+```{r fig1-sets, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.25, fig.height=3, set.cap.width=T, num.cols.cap=1, fig.cap = "Nine of the 10 3D objects used for dropping and as targets (not pictured: ball)."}
 img <- png::readPNG("figs/fig1-objects.png")
 grid::grid.raster(img)
 ```
 
-## Procedure
+### Design
 
-Participants were told they would be helping choose which toys to include in a new set of children's blocks in order to make them the most interesting.
-An example trial is illustrated in Figure 2.
+The experiment consisted of 20 drop trials, completed by each participant in one of four pseudorandom orders.
+Participants were randomly assigned to each order.
+Each drop trial displayed an object X that is to be dropped on one of two other objects (Y or Z), as described in the following procedure.
+In the 20 trials, each of the above 3D objects was used twice as the drop object (X), and appeared at least twice (three times?? check) as potential targets.
+Instead of randomly sampling the target objects (Y or Z), each trial was designed to allow for one of two goal relations (or affordances): containment, or support.
+That is, the target objects were chosen so that either (but not both) of them would be capable of either supporting or (partially) containing the dropped object.
+For example, if asked to drop the cone on either the torus or the octahedron, a containment relation could be achieved between the cone and the torus, but not the octahedron (and support is unlikely due to the small surface area of the octahedron).
+An example support relation is choosing to drop the pentagonal prism on the (equal diameter) pipe rather than the pyramid.
+Half of the 20 trials were designed to afford containment relations, and the other half afforded support relations.
+We refer to these designed containment and support relations as the "targets", and the alternatives objects as the "distractors".
+Distractors for each trial were the same for all participants, and were selected to 1) not afford containment/support of the dropped object, and 2) roughly equate the frequency of appearance of all 10 objects.
+
+### Procedure
+
+Participants were instructed that they would be helping choose which toys to include in a new set of children's blocks in order to make them the most interesting.
+Participants were then given a practice trial (see Figure 2), in which they were told that they should imagine dropping a given object (the torus) on each of two toys (the dumbbell or the pentagonal prism) in a bin. 
+They were than asked to choose which toy to drop the torus on, and prompted to choose the most most interesting or surprising combination.
+After making their choice on the practice trial, participants were shown a 10-second video recording of 3D-printed plastic toys carrying out their chosen interaction (e.g., if they chose the dumbbell, they would see the torus dropped on the dumbbell).
+This was done to ensure that they understood the consequences of the choice they made.
+After the video of the torus drop, participants were given a sequence of 20 more drop trials asking them to choose which toy (X or Y) they would like to drop object Z on, but without videos.
+Four catch trials were interspersed among the 20 drop trials, which asked them to indicate which object they had just dropped on the previous trial (4-alternative forced choice).
+The goal of the catch trials was to encourage participants to attend to the objects and the choices they made.
+Finally, there were two free response explanation trials mixed among the drop trials, querying participants, "Why did you make that choice?"
+These free responses were examined to determine if participants had particular goals in mind when making a choice, and how prevalent those goals were among participants.
 
 ```{r fig2-task, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.25, fig.height=3.25, set.cap.width=T, num.cols.cap=1, fig.cap = "Example trial from Experiment 1 with adults. Trials in Experiment 2 (for children) were similar, but arranged for Zoom with the experimenter's face in the center."}
 img <- png::readPNG("figs/2AFC_DropTaskFig.png")
@@ -167,7 +191,8 @@ After exclusions, results from `r Nch` were analyzed, including `r age[1,]$N` 3-
 
 ### Materials
 
-The materials were the same as those used in Experiment 1.
+The materials were the same as those used in Experiment 1, except that the trials were adapted for presentation via Zoom in a Keynote.
+[Sama, maybe you can explain this and the procedure in a bit more detail? (example fig if we have space)]
 
 ### Procedure
 
@@ -189,9 +214,116 @@ ch_ad_cor <- cor.test(child_trial_agg$chose_target, adult_trial_agg$chose_target
 trial_tab <- child_trial_agg %>% select(-n) %>% 
   bind_cols(adult_target_choice = adult_trial_agg$chose_target) %>% 
   rename(child_target_choice = chose_target) 
+
+#knitr::kable(trial_tab %>% arrange(relation, desc(adult_target_choice)), digits=2)
 ```
 
 We first examine children's choice of drop objects and target objects to determine if children were choosing randomly, or had consistent preferences for some objects. 
+
+
+```{r adults-vs-children, fig.env = "figure", fig.pos = "h", fig.align="center", fig.width=3.25, fig.height=3.25, set.cap.width=T, num.cols.cap=1, fig.cap = "Comparison of children's vs. adults' choices for each trial (dot), with bootstrapped 95\\% confidence intervals."}
+# add vert and horiz error bars 
+adult_long <- adult_long %>% rename(ID = ResponseId) %>%
+  mutate(Age = "adult") %>%
+  select(ID, Age, Trial, choice, drop, target, relation, chose_target)
+
+combo_dat <- child_long %>% mutate(ID = as.character(ID),
+                                Age = as.character(Age)) %>%
+  select(ID, Age, Trial, choice, drop, target, relation, chose_target) %>%
+  bind_rows(adult_long) %>% 
+  mutate(AgeGroup = ifelse(Age!="adult", "child", "adult"))
+
+combo_dat %>% group_by(drop, target, relation, ID) %>%
+  group_by(drop, target, relation, AgeGroup) %>%
+  tidyboot_mean(chose_target, na.rm=T) %>%
+  select(-n, -empirical_stat) %>%
+  pivot_wider(names_from = AgeGroup, values_from = c(mean, ci_lower, ci_upper)) %>%
+  ggplot(aes(x=mean_adult, y=mean_child, group=relation, color=relation)) + 
+    geom_point(alpha=.6) + 
+    geom_errorbar(aes(ymin=ci_lower_child, ymax=ci_upper_child), alpha=.6) +
+    geom_errorbarh(aes(xmin=ci_lower_adult, xmax=ci_upper_adult), alpha=.6) + 
+    theme_bw() + ylim(0,1) + xlim(0,1) + 
+    xlab("Adults' Choice Proportions") + ylab("Children's Choice Proportions") + 
+    geom_abline(xintercept=0, slope=1, linetype="dashed") +
+    geom_smooth(method = "lm") 
+  #geom_text(aes(label=target)) # 
+
+```
+
+
+```{r adults-vs-children-relational-choices, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.25, fig.height=3.25, set.cap.width=T, num.cols.cap=1, fig.cap = "Comparison of children's vs. adults' choices for each type of trial, with bootstrapped 95\\% confidence intervals."}
+pos = position_dodge(width = .9)
+
+p1 <- combo_dat %>%
+  mutate(AgeGroup = ifelse(Age=="adult", "adult", "child"),
+         AgeGroup = factor(AgeGroup, levels=c("child", "adult"))) %>%
+  group_by(ID, AgeGroup, relation) %>% # alt, 
+  summarize(chose_target=mean(chose_target, na.rm=T)) %>%
+  group_by(relation, AgeGroup) %>%
+  tidyboot_mean(chose_target) %>%
+  ggplot(aes(x=relation, y=mean, fill=AgeGroup)) + geom_bar(stat="identity", position=pos) + 
+  geom_linerange(aes(ymin = ci_lower, ymax = ci_upper), position = pos) + 
+  geom_hline(aes(yintercept=.5), linetype="dashed") + theme_classic() + ylim(0,1)
+
+p2 <- combo_dat %>% 
+  mutate(AgeGroup = ifelse(Age=="adult", "adult", 
+                           ifelse(Age=="3" | Age=="4", "3-4 yo", "5-7 yo"))) %>%
+  group_by(ID, AgeGroup, relation) %>% # alt, 
+  summarize(chose_target=mean(chose_target, na.rm=T)) %>%
+  group_by(relation, AgeGroup) %>%
+  tidyboot_mean(chose_target) %>%
+  ggplot(aes(x=relation, y=mean, fill=AgeGroup)) + geom_bar(stat="identity", position=pos) + 
+  geom_linerange(aes(ymin = ci_lower, ymax = ci_upper), position = pos) + 
+  geom_hline(aes(yintercept=.5), linetype="dashed") + theme_classic() + ylim(0,1)
+
+#grid.arrange(p1, p2, nrow = 1)
+p2
+```
+
+
+Check reliability of responses within- and across-conditions (support and containment).
+
+```{r reliability}
+# split subjects in half, check cor between halves
+split_half_subj_cor <- function(dat, nsim=100) {
+  subjs = unique(dat$ID)
+  cors = rep(NA, nsim)
+  for(i in 1:nsim) {
+    idx1 = sample(subjs, size=length(subjs)/2)
+    idx2 = setdiff(subjs, idx1) # nonsampled items
+    h1 <- dat %>% filter(is.element(ID, idx1)) %>% 
+      group_by(AgeGroup, Trial) %>%
+      summarise(mean = mean(chose_target, na.rm=T), .groups="keep")
+    h2 <- dat %>% filter(is.element(ID, idx2)) %>% 
+      group_by(AgeGroup, Trial) %>%
+      summarise(mean = mean(chose_target, na.rm=T), .groups="keep")
+    cors[i] = cor(h1$mean, h2$mean)
+  }
+  return(cors)
+}
+
+# overall
+sh_subj = split_half_subj_cor(combo_dat)
+
+sh_subj_adult = split_half_subj_cor(subset(combo_dat, AgeGroup=="adult"))
+
+sh_subj_child = split_half_subj_cor(subset(combo_dat, AgeGroup=="child"))
+
+sh_subj_contain = split_half_subj_cor(subset(combo_dat, relation=="contain"))
+
+sh_subj_support = split_half_subj_cor(subset(combo_dat, relation=="support"))
+
+# split items in half, check cor between halves...GK: I don't think we care about this
+
+```
+
+Split-half reliability for all subjects: `r round(mean(sh_subj),2)`.
+Split-half reliability for adults: `r round(mean(sh_subj_adult), 2)`.
+Split-half reliability for children: `r round(mean(sh_subj_child), 2)`.
+
+Split-half reliability for contain relations: `r round(mean(sh_subj_contain), 2)`.
+Split-half reliability for support relations: `r round(mean(sh_subj_support), 2)`.
+
 
 Were children's drop choices consistent with adults'?
 Correlation between children's individual proportion of "missed" targets and their age (`r cor_apa(ch_ad_cor, format="rmarkdown", print=F)`).

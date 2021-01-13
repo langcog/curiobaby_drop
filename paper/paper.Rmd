@@ -390,7 +390,7 @@ ggarrange(fig_drop, fig_targ_hit, fig_targ_space, nrow=1,
 Figure 4 shows participants' mean proportion of unique objects dropped as a function of age.
 Children of all ages sampled approximately equal proportions of the objects for dropping--roughly 70%, which is close to the 75% that would be expected if they were selected by chance (9 unique object occurring across 12 trials).
 
-```{r unique-drop-objects, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3, fig.height=2.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Proportion of unique objects selected by participants. Error bars show boostrapped 95\\% confidence intervals."}
+```{r unique-drop-objects, fig.env = "figure", fig.pos = "H", fig.align='center', fig.width=3, fig.height=2.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Proportion of unique objects selected by participants. Error bars show bootstrapped 95\\% confidence intervals."}
 # 12 trials, 9 objects; random selection would be 9/12 = 75%...
 uniq_s <- hum %>% group_by(SID, Age_Group) %>%
   summarise(DropObjs = n_distinct(DropChoice), N=n(), prop=DropObjs/N) 
