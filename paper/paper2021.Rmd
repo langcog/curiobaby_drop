@@ -17,7 +17,7 @@ abstract: >
      same stimuli. Here we propose a new experimental paradigm for examining children's--and curious
      AI agents'--curiosity about objects' physical interactions, using a task that is both open-ended
      enough to allow room for curiosity, but also constrained enough to make detailed behavioral 
-     comparisons. We children's choices (N=XX; 2-6 years of age) to those of adults (N=XX), and find
+     comparisons. We children's choices (N=66; 3-7 years of age) to those of adults (N=XX), and find
      systematic preference for drops affording particular relations (e.g., containment)
     
 keywords: >
@@ -173,7 +173,7 @@ grid::grid.raster(img)
 
 ## Results
 
-We analyzed data from the `r Nad` adults who completed the experiment and got more than 50% of the catch trials correct.
+We analyzed data from the `r Nad` adults who completed the experiment and got at least 3 of the 4 catch trials correct.
 
 
 ```{r adult-agg}
@@ -188,9 +188,9 @@ adult_trial_agg <- adult_long %>% group_by(drop, target) %>% # alt,
 ## Method
 
 ### Participants
-Participants were `r Nch` children recruited online via XX.
+Participants were 73 children recruited online via XXX.
 Participant exclusions were made based on cases where i) the participant did not complete more than half of the study play session or ii) the parent did not consent for video recording of study. 
-After exclusions, results from `r Nch` were analyzed, including `r age[1,]$N` 3-year-olds, `r age[2,]$N` 4-year-olds, `r age[3,]$N` 5-year-olds, `r age[4,]$N` 6-year-olds, and `r age[5,]$N` 7-year-olds.
+After exclusions [based on?], results from `r Nch` were analyzed, including `r age[1,]$N` 3-year-olds, `r age[2,]$N` 4-year-olds, `r age[3,]$N` 5-year-olds, `r age[4,]$N` 6-year-olds, and `r age[5,]$N` 7-year-olds.
 
 ### Materials
 
