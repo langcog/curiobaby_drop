@@ -123,7 +123,7 @@ To investigate the systematicity of people's preferences for physical interactio
 ## Method
 
 ### Participants
-Participants were 44 adults recruited online via Amazon Mechanical Turk who were paid $X for their participation.
+Participants were 44 adults recruited online via Amazon Mechanical Turk who were paid $1 for their participation.
 
 
 ### Materials
@@ -142,7 +142,7 @@ grid::grid.raster(img)
 The experiment consisted of 20 drop trials, completed by each participant in one of four pseudorandom orders.
 Participants were randomly assigned to each order.
 Each drop trial displayed an object X that is to be dropped on one of two other objects (Y or Z), as described in the following procedure.
-In the 20 trials, each of the above 3D objects was used twice as the drop object (X), and appeared at least twice (three times?? check) as potential targets.
+In the 20 trials, each of the above 3D objects was used twice as the drop object (X), and appeared four times as potential targets.
 Instead of randomly sampling the target objects (Y or Z), each trial was designed to allow for one of two goal relations (or affordances): containment, or support.
 That is, the target objects were chosen so that either (but not both) of them would be capable of either supporting or (partially) containing the dropped object.
 For example, if asked to drop the cone on either the torus or the octahedron, a containment relation could be achieved between the cone and the torus, but not the octahedron (and support is unlikely due to the small surface area of the octahedron).
