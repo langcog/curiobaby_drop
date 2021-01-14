@@ -155,11 +155,11 @@ Distractors for each trial were the same for all participants, and were selected
 
 Participants were instructed that they would be helping choose which toys to include in a new set of children's blocks in order to make them the most interesting.
 Participants were then given a practice trial (see Figure 2), in which they were told that they should imagine dropping a given object (the torus) on each of two toys (the dumbbell or the pentagonal prism) in a bin. 
-They were than asked to choose which toy to drop the torus on, and prompted to choose the most most interesting or surprising combination.
+They were than asked to choose which toy to drop the torus on, and prompted to choose the most interesting or surprising combination.
 After making their choice on the practice trial, participants were shown a 10-second video recording of 3D-printed plastic toys carrying out their chosen interaction (e.g., if they chose the dumbbell, they would see the torus dropped on the dumbbell).
 This was done to ensure that they understood the consequences of the choice they made.
 After the video of the torus drop, participants were given a sequence of 20 more drop trials asking them to choose which toy (X or Y) they would like to drop object Z on, but without videos.
-Four catch trials were interspersed among the 20 drop trials, which asked them to indicate which object they had just dropped on the previous trial (4-alternative forced choice).
+Four catch trials were interspersed among the 20 drop trials, which asked them to indicate which object they had just dropped on the previous trial (3-alternative forced choice).
 The goal of the catch trials was to encourage participants to attend to the objects and the choices they made, and to exclude any participants who were incorrect on 2 or more of the catch trials.
 Finally, there were two free response explanation trials mixed among the drop trials, querying participants, "Why did you make that choice?"
 These free responses were examined to determine if participants had particular goals in mind when making a choice, and how prevalent those goals were among participants.
@@ -188,22 +188,26 @@ adult_trial_agg <- adult_long %>% group_by(drop, target) %>% # alt,
 ## Method
 
 ### Participants
-Participants were 73 children recruited online via XXX.
+Participants were 73 children recruited online via Bing Nursery School and targeted Facebook Ads.
 Participant exclusions were made based on cases where i) the participant did not complete more than half of the study play session or ii) the parent did not consent for video recording of study. 
 After exclusions [based on?], results from `r Nch` were analyzed, including `r age[1,]$N` 3-year-olds, `r age[2,]$N` 4-year-olds, `r age[3,]$N` 5-year-olds, `r age[4,]$N` 6-year-olds, and `r age[5,]$N` 7-year-olds.
 
 ### Materials
 
-The materials were the same as those used in Experiment 1, except that the trials were adapted for presentation via Zoom in a Keynote.
+The materials were the same as those used in Experiment 1, except that the trials were adapted for presentation via Zoom in a Keynote. Introductory slides were added for informed consenting process and screen configuration, where researcher's video was placed directly below drop object X and in between target objects Y and Z (see Figure 3). 
+
+```{r fig1-sets, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.25, fig.height=3, set.cap.width=T, num.cols.cap=1, fig.cap = "Children online study screen configuration."}
+img <- png::readPNG("figs/online-child-practice-trial")
+grid::grid.raster(img)
+```
+
 [Sama, maybe you can explain this and the procedure in a bit more detail? (example fig if we have space)]
 
 ### Procedure
 
-After the parent provided informed consent, children were assigned to Order 1 or Order 2. Participants were assigned to condition in counterbalanced order.
+Based on piloting, we estimated the activity would would only require 10 minutes to complete. After the parent provided informed consent, children were assigned to Order 1 or Order 2. Participants were assigned to condition in counterbalanced order. In both conditions, a video recording was taken of the online session.
 
-Based on piloting, we estimated the activity would would only require X minutes to complete. 
-In both conditions, a video camera was used to record the play session from an angle above the bin, to show child's block selection and drop location as well as child's completed tower. 
-After child notified the researcher that they were finished building their tower, the session was completed.
+To accompany the practice  trial, children were shown the three physical objects on video, to ensure understanding of their 3D properties. Verbal responses were collected from children to indicate the slection of target object Y or Z. To prevent left/right mapping confusion, target objects Y and Z were overlayed on thirds of the screen with either red or green background color, which were counterbalanced across trials. The child was asked to verbally select target object and then to indicate whether it was on the "red side or the green side." 
 
 
 ## Results
