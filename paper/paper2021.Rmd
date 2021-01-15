@@ -201,11 +201,28 @@ adtab <- xtable::xtable(adult_trial_agg, digits=2,
 print(adtab, type="latex", comment = F, include.rownames = F, table.placement = "H")
 ```
 
+```{r}
+ad_subj_agg <- adult_long %>% group_by(ResponseId, relation) %>% # alt, 
+  summarize(chose_target=mean(chose_target, na.rm=T)) 
 
+ad_rel_means <- ad_subj_agg %>% group_by(relation) %>% summarize(M=mean(chose_target))
+
+ad_supp_cont <- t.test(subset(ad_subj_agg, relation=="contain")$chose_target -
+         subset(ad_subj_agg, relation=="support")$chose_target)
+```
+
+
+Were adults more consistent in their choices on support or containment trials?
+Averaging each subject's binary responses (1=target relation, 0=alternative) for each trial type revealed a stronger preference for containment relations (M=`r round(ad_rel_means[1,]$M,2)`) than support relations (M=`r round(ad_rel_means[2,]$M,2)`; one-sample `r t_apa(ad_supp_cont, format="rmarkdown", print=F)`).
+For the five support trials for which adults showed no significant preference, we will return to discuss alternative hypotheses after looking at children's preferences in Experiment 2.
 
 # Experiment 2: Children
 
+Experiment 1 showed that adults show remarkably consistent preferences for dropping objects on target objects that afford containment relations, and to a lesser extent support relations. 
+Experiment 2 investigates whether these strong preferences are present even in young children, recognizing that children may find different types of physical interactions (e.g., rolling, bouncing, unpredictability) of greater interest.
+
 ## Method
+We adapted the same materials and procedure used in Experiment 1 for use in an online experiment with children, in order to directly compare the results for children and adults.
 
 ### Participants
 Participants were 73 children recruited online via Bing Nursery School and targeted Facebook Ads.
@@ -213,17 +230,20 @@ Participant exclusions were made based on cases where i) the participant did not
 After exclusions [based on?], results from `r Nch` were analyzed, including `r age[1,]$N` 3-year-olds, `r age[2,]$N` 4-year-olds, `r age[3,]$N` 5-year-olds, `r age[4,]$N` 6-year-olds, and `r age[5,]$N` 7-year-olds.
 
 ### Materials
+The materials were the same as those used in Experiment 1, except that the trials were adapted for presentation via Zoom in a Keynote. 
+Introductory slides were added for informed consenting process and screen configuration, where researcher's video was placed directly below drop object X and in between target objects Y and Z (see Figure 3). 
 
-The materials were the same as those used in Experiment 1, except that the trials were adapted for presentation via Zoom in a Keynote. Introductory slides were added for informed consenting process and screen configuration, where researcher's video was placed directly below drop object X and in between target objects Y and Z (see Figure 3). 
-
-```{r fig1-sets, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=2.75, fig.height=2.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Children online study screen configuration."}
+```{r fig1-sets, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=2.75, fig.height=2.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Zoom screen configuration for children in Experiment 2. Parents were asked to place the experimenter's video feed in the bottom center so the experimenter could point up to the drop object and left and right at each target choice."}
 img <- png::readPNG("figs/online-child-practice-trial.png")
 grid::grid.raster(img)
 ```
 
 ### Procedure
 
-Based on piloting, we estimated the activity would would only require 10 minutes to complete. After the parent provided informed consent, children were assigned to Order 1 or Order 2. Participants were assigned to condition in counterbalanced order. In both conditions, a video recording was taken of the online session.
+Based on piloting, we estimated the activity would would require 10 minutes to complete. 
+After the parent provided informed consent, children were assigned to one of two pseudorandom trial orders. 
+Participants were assigned to condition in counterbalanced order. 
+In both conditions, a video recording was taken of the online session.
 
 To accompany the practice  trial, children were shown the three physical objects on video, to ensure understanding of their 3D properties. Verbal responses were collected from children to indicate the slection of target object Y or Z. To prevent left/right mapping confusion, target objects Y and Z were overlayed on thirds of the screen with either red or green background color, which were counterbalanced across trials. The child was asked to verbally select target object and then to indicate whether it was on the "red side or the green side." 
 
