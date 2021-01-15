@@ -132,7 +132,7 @@ Stimuli were images of 3D objects produced using Blender 3D-modeling software.
 The nine objects, depicted in Figure 1, were bowl, cone, dumbbell, octahedron, pentagon (pentagonal prism), pipe, pyramid, torus, triangular prism, and ball (sphere; not pictured).
 
 <!-- GK: possibly re-do this figure to have the proper orientations -->
-```{r fig1-sets, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.25, fig.height=3, set.cap.width=T, num.cols.cap=1, fig.cap = "Nine of the 10 3D objects used for dropping and as targets (not pictured: ball)."}
+```{r fig3-child-sets, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.25, fig.height=3, set.cap.width=T, num.cols.cap=1, fig.cap = "Nine of the 10 3D objects used for dropping and as targets (not pictured: ball)."}
 img <- png::readPNG("figs/fig1-objects.png")
 grid::grid.raster(img)
 ```
@@ -155,7 +155,7 @@ Distractors for each trial were the same for all participants, and were selected
 
 Participants were instructed that they would be helping choose which toys to include in a new set of children's blocks in order to make them the most interesting.
 Participants were then given a practice trial (see Figure 2), in which they were told that they should imagine dropping a given object (the torus) on each of two toys (the dumbbell or the pentagonal prism) in a bin. 
-They were than asked to choose which toy to drop the torus on, and prompted to choose the most interesting or surprising combination.
+They were then asked to choose which toy to drop the torus on, and prompted to choose the most interesting or surprising combination.
 After making their choice on the practice trial, participants were shown a 10-second video recording of 3D-printed plastic toys carrying out their chosen interaction (e.g., if they chose the dumbbell, they would see the torus dropped on the dumbbell).
 This was done to ensure that they understood the consequences of the choice they made.
 After the video of the torus drop, participants were given a sequence of 20 more drop trials asking them to choose which toy (X or Y) they would like to drop object Z on, but without videos.
@@ -197,7 +197,7 @@ After exclusions [based on?], results from `r Nch` were analyzed, including `r a
 The materials were the same as those used in Experiment 1, except that the trials were adapted for presentation via Zoom in a Keynote. Introductory slides were added for informed consenting process and screen configuration, where researcher's video was placed directly below drop object X and in between target objects Y and Z (see Figure 3). 
 
 ```{r fig1-sets, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.25, fig.height=3, set.cap.width=T, num.cols.cap=1, fig.cap = "Children online study screen configuration."}
-img <- png::readPNG("figs/online-child-practice-trial")
+img <- png::readPNG("figs/online-child-practice-trial.png")
 grid::grid.raster(img)
 ```
 
