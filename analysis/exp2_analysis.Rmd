@@ -46,7 +46,8 @@ mdat %>% group_by(drop, target, train_stage) %>% # alt,
 # Load Adult Data
 
 ```{r load-human-data, echo=FALSE}
-raw = read_csv("exp2-mturk-data/MturkAdultDrop-Data-Combined.csv")
+#raw_old = read_csv("exp2-mturk-data/MturkAdultDrop-Data-Combined.csv")
+raw = read_csv("exp2-mturk-data/MturkAdultDrop DataRound2  - Combined.csv")
 # row 1 is empty, row 2 should be header
 d = raw[3:nrow(raw),]
 names(d) = raw[1,]
@@ -58,8 +59,8 @@ d[which(is.na(d$Exclude)),]$Exclude = 'N'
 explanations = d %>% select(Q42, Q43) # should also select relevant trials
 
 # Q38-Q41 = which toy did you just drop? (catch trials)
-d = d %>% 
-  dplyr::select(-Q11, -Q38, -Q39, -Q40, -Q41, -Q42, -Q43, -`Random ID`) %>%
+d = d %>% # Q38 no longer exists ..
+  dplyr::select(-Q11,  -Q39, -Q40, -Q41, -Q42, -Q43, -`Random ID`) %>% # -Q38,
   rename(Duration = `Duration (in seconds)`)
 #write.csv(d, file="exp2_cleaned.csv")
 
