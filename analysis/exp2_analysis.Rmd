@@ -60,7 +60,7 @@ explanations = d %>% select(Q42, Q43) # should also select relevant trials
 
 # Q38-Q41 = which toy did you just drop? (catch trials)
 d = d %>% # Q38 no longer exists ..
-  dplyr::select(-Q11,  -Q39, -Q40, -Q41, -Q42, -Q43, -`Random ID`) %>% # -Q38,
+  dplyr::select(-Q11, -`Q38- Catch`, -`Q39- Catch`, -`Q40- Catch`, -`Q41- Catch`, -Q42, -Q43, -`Random ID`) %>% # -Q38,
   rename(Duration = `Duration (in seconds)`)
 #write.csv(d, file="exp2_cleaned.csv")
 

@@ -123,7 +123,7 @@ To investigate the systematicity of people's preferences for physical interactio
 ## Method
 
 ### Participants
-Participants were 44 adults recruited online via Amazon Mechanical Turk who were paid $1 for their participation.
+Participants were XX adults recruited online via Amazon Mechanical Turk who were paid $1 for their participation.
 
 
 ### Materials
@@ -196,12 +196,10 @@ After exclusions [based on?], results from `r Nch` were analyzed, including `r a
 
 The materials were the same as those used in Experiment 1, except that the trials were adapted for presentation via Zoom in a Keynote. Introductory slides were added for informed consenting process and screen configuration, where researcher's video was placed directly below drop object X and in between target objects Y and Z (see Figure 3). 
 
-```{r fig1-sets, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.25, fig.height=3, set.cap.width=T, num.cols.cap=1, fig.cap = "Children online study screen configuration."}
+```{r fig1-sets, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=2.75, fig.height=2.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Children online study screen configuration."}
 img <- png::readPNG("figs/online-child-practice-trial.png")
 grid::grid.raster(img)
 ```
-
-[Sama, maybe you can explain this and the procedure in a bit more detail? (example fig if we have space)]
 
 ### Procedure
 
