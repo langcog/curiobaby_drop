@@ -124,7 +124,7 @@ Our design is motivated by the results of a pilot study conducted in-person in J
 In the pilot study (N=15), the pairs of target or drop objects were chosen essentially at random, but were the same for all participants.
 We were surprised to find consistency in adults' preferences for many of the trials: especially when given a drop object and asked to choose one of two target objects, adults were quite often (75-90%) targeting that object that would either *contain* or *support* the dropped object (i.e., the pipe could contain the cone; the pentagonal prism could support the octahedron).
 This consistency in their choices is remarkable given that there are many other possible goals that people might choose in order to make something "interesting" happen: they might attempt to make the dropped object roll or bounce far from the target, or rebound in an unexpected direction, but in fact most people settled on attempting support or containment relations.
-Thus, we set out to examine the development of these preferences, first in a large adult sample, and then in young children, since some have characterized children as simply being noisy adults.
+Thus, we set out to examine the development of these preferences, first in a large adult sample, and then in young children. <!-- , since some have characterized children as simply being noisy adults. -->
 
 ## Method
 
@@ -241,11 +241,14 @@ grid::grid.raster(img)
 ### Procedure
 
 Based on piloting, we estimated the activity would would require 10 minutes to complete. 
-After the parent provided informed consent, children were assigned to one of two pseudorandom trial orders. 
+After the parent provided informed consent, children were assigned to one of two pseudorandom trial orders.
 Participants were assigned to condition in counterbalanced order. 
 In both conditions, a video recording was taken of the online session.
 
-To accompany the practice  trial, children were shown the three physical objects on video, to ensure understanding of their 3D properties. Verbal responses were collected from children to indicate the slection of target object Y or Z. To prevent left/right mapping confusion, target objects Y and Z were overlayed on thirds of the screen with either red or green background color, which were counterbalanced across trials. The child was asked to verbally select target object and then to indicate whether it was on the "red side or the green side." 
+To accompany the practice  trial, children were shown the three physical objects on video, to ensure understanding of their 3D properties. 
+Verbal responses were collected from children to indicate the selection of target object Y or Z. 
+To prevent left/right mapping confusion, target objects Y and Z were overlaid on thirds of the screen with either red or green background color, which were counterbalanced across trials. 
+The child was asked to verbally select target object and then to indicate whether it was on the "red side or the green side." 
 
 
 ## Results
@@ -257,13 +260,22 @@ child_trial_agg <- child_long %>% group_by(relation, drop, target) %>% # alt,
 ch_ad_cor <- cor.test(child_trial_agg$chose_target, adult_trial_agg$chose_target)
 
 trial_tab <- child_trial_agg %>% select(-n) %>% 
-  bind_cols(adult_target_choice = adult_trial_agg$chose_target) %>% 
-  rename(child_target_choice = chose_target) 
+  bind_cols(adult = adult_trial_agg$chose_target) %>% 
+  rename(child = chose_target) %>%
+  arrange(relation, desc(child))
 
 #knitr::kable(trial_tab %>% arrange(relation, desc(adult_target_choice)), digits=2)
 ```
 
-We first examine children's choice of drop objects and target objects to determine if children were choosing randomly, or had consistent preferences for some objects. 
+```{r child-table, results="asis"}
+# how to do 2-col table? , fig.env = "figure*" 
+chtab <- xtable::xtable(trial_tab, digits=2, 
+                       caption = "Children's and adults' target preferences per trial.")
+
+print(chtab, type="latex", comment = F, include.rownames = F, table.placement = "H")
+```
+
+We first examine children's choice of target objects to determine if children were choosing randomly, or had consistent preferences for some objects. 
 
 
 ```{r adults-vs-children, fig.env = "figure", fig.pos = "h", fig.align="center", fig.width=3.25, fig.height=3.25, set.cap.width=T, num.cols.cap=1, fig.cap = "Comparison of children's vs. adults' choices for each trial (dot), with bootstrapped 95\\% confidence intervals."}
