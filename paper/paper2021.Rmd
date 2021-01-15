@@ -5,9 +5,9 @@ csl: apa6.csl
 document-params: "10pt, letterpaper"
 
 author-information: > 
-    \author{{\large \bf George Kachergis (kachergis@stanford.edu)} \and {\large \bf Sama Radwan} \\ Department of Psychology, Stanford University \\ Palo Alto, CA 94305 USA
+    \author{{\large \bf George Kachergis (kachergis@stanford.edu)} \and {\large \bf Sama Radwan} \and {\large \bf Bria Long} \\ Department of Psychology, Stanford University \\ Palo Alto, CA 94305 USA
     \AND {\large \bf Judith Fan (jefan@ucsd.edu)} \\ Department of Psychology, University of San Diego \\ Madison, WI 53706 USA
-    \AND {\large \bf Dan Yamins} \\ Departments of Psychology & Computer Science, Stanford University \\ Palo Alto, CA 94305 USA
+    \AND {\large \bf Daniel Bear} \and {\large \bf Daniel Yamins} \\ Departments of Psychology & Computer Science, Stanford University \\ Palo Alto, CA 94305 USA
     \AND {\large \bf Michael C.~Frank} \\ Department of Psychology, Stanford University \\ Palo Alto, CA 94305 USA}
 
 abstract: >
