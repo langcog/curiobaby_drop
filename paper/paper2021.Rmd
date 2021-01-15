@@ -5,8 +5,10 @@ csl: apa6.csl
 document-params: "10pt, letterpaper"
 
 author-information: > 
-    \author{{\large \bf George (kachergis@stanford.edu)} \\ Department of Psychology, Stanford University \\ Madison, WI 53706 USA
-    \AND {\large \bf Judith Fan (SDJ@Macc.Wisc.Edu)} \\ Department of Psychology, University of San Diego \\ Madison, WI 53706 USA}
+    \author{{\large \bf George Kachergis (kachergis@stanford.edu)} \and {\large \bf Sama Radwan} \\ Department of Psychology, Stanford University \\ Palo Alto, CA 94305 USA
+    \AND {\large \bf Judith Fan (jefan@ucsd.edu)} \\ Department of Psychology, University of San Diego \\ Madison, WI 53706 USA
+    \AND {\large \bf Dan Yamins} \\ Departments of Psychology & Computer Science, Stanford University \\ Palo Alto, CA 94305 USA
+    \AND {\large \bf Michael C.~Frank} \\ Department of Psychology, Stanford University \\ Palo Alto, CA 94305 USA}
 
 abstract: >
      Curiosity is a fundamental driver of human behavior, and yet because of its open-ended nature 
@@ -182,13 +184,13 @@ grid::grid.raster(img)
 We analyzed data from the `r Nad` adults who completed the experiment and got at least 3 of the 4 catch trials correct (XX participants were excluded for not meeting this criterion).
 The main questions of interest are 1) are adults consistent in their preference of drop-target combinations? 2) are they more consistent with trials that afford support or containment relations? and 3) are there other apparent factors that drive their preferences?
 Our analysis addresses each in turn.
-Table 1 shows the mean number of participants choosing the designed target relation for each of the 20 trials [should also show alternative target object?]. 
-Based on the binomial distribution, any of the trials on which more than 90 of the 155 participants agree (i.e., >0.59 or <0.41) significantly differ from chance.
+Table 1 shows the proportion of participants that chose the designed target relation for each of the 20 trials [should also show alternative target object?]. 
+Based on the binomial distribution, any of the trials on which more than 90 of the 155 participants agree (i.e., >0.59 or <0.41) significantly differ from chance [adjust criterion for multiple comparisons?].
 As can be seen in Table 1, participants significantly preferred the target relation for all 10 of the containment trials, and significantly preferred five targets on the 10 support trials; the other five support trials did not significantly differ from chance.
 
 
 ```{r adult-agg}
-adult_trial_agg <- adult_long %>% group_by(drop, target, relation) %>% # alt, 
+adult_trial_agg <- adult_long %>% group_by(relation, drop, target) %>% # alt, 
   summarize(chose_target=mean(chose_target, na.rm=T)) %>% # , n=n()
   arrange(relation, desc(chose_target))
 ```
@@ -240,12 +242,11 @@ grid::grid.raster(img)
 
 ### Procedure
 
-Based on piloting, we estimated the activity would would require 10 minutes to complete. 
-After the parent provided informed consent, children were assigned to one of two pseudorandom trial orders.
-Participants were assigned to condition in counterbalanced order. 
-In both conditions, a video recording was taken of the online session.
+Based on piloting, we estimated the activity would require 10 minutes to complete. 
+After the parent provided informed consent, children were assigned to one of two pseudorandom trial orders in counterbalanced order.
+A video recording was taken of the online session.
 
-To accompany the practice  trial, children were shown the three physical objects on video, to ensure understanding of their 3D properties. 
+To accompany the practice trial, children were shown the three physical objects on video, to ensure understanding of their 3D properties. 
 Verbal responses were collected from children to indicate the selection of target object Y or Z. 
 To prevent left/right mapping confusion, target objects Y and Z were overlaid on thirds of the screen with either red or green background color, which were counterbalanced across trials. 
 The child was asked to verbally select target object and then to indicate whether it was on the "red side or the green side." 
@@ -253,18 +254,45 @@ The child was asked to verbally select target object and then to indicate whethe
 
 ## Results
 
+We first examine children's choice of target objects to determine if children were choosing randomly, or had consistent preferences for some objects. 
+Table 2 shows the proportion of children ("child" column) choosing the designed target relation for each of the 20 trials, alongside the adult choice proportions from Experiment 1 [maybe just drop Table 1?]. 
+Based on the binomial distribution, any of the trials on which more than 41 of the 66 participants agree (i.e., >0.64 or <0.36) significantly differ (*p*<.05 [use stricter for mult comparisons? Bonf=.0025]) from chance.
+Children significantly preferred the designed relation on eight of the 10 containment trials, while only significantly preferring two of the 10 support relation choices.
+On the remaining two containment trials and the other eight support trials, children's preferences also did not significantly differ from chance against the designed relation.
+
 ```{r child-data-agg}
 child_trial_agg <- child_long %>% group_by(relation, drop, target) %>% # alt, 
   summarize(chose_target=mean(chose_target, na.rm=T), n=n())
 
 ch_ad_cor <- cor.test(child_trial_agg$chose_target, adult_trial_agg$chose_target)
+# Were children's drop choices consistent with adults'? (trial-level, not sig)
+# Correlation between children's individual proportion of "missed" targets and their age (`r cor_apa(ch_ad_cor, format="rmarkdown", print=F)`).
 
 trial_tab <- child_trial_agg %>% select(-n) %>% 
   bind_cols(adult = adult_trial_agg$chose_target) %>% 
   rename(child = chose_target) %>%
   arrange(relation, desc(child))
 
+
+adult_long <- adult_long %>% rename(ID = ResponseId) %>%
+  mutate(Age = "adult") %>%
+  select(ID, Age, Trial, choice, drop, target, relation, chose_target)
+
+combo_dat <- child_long %>% mutate(ID = as.character(ID),
+                                Age = as.character(Age)) %>%
+  select(ID, Age, Trial, choice, drop, target, relation, chose_target) %>%
+  bind_rows(adult_long) %>% 
+  mutate(AgeGroup = ifelse(Age!="adult", "child", "adult"))
 #knitr::kable(trial_tab %>% arrange(relation, desc(adult_target_choice)), digits=2)
+
+# support vs. contain relations in children
+ch_subj_agg <- child_long %>% group_by(ID, relation) %>% # alt, 
+  summarize(chose_target=mean(chose_target, na.rm=T)) 
+
+ch_rel_means <- ch_subj_agg %>% group_by(relation) %>% summarize(M=mean(chose_target))
+
+ch_supp_cont <- t.test(subset(ad_subj_agg, relation=="contain")$chose_target -
+         subset(ad_subj_agg, relation=="support")$chose_target)
 ```
 
 ```{r child-table, results="asis"}
@@ -275,21 +303,40 @@ chtab <- xtable::xtable(trial_tab, digits=2,
 print(chtab, type="latex", comment = F, include.rownames = F, table.placement = "H")
 ```
 
-We first examine children's choice of target objects to determine if children were choosing randomly, or had consistent preferences for some objects. 
+Were children more consistent in their choices on support or containment trials?
+As for adults, averaging each child's binary responses for each trial type revealed a stronger preference for containment relations (M=`r round(ch_rel_means[1,]$M,2)`) than support relations (M=`r round(ch_rel_means[2,]$M,2)`; one-sample `r t_apa(ch_supp_cont, format="rmarkdown", print=F)`).
+Overall, children did not show a significant preference for choosing the support relation [should we add a regression with trial_type * age (3 - 18=adult)?].
+Figure 4 shows the proportion of participants' choice of the designed target relation broken down by relation type and age group, showing a preference for the designed relations that grows with age, and that is stronger for containment.
+
+```{r adults-vs-children-relational-choices, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.5, fig.height=3.25, set.cap.width=T, num.cols.cap=1, fig.cap = "Comparison of children's vs. adults' choices for each type of trial, with bootstrapped 95\\% confidence intervals."}
+pos = position_dodge(width = .9)
+
+combo_dat %>% 
+  mutate(AgeGroup = ifelse(Age=="adult", "adult", 
+                           ifelse(Age=="3" | Age=="4", "3-4 yo", "5-7 yo"))) %>%
+  group_by(ID, AgeGroup, relation) %>% # alt, 
+  summarize(chose_target=mean(chose_target, na.rm=T)) %>%
+  group_by(relation, AgeGroup) %>%
+  tidyboot_mean(chose_target) %>%
+  ggplot(aes(x=relation, y=mean, fill=AgeGroup)) + geom_bar(stat="identity", position=pos) + 
+  geom_linerange(aes(ymin = ci_lower, ymax = ci_upper), position = pos) + 
+  geom_hline(aes(yintercept=.5), linetype="dashed") + theme_classic() + ylim(0,1) +
+  ylab("Proportion Choosing Target Relation") +
+  labs(fill = "Age Group")
+
+```
 
 
-```{r adults-vs-children, fig.env = "figure", fig.pos = "h", fig.align="center", fig.width=3.25, fig.height=3.25, set.cap.width=T, num.cols.cap=1, fig.cap = "Comparison of children's vs. adults' choices for each trial (dot), with bootstrapped 95\\% confidence intervals."}
+## Comparison of Children's vs. Adults' Preferences
+
+Finally, we compare the trial-level preferences of children and adults.
+Figure 5 shows adults' (Experiment 1) vs. children's (Experiment 2) choice proportions for the target relations, colored by relation type (visualizing the same data presented in Table 2). 
+If they corresponded perfectly, they would fall along the dotted $y=x$ line, but children's preferences mostly fall short of that line, lying closer to $y=0.5$. 
+At a glance, this seems to support the hypothesis that "children are noisy adults."
+We will re-examine this hypothesis with model-based predictions for each trial.
+
+```{r adults-vs-children, fig.env = "figure", fig.pos = "h", fig.align="center", fig.width=3.5, fig.height=3.75, set.cap.width=T, num.cols.cap=1, fig.cap = "Comparison of children's vs. adults' preferences on each trial (dot), with bootstrapped 95\\% confidence intervals."}
 # add vert and horiz error bars 
-adult_long <- adult_long %>% rename(ID = ResponseId) %>%
-  mutate(Age = "adult") %>%
-  select(ID, Age, Trial, choice, drop, target, relation, chose_target)
-
-combo_dat <- child_long %>% mutate(ID = as.character(ID),
-                                Age = as.character(Age)) %>%
-  select(ID, Age, Trial, choice, drop, target, relation, chose_target) %>%
-  bind_rows(adult_long) %>% 
-  mutate(AgeGroup = ifelse(Age!="adult", "child", "adult"))
-
 combo_dat %>% group_by(drop, target, relation, ID) %>%
   group_by(drop, target, relation, AgeGroup) %>%
   tidyboot_mean(chose_target, na.rm=T) %>%
@@ -302,43 +349,12 @@ combo_dat %>% group_by(drop, target, relation, ID) %>%
     theme_bw() + ylim(0,1) + xlim(0,1) + 
     xlab("Adults' Choice Proportions") + ylab("Children's Choice Proportions") + 
     geom_abline(xintercept=0, slope=1, linetype="dashed") +
-    geom_smooth(method = "lm") 
+    geom_smooth(method = "lm") +
+    theme(legend.position = "bottom")
   #geom_text(aes(label=target)) # 
 
 ```
 
-
-```{r adults-vs-children-relational-choices, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.25, fig.height=3.25, set.cap.width=T, num.cols.cap=1, fig.cap = "Comparison of children's vs. adults' choices for each type of trial, with bootstrapped 95\\% confidence intervals."}
-pos = position_dodge(width = .9)
-
-p1 <- combo_dat %>%
-  mutate(AgeGroup = ifelse(Age=="adult", "adult", "child"),
-         AgeGroup = factor(AgeGroup, levels=c("child", "adult"))) %>%
-  group_by(ID, AgeGroup, relation) %>% # alt, 
-  summarize(chose_target=mean(chose_target, na.rm=T)) %>%
-  group_by(relation, AgeGroup) %>%
-  tidyboot_mean(chose_target) %>%
-  ggplot(aes(x=relation, y=mean, fill=AgeGroup)) + geom_bar(stat="identity", position=pos) + 
-  geom_linerange(aes(ymin = ci_lower, ymax = ci_upper), position = pos) + 
-  geom_hline(aes(yintercept=.5), linetype="dashed") + theme_classic() + ylim(0,1)
-
-p2 <- combo_dat %>% 
-  mutate(AgeGroup = ifelse(Age=="adult", "adult", 
-                           ifelse(Age=="3" | Age=="4", "3-4 yo", "5-7 yo"))) %>%
-  group_by(ID, AgeGroup, relation) %>% # alt, 
-  summarize(chose_target=mean(chose_target, na.rm=T)) %>%
-  group_by(relation, AgeGroup) %>%
-  tidyboot_mean(chose_target) %>%
-  ggplot(aes(x=relation, y=mean, fill=AgeGroup)) + geom_bar(stat="identity", position=pos) + 
-  geom_linerange(aes(ymin = ci_lower, ymax = ci_upper), position = pos) + 
-  geom_hline(aes(yintercept=.5), linetype="dashed") + theme_classic() + ylim(0,1)
-
-#grid.arrange(p1, p2, nrow = 1)
-p2
-```
-
-
-Check reliability of responses within- and across-conditions (support and containment).
 
 ```{r reliability}
 # split subjects in half, check cor between halves
@@ -359,9 +375,9 @@ split_half_subj_cor <- function(dat, nsim=100) {
   return(cors)
 }
 
+set.seed(42)
 # overall
-sh_subj = split_half_subj_cor(combo_dat)
-
+#sh_subj = split_half_subj_cor(combo_dat)
 sh_subj_adult = split_half_subj_cor(subset(combo_dat, AgeGroup=="adult"))
 
 sh_subj_child = split_half_subj_cor(subset(combo_dat, AgeGroup=="child"))
@@ -374,17 +390,10 @@ sh_subj_support = split_half_subj_cor(subset(combo_dat, relation=="support"))
 
 ```
 
-Split-half reliability for all subjects: `r round(mean(sh_subj),2)`.
-Split-half reliability for adults: `r round(mean(sh_subj_adult), 2)`.
-Split-half reliability for children: `r round(mean(sh_subj_child), 2)`.
-
-Split-half reliability for contain relations: `r round(mean(sh_subj_contain), 2)`.
-Split-half reliability for support relations: `r round(mean(sh_subj_support), 2)`.
-
-
-Were children's drop choices consistent with adults'?
-Correlation between children's individual proportion of "missed" targets and their age (`r cor_apa(ch_ad_cor, format="rmarkdown", print=F)`).
-Table 2 shows a summary of participants' choice of target objects per set.
+Finally, we also examined the split-half reliability of children's and adults' choices by repeatedly  splitting the samples in half and testing the correlation between the halves.
+Based on 100 random samples, the split-half reliability for adults is *r* = `r round(mean(sh_subj_adult), 2)` (sd=`r round(sd(sh_subj_adult), 2)`), and for children is *r* = `r round(mean(sh_subj_child), 2)` (sd=`r round(sd(sh_subj_child), 2)`).
+The overall split-half reliability on the containment trials is *r* = `r round(mean(sh_subj_contain), 2)` (sd=`r round(sd(sh_subj_contain), 2)`), and for support trials is *r* = `r round(mean(sh_subj_support), 2)` (sd=`r round(sd(sh_subj_support), 2)`).
+[should we separately report these for adults and children?]
 
 <!-- Finally, we examine a more lenient analysis children's choice of target location (i.e., the identity of the closest target), regardless of whether there was a collision of drop and target objects. -->
 <!-- Chi-square tests of children's target collisions once more found that ... -->
@@ -439,11 +448,21 @@ ggplot(uniq, aes(x=Age_Group, y=mean)) + geom_point() +
 ```
 
 
+## Model Comparison
 
+Can these preferences be predicted by heuristic models of physical interactions?
+We implement and test a few models, generate relative preferences for the same drop objects and target object pairs used in Experiments 1 and 2, and see how well each model explains the strength of trial-level preferences seen in participants.
 
 # Discussion 
+This study aimed to investigate what physical interactions between objects most evoke curiosity.
+After finding surprising consistency in an in-person pilot study of adults, an online study designed to make possible the same support and containment relations between dropped and target objects replicated this finding of consistency: adults are interested in dropping objects into containers, and to a lesser degree on top of supporting objects.
+Experiment 2 found the same pattern in children, but with greater noise -- even to the extent that younger children were at-chance at choosing the support relation on most trials.
 
-
+Thus, we find an early-emerging interest in containment (cite Marianella Casasola and Leslie B. Cohen) that persists into adulthood, along with a weaker interest in support relations.
+Is containment inherently more satisfying, or is there greater interest because it is more achievable? (Less susceptible to small amounts of error)
+Are children less interested in relations that are more difficult to achieve with more motor noise?
+Or are they less aware (or simply less interested in) support?
+Or do children find some other goal relatively more enticing?
 
 # Acknowledgements
 
