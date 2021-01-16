@@ -9,3 +9,4 @@
 paper/paper.pdf
 *.tex
 .Rhistory
+*.py~
