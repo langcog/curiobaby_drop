@@ -1,3 +1,4 @@
+import time
 import os
 import drop #how are we dealing with the fact that we might want to reuse controller code like this? drop controller is not in any package!
 
@@ -42,7 +43,7 @@ def get_drop_target_pairs(scenarios):
 def main(output_dir, num, launch_build=True, port=1071):
     scenarios = get_drop_target_pairs(SCENARIOS)
     scenes = list(zip(scenarios, SCENARIO_TYPES))
-    scenes = scenes[:1]
+    #scenes = scenes[:1]
     for (sd, st), tp in scenes:
         if isinstance(sd, str):
             drop_obj = sd 
@@ -61,7 +62,7 @@ def main(output_dir, num, launch_build=True, port=1071):
                        port=port,
                        randomize=0,
                        seed=0,
-                       height_range=[0.75, 1.25],
+                       height_range=[1.1, 1.1],
                        drop_scale_range=[drop_scale, drop_scale],
                        drop_jitter=0.2,
                        drop_rotation=drop_rotation,
@@ -81,5 +82,5 @@ def main(output_dir, num, launch_build=True, port=1071):
                temp_path='tmp',
                width=256,
                height=256)
-               
+        time.sleep(10)
                        
