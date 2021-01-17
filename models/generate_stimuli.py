@@ -57,7 +57,9 @@ def main(output_dir, num):
         else:
             target_obj, target_rotation, target_scale = st
 
-        dc = drop.Drop(randomize=0,
+        dc = drop.Drop(launch_build=False,
+                       port=1075,
+                       randomize=0,
                        seed=0,
                        height_range=[0.75, 1.25],
                        drop_scale_range=[drop_scale, drop_scale],
@@ -71,7 +73,7 @@ def main(output_dir, num):
                        camera_max_angle=0
         )
 
-        suffix = '%s_on_%s_%s' % (drop, target, tp)
+        suffix = '%s_on_%s_%s' % (drop_obj, target_obj, tp)
         output_path = os.path.join(output_dir, suffix)
         dc.run(num=num,
                output_dir=output_path,
