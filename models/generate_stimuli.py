@@ -12,18 +12,18 @@ CONTAIN_SCENARIOS = [('bowl', ['pyramid', 'trianular_prism']),
                      ('pyramid', ['torus', 'dumbbell']),
                      ('sphere', ['bowl', 'pentagon']),
                      ('torus', ['cone', 'dumbbell']),
-                     ('triangular prism', ['bowl', 'dumbbell'])]
+                     ('triangular_prism', ['bowl', 'dumbbell'])]
 
-SUPPORT_SCENARIOS = [('bowl', ['torus', 'triangular prism']),
-                     ('cone', ['triangular prism', 'sphere']),
+SUPPORT_SCENARIOS = [('bowl', ['torus', 'triangular_prism']),
+                     ('cone', ['triangular_prism', 'sphere']),
                      ('dumbbell', ['pentagon', 'octahedron']),
                      ('octahedron', ['pentagon', 'pyramid']),
                      ('pentagon', ['pipe', 'pyramid']),
                      ('pipe', ['torus', 'dumbbell']),
-                     ('pyramid', ['triangular prism', 'sphere']),
+                     ('pyramid', ['triangular_prism', 'sphere']),
                      ('sphere', ['pipe', 'cone']),
                      ('torus', ['bowl', 'octahedron']),
-                     ('triangular prism', ['pentagon', 'cone'])]
+                     ('triangular_prism', ['pentagon', 'cone'])]
 
 SCENARIO_TYPES = 10 * ['contain'] + 10 * ['support']
 
@@ -40,7 +40,6 @@ def get_drop_target_pairs(scenarios):
 
 def main(output_dir, num):
     scenarios = get_drop_target_pairs(SCENARIOS)
-    print(scenarios)
     scenes = list(zip(scenarios, SCENARIO_TYPES))
     scenes = scenes[:1]
     for (sd, st), tp in scenes:
@@ -57,8 +56,8 @@ def main(output_dir, num):
         else:
             target_obj, target_rotation, target_scale = st
 
-        dc = drop.Drop(launch_build=False,
-                       port=1075,
+        dc = drop.Drop(#launch_build=False,
+                       #port=1075,
                        randomize=0,
                        seed=0,
                        height_range=[0.75, 1.25],
@@ -69,6 +68,7 @@ def main(output_dir, num):
                        target_objects = [target_obj],
                        target_scale_range=[target_scale, target_scale],
                        target_rotation=target_rotation,
+                       camera_radius=1.25,
                        camera_min_angle=0,
                        camera_max_angle=0
         )
@@ -77,6 +77,7 @@ def main(output_dir, num):
         output_path = os.path.join(output_dir, suffix)
         dc.run(num=num,
                output_dir=output_path,
+               temp_path='tmp',
                width=256,
                height=256)
                
