@@ -74,14 +74,14 @@ Moreover, extant theories have rarely provided quantitatively precise enough pre
 The goal of the current paper is to help close this gap by proposing a framework for advancing our theoretical understanding of curiosity that combines three key ingredients: _first_, we present a computational theory of how a learner's knowledge state interacts with ongoing perceptual experiences to give rise to curiosity-driven exploratory behavior; _second_, we present an empirical investigation of the pattern of actions taken by children in a novel physical exploration task; and _third_, we evaluate the quantitative correspondence between the exploratory actions taken by an artificial agent that instantiates our computational theory and those taken by human children on the same set of tasks. 
 
 Our computational theory is inspired by classic descriptive theories that posited that curiosity-driven behavior was the consequence of attentional capture by novel stimuli [e.g., @Berlyne1954; @Fantz1964], as well as theories providing qualitative explanations for curiosity-driven behavior as the result of learners' preferences for stimuli that are "moderately discrepant" in relation to their current knowledge state, and thereby provide opportunities to learn [@Kinney1976]. 
-Recent studies have provided empirical support for this basic idea: 7- to 8-month-old infants are sensitive to stimulus complexity and prefer to look at moderately complex stimuli rather than overly simple or overly complex stimuli; @Kidd2012; @Kidd2014].
+Recent studies have provided empirical support for this basic idea: 7- to 8-month-old infants are sensitive to stimulus complexity and prefer to look at moderately complex stimuli rather than simple or highly-complex stimuli [@Kidd2012; @Kidd2014].
 According to these theories, curiosity-driven behavior reflects a gap between the learner's knowledge and the state of the world [@Loewenstein1994], and thus they predict that as a learner gains additional knowledge, their preferences will shift toward more complex stimuli [@Dember1957].
 Although these theories have provided important qualitative insights, one of their major limitations is that they do not provide precise ways to characterize a learner's current knowledge state, how physical states of the world are represented in their mind, nor how discrepancies between a learner's knowledge and such states are compared.  
 Our approach leverages theory and insights from reinforcement learning (RL), including the value of mechanisms that equip RL agents with "intrinsic motivation" — a drive to explore the state space even when rewards are sparse or absent, and favor actions with uncertain outcomes, because they may result in the discovery of new policies with high expected values [@Schmidhuber2010].
 Our modeling approach is resonant with recent work that has instantiated such intrinsic-motivation mechanisms in robots to help them learn robust ways to predict physical events in the world world [@Oudeyer2007; @Oudeyer2013], although this work typically involves pretraining models on a separate physical prediction task before implementing curiosity-driven learning, and has not yet been directly compared to human behavior in the same prediction tasks.
 
-Our empirical study is motivated by a large body of prior work in developmental psychology investigating the development of knowledge about physical objects, their properties, and how they interact (CITE), thus making exploration of physical objects a natural choice of domain to explore the implications of our theory. 
-However, the measures used in this literature have typically been coarse-grained with respect to infants' and children's physical knowledge, and thus do not specify or constrain which events might be moderately discrepant from this knowledge. 
+Our empirical study is motivated by a large body of prior work in developmental psychology investigating the development of knowledge about physical objects, their properties, and how they interact (CITE Spelke, Baillargeon..), thus making exploration of physical objects a natural choice of domain to explore the implications of our theory. 
+However, the measures used in this literature have typically focused on either children's ability to discriminate types of events, or their ability to carry out particular tasks (e.g., shape sorting), but have not examined which types of interactions children are most interested in testing.
 For instance, a typical measure of physical curiosity has been longer looking times to surprising events than to expected events (e.g., objects appearing to pass through a wall; @Stahl2015; @Baillargeon2007). 
 Other work that has investigated exploratory behavior in children have used more granular measures, such as counting the number of functions discovered while playing with novel and complex toy [e.g., @Cook2011; @Bonawitz2012; @Gweon2014]. 
 Moreover, these studies have yet to directly constrain theories that predict which functions children will discover, and in what sequence. 
@@ -186,7 +186,7 @@ The main questions of interest are 1) are adults consistent in their preference 
 Our analysis addresses each in turn.
 Table 1 shows the proportion of participants that chose the designed target relation for each of the 20 trials [should also show alternative target object?]. 
 Based on the binomial distribution, any of the trials on which more than 90 of the 155 participants agree (i.e., >0.59 or <0.41) significantly differ from chance [adjust criterion for multiple comparisons?].
-As can be seen in Table 1, participants significantly preferred the target relation for all 10 of the containment trials, and significantly preferred five targets on the 10 support trials; the other five support trials did not significantly differ from chance.
+As can be seen in Table 1, adults participants ("adult" column) significantly preferred the target relation for all 10 of the containment trials, and significantly preferred five targets on the 10 support trials; the other five support trials did not significantly differ from chance.
 
 
 ```{r adult-agg}
@@ -195,8 +195,7 @@ adult_trial_agg <- adult_long %>% group_by(relation, drop, target) %>% # alt,
   arrange(relation, desc(chose_target))
 ```
 
-```{r adults-table, results="asis"}
-# how to do 2-col table? , fig.env = "figure*" 
+```{r adults-table, results="asis", include=F}
 adtab <- xtable::xtable(adult_trial_agg, digits=2, 
                        caption = "Adult target preferences per trial.")
 
@@ -214,52 +213,6 @@ ad_supp_cont <- t.test(subset(ad_subj_agg, relation=="contain")$chose_target -
 ```
 
 
-Were adults more consistent in their choices on support or containment trials?
-Averaging each subject's binary responses (1=target relation, 0=alternative) for each trial type revealed a stronger preference for containment relations (M=`r round(ad_rel_means[1,]$M,2)`) than support relations (M=`r round(ad_rel_means[2,]$M,2)`; one-sample `r t_apa(ad_supp_cont, format="rmarkdown", print=F)`).
-For the five support trials for which adults showed no significant preference, we will return to discuss alternative hypotheses after looking at children's preferences in Experiment 2.
-
-# Experiment 2: Children
-
-Experiment 1 showed that adults show remarkably consistent preferences for dropping objects on target objects that afford containment relations, and to a lesser extent support relations. 
-Experiment 2 investigates whether these strong preferences are present even in young children, recognizing that children may find different types of physical interactions (e.g., rolling, bouncing, unpredictability) of greater interest.
-
-## Method
-We adapted the same materials and procedure used in Experiment 1 for use in an online experiment with children, in order to directly compare the results for children and adults.
-
-### Participants
-Participants were 73 children recruited online via Bing Nursery School and targeted Facebook Ads.
-Participant exclusions were made based on cases where i) the participant did not complete more than half of the study play session or ii) the parent did not consent for video recording of study. 
-After exclusions [based on?], results from `r Nch` were analyzed, including `r age[1,]$N` 3-year-olds, `r age[2,]$N` 4-year-olds, `r age[3,]$N` 5-year-olds, `r age[4,]$N` 6-year-olds, and `r age[5,]$N` 7-year-olds.
-
-### Materials
-The materials were the same as those used in Experiment 1, except that the trials were adapted for presentation via Zoom in a Keynote. 
-Introductory slides were added for informed consenting process and screen configuration, where researcher's video was placed directly below drop object X and in between target objects Y and Z (see Figure 3). 
-
-```{r fig1-sets, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=2.75, fig.height=2.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Zoom screen configuration for children in Experiment 2. Parents were asked to place the experimenter's video feed in the bottom center so the experimenter could point up to the drop object and left and right at each target choice."}
-img <- png::readPNG("figs/online-child-practice-trial.png")
-grid::grid.raster(img)
-```
-
-### Procedure
-
-Based on piloting, we estimated the activity would require 10 minutes to complete. 
-After the parent provided informed consent, children were assigned to one of two pseudorandom trial orders in counterbalanced order.
-A video recording was taken of the online session.
-
-To accompany the practice trial, children were shown the three physical objects on video, to ensure understanding of their 3D properties. 
-Verbal responses were collected from children to indicate the selection of target object Y or Z. 
-To prevent left/right mapping confusion, target objects Y and Z were overlaid on thirds of the screen with either red or green background color, which were counterbalanced across trials. 
-The child was asked to verbally select target object and then to indicate whether it was on the "red side or the green side." 
-
-
-## Results
-
-We first examine children's choice of target objects to determine if children were choosing randomly, or had consistent preferences for some objects. 
-Table 2 shows the proportion of children ("child" column) choosing the designed target relation for each of the 20 trials, alongside the adult choice proportions from Experiment 1 [maybe just drop Table 1?]. 
-Based on the binomial distribution, any of the trials on which more than 41 of the 66 participants agree (i.e., >0.64 or <0.36) significantly differ (*p*<.05 [use stricter for mult comparisons? Bonf=.0025]) from chance.
-Children significantly preferred the designed relation on eight of the 10 containment trials, while only significantly preferring two of the 10 support relation choices.
-On the remaining two containment trials and the other eight support trials, children's preferences also did not significantly differ from chance against the designed relation.
-
 ```{r child-data-agg}
 child_trial_agg <- child_long %>% group_by(relation, drop, target) %>% # alt, 
   summarize(chose_target=mean(chose_target, na.rm=T), n=n())
@@ -271,7 +224,7 @@ ch_ad_cor <- cor.test(child_trial_agg$chose_target, adult_trial_agg$chose_target
 trial_tab <- child_trial_agg %>% select(-n) %>% 
   bind_cols(adult = adult_trial_agg$chose_target) %>% 
   rename(child = chose_target) %>%
-  arrange(relation, desc(child))
+  arrange(relation, desc(adult)) # desc(child)
 
 
 adult_long <- adult_long %>% rename(ID = ResponseId) %>%
@@ -302,6 +255,52 @@ chtab <- xtable::xtable(trial_tab, digits=2,
 
 print(chtab, type="latex", comment = F, include.rownames = F, table.placement = "H")
 ```
+
+Were adults more consistent in their choices on support or containment trials?
+Averaging each subject's binary responses (1=target relation, 0=alternative) for each trial type revealed a stronger preference for containment relations (M=`r round(ad_rel_means[1,]$M,2)`) than support relations (M=`r round(ad_rel_means[2,]$M,2)`; one-sample `r t_apa(ad_supp_cont, format="rmarkdown", print=F)`).
+For the five support trials for which adults showed no significant preference, we will return to discuss alternative hypotheses after looking at children's preferences in Experiment 2.
+
+# Experiment 2: Children
+
+Experiment 1 demonstrated that adults show remarkably consistent preferences for dropping objects on target objects that afford containment relations, and to a lesser extent support relations. 
+Experiment 2 investigates whether these strong preferences are present even in young children, recognizing that children may find different types of physical interactions (e.g., rolling, bouncing, unpredictability) of greater interest.
+
+## Method
+We adapted the same materials and procedure used in Experiment 1 for use in an online experiment with children, in order to directly compare the results for children and adults.
+
+### Participants
+Participants were 73 children recruited online via Bing Nursery School and targeted Facebook Ads.
+Participant exclusions were made based on cases where i) the participant did not complete more than half of the study play session or ii) the parent did not consent for video recording of study. 
+After exclusions [based on?], results from `r Nch` were analyzed, including `r age[1,]$N` 3-year-olds, `r age[2,]$N` 4-year-olds, `r age[3,]$N` 5-year-olds, `r age[4,]$N` 6-year-olds, and `r age[5,]$N` 7-year-olds.
+
+### Materials
+The materials were the same as those used in Experiment 1, except that the trials were adapted for presentation via Zoom in a Keynote. 
+Introductory slides were added for informed consenting process and screen configuration, where researcher's video was placed directly below drop object X and in between target objects Y and Z (see Figure 3). 
+
+```{r fig1-sets, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=2.75, fig.height=2.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Zoom screen configuration for children in Experiment 2. Parents were asked to place the experimenter's video feed in the bottom center so the experimenter could point up to the drop object and left and right at each target choice."}
+img <- png::readPNG("figs/online-child-practice-trial.png")
+grid::grid.raster(img)
+```
+
+### Procedure
+
+<!-- Based on piloting, we estimated the activity would require 10 minutes to complete. -->
+After the parent provided informed consent, children were assigned to one of two pseudorandom trial orders in counterbalanced order.
+A video recording was taken of the online session.
+
+To accompany the practice trial, children were shown the three physical objects on video, to ensure understanding of their 3D properties. 
+Verbal responses were collected from children to indicate the selection of target object Y or Z. 
+To prevent left/right mapping confusion, target objects Y and Z were overlaid on thirds of the screen with either red or green background color, which were counterbalanced across trials. 
+The child was asked to verbally select target object and then to indicate whether it was on the "red side or the green side." 
+
+
+## Results
+
+We examined children's choice of target objects to determine if children were choosing randomly, or had consistent preferences for some objects. 
+Table 1 shows the proportion of children ("child" column) choosing the designed target relation for each of the 20 trials, alongside the adult choice proportions from Experiment 1 [maybe just drop Table 1?]. 
+Based on the binomial distribution, any of the trials on which more than 41 of the 66 participants agree (i.e., >0.64 or <0.36) significantly differ (*p*<.05 [use stricter for mult comparisons? Bonf=.0025]) from chance.
+Children significantly preferred the designed relation on eight of the 10 containment trials, while only significantly preferring two of the 10 support relation choices.
+On the remaining two containment trials and the other eight support trials, children's preferences also did not significantly differ from chance against the designed relation.
 
 Were children more consistent in their choices on support or containment trials?
 As for adults, averaging each child's binary responses for each trial type revealed a stronger preference for containment relations (M=`r round(ch_rel_means[1,]$M,2)`) than support relations (M=`r round(ch_rel_means[2,]$M,2)`; one-sample `r t_apa(ch_supp_cont, format="rmarkdown", print=F)`).
