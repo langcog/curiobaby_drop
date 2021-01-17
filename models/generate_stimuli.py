@@ -1,5 +1,5 @@
 import os
-import drop
+import drop #how are we dealing with the fact that we might want to reuse controller code like this? drop controller is not in any package!
 
 OBJECT_INFO = {}
 
@@ -39,35 +39,43 @@ def get_drop_target_pairs(scenarios):
 
 
 def main(output_dir, num):
-    for (sd, st), tp in zip(SCENARIOS, SCENARIO_TYPE):
+    scenarios = get_drop_target_pairs(SCENARIOS)
+    print(scenarios)
+    scenes = list(zip(scenarios, SCENARIO_TYPES))
+    scenes = scenes[:1]
+    for (sd, st), tp in scenes:
         if isinstance(sd, str):
-            drop = sd 
+            drop_obj = sd 
             drop_rotation = [0, 0, 0]
             drop_scale = 1
         else:
-            drop, drop_rotation, drop_scale = sd
+            drop_obj, drop_rotation, drop_scale = sd
         if isinstance(st, str):
-            target = st
+            target_obj = st
             target_rotation = [0, 0, 0]
             target_scale = 1
         else:
-            target, target_rotation, target_scale = st
+            target_obj, target_rotation, target_scale = st
 
-        dc = drop.Drop(random=0,
+        dc = drop.Drop(randomize=0,
                        seed=0,
                        height_range=[0.75, 1.25],
                        drop_scale_range=[drop_scale, drop_scale],
                        drop_jitter=0.2,
                        drop_rotation=drop_rotation,
-                       drop_objects = [drop],
-                       target_obejcts = [target],
+                       drop_objects = [drop_obj],
+                       target_objects = [target_obj],
                        target_scale_range=[target_scale, target_scale],
                        target_rotation=target_rotation,
+                       camera_min_angle=0,
+                       camera_max_angle=0
         )
 
         suffix = '%s_on_%s_%s' % (drop, target, tp)
         output_path = os.path.join(output_dir, suffix)
         dc.run(num=num,
-               output_dir=output_path)
+               output_dir=output_path,
+               width=256,
+               height=256)
                
                        
