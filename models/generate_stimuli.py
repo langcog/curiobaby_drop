@@ -32,13 +32,14 @@ SCENARIOS = CONTAIN_SCENARIOS + SUPPORT_SCENARIOS
 def get_drop_target_pairs(scenarios):
     pairs = []
     for sd, st in scenarios:
-        pairs.append((sd, st[0]))
-        pairs.append((sd, st[1]))
-    pairs = list(set(pairs))
+        if (sd, st[0]) not in scenarios:
+            pairs.append((sd, st[0]))
+        if (sd, st[1]) not in scenarios:
+            pairs.append((sd, st[1]))
     return pairs
 
 
-def main(output_dir, num):
+def main(output_dir, num, launch_build=True, port=1071):
     scenarios = get_drop_target_pairs(SCENARIOS)
     scenes = list(zip(scenarios, SCENARIO_TYPES))
     scenes = scenes[:1]
@@ -56,8 +57,8 @@ def main(output_dir, num):
         else:
             target_obj, target_rotation, target_scale = st
 
-        dc = drop.Drop(#launch_build=False,
-                       #port=1075,
+        dc = drop.Drop(launch_build=launch_build,
+                       port=port,
                        randomize=0,
                        seed=0,
                        height_range=[0.75, 1.25],
