@@ -4,7 +4,9 @@ import drop #how are we dealing with the fact that we might want to reuse contro
 
 OBJECT_INFO = {}
 
-CONTAIN_SCENARIOS = [
+CONTAIN_SCENARIOS = [(('torus', {"x": 0, "y": 0, "z": 0}, 1), 
+                      [('cone', {"x": 0, "y": 0, "z": 0}, 0.6), 
+                       ('dumbbell', {"x": 0, "y": 0, "z": 0}, 0.5)]),
                      (('bowl', {"x": 0, "y": 0, "z": 180}, 1.3), 
                       ['pyramid', 
                        ('triangular_prism', {"x": 0, "y": 90., "z": 0}, 1)]),
@@ -41,9 +43,6 @@ CONTAIN_SCENARIOS = [
                         {"x": 0, "y": 0, "z": 0}, 
                         {"x": 0.8, "y": 0.56, "z": 0.8})
                        ]),
-                     (('torus', {"x": 0, "y": 0, "z": 0}, 5), 
-                      [('cone', {"x": 0, "y": 0, "z": 0}, 0.4), 
-                       'dumbbell']),
                      (('triangular_prism',
                        {"x": 0, "y": 0, "z": 90},
                        {"x": 1, "y": 0.6, "z": 0.6}),
@@ -94,9 +93,9 @@ SUPPORT_SCENARIOS = [
                         {"x": 0, "y": 0, "z": 0},
                         {"x": 1.1, "y": 0.35, "z": 1.1}),
                       'cone']),
-                     (('torus', {"x": 0, "y": 0, "z": 0}, 4), 
+                     (('torus', {"x": 0, "y": 0, "z": 0}, 1), 
                       ['bowl', 
-                       ('octahedron', {"x": 0, "y": 0, "z": 0}, 0.4)]),
+                       ('octahedron', {"x": 0, "y": 0, "z": 0}, 0.6)]),
                      ('triangular_prism', 
                       [('pentagon',
                         {"x": 0, "y": 0, "z": 0},
