@@ -1,5 +1,7 @@
 import time
 import os
+import numpy as np
+
 import drop #how are we dealing with the fact that we might want to reuse controller code like this? drop controller is not in any package!
 
 OBJECT_INFO = {}
@@ -118,6 +120,26 @@ def get_drop_target_pairs(scenarios):
     return pairs
 
 
+class Rotator(object):
+    def __init__(self, range_dict, seed=0, initial=None):
+        if initial is None:
+            initial = {}
+        self.initial = initial
+        self.xmin, self.xmax = range_dict['x']
+        self.ymin, self.ymax = range_dict['y']
+        self.zmin, self.zmax = range_dict['z']
+        self.rng = np.random.RandomState(seed=seed)
+
+    def __call__(self):
+        xinit = self.initial.get('x', 0)
+        yinit = self.initial.get('y', 0)
+        zinit = self.initial.get('z', 0)
+        xrot = self.rng.uniform(xinit + self.xmin, xinit + self.xmax)
+        yrot = self.rng.uniform(yinit + self.ymin, yinit + self.ymax)
+        zrot = self.rng.uniform(zinit + self.zmin, zinit + self.zmax)
+        return {'x': xrot, 'y': yrot, 'z': zrot}
+
+
 def main(output_dir, num, launch_build=True, port=1071):
     scenarios = get_drop_target_pairs(SCENARIOS)
     for i, ((sd, st), tp) in enumerate(scenarios):
@@ -138,6 +160,12 @@ def main(output_dir, num, launch_build=True, port=1071):
         output_path = os.path.join(output_dir, suffix)
         temp_path = 'tmp' 
 
+        drop_rotation_range = Rotator({"x": [-20, 20],
+                                       "y": [-20, 20],
+                                       "z": [-20, 20]},
+                                       seed=i,
+                                       initial=drop_rotation)
+
         if i == 0:
             dc = drop.Drop(launch_build=launch_build,
                        port=port,
@@ -145,8 +173,8 @@ def main(output_dir, num, launch_build=True, port=1071):
                        seed=0,
                        height_range=[1.9, 1.9],
                        drop_scale_range=drop_scale,
-                       drop_jitter=0.1,
-                       drop_rotation_range=drop_rotation,
+                       drop_jitter=0.2,
+                       drop_rotation_range=drop_rotation_range,
                        drop_objects = [drop_obj],
                        target_objects = [target_obj],
                        target_scale_range=target_scale,
@@ -162,7 +190,7 @@ def main(output_dir, num, launch_build=True, port=1071):
             dc.clear_static_data()
             dc.drop_scale_range = drop_scale
             dc.target_scale_range = target_scale
-            dc.drop_rotation_range = drop_rotation
+            dc.drop_rotation_range = drop_rotation_range
             dc.target_rotation_range = target_rotation
             dc.set_drop_types([drop_obj])
             dc.set_target_types([target_obj])
