@@ -227,13 +227,15 @@ def get_collision_frames(d):
 	return collision_frames
 
 
-def velocity_std_after_first_collision(data, objects=None, window=5):
+def normed_velocity_std_after_first_collision(data, objects=None, window=5):
     fcfs = list(map(get_first_collision_frame, data))
     object_inds = get_object_inds(objects)
     vels = get_velocities(data, object_inds=object_inds)
     #V is of shape (num_trials, window, num_objects, 3)
     V = np.array([v[fcf:fcf + window] for v, fcf in zip(vels, fcfs) if fcf is not None])
     Vm = V.mean(axis=1)
-    return np.sqrt(Vm.var(axis=0).sum())
+    Vn = np.linalg.norm(Vm, axis=2)
+    W = Vm / Vn[:, :, np.newaxis]
+    return np.sqrt(W.var(axis=0).sum())
 
 
