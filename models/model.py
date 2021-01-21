@@ -354,7 +354,7 @@ def get_all_stats(base_dir, out_dir):
         print('Getting stats for %s' % sname)
         outcomes = get_stats(path)
         outpath = os.path.join(out_dir, sname)
-        with open(outpath, 'w') as _f:
+        with open(outpath, 'wb') as _f:
             pickle.dump(outcomes, _f)
 
 
