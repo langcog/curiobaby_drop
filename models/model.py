@@ -264,7 +264,7 @@ def get_support(d):
     also supported by the floor.  
     """
     c_ids = get_collision_ids(d)
-    c_ids_env = get_collision_ids(d, collision_key='env_collision')
+    c_ids_env = get_collision_ids(d, collision_key='env_collisions')
     support = ((len(c_ids[-2]) == 2) and (len(c_ids_env[-2]) <= 1))
     return support  
 
