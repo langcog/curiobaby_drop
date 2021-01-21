@@ -1,5 +1,14 @@
 import numpy as np
+import h5py
+import os
+try:
+    import cPickle as pickle
+except:
+    import pickle
 
+from experimental import (SCENARIOS, 
+                          scenario_pathname,
+                          get_drop_target_pairs)
 
 ################
 #####BASICS#####
@@ -20,7 +29,7 @@ class CuriosityBinaryChoice(object):
         if curiosity_kwargs is None:
             curiosity_kwargs = {}
         if linking_kwargs is None:
-            lining_kwargs = {}
+            linking_kwargs = {}
         self.curiosity_function = curiosity_function
         self.linking_function = linking_function
         self.curiosity_kwargs = curiosity_kwargs
@@ -170,19 +179,20 @@ def obj_final_position_std(data, objects=None):
     return total_std
 
 
+def get_radii(data, objects=None):
+    """helper function"""
+    object_inds = get_object_inds(objects)
+    positions = get_positions(data, object_inds=object_inds)
+    radii = [np.sqrt((pos**2).sum(axis=2)) for pos in positions]
+    return radii
+
+
 def avg_final_radius(data, objects=None):
     """model expressing avg final radius of objects
        mean is taken over trials and objects of radius of objects at last time point
     """
     radii = get_radii(data, objects=objects)
     return np.mean([rad[-1].mean() for rad in radii])
-
-
-def get_radii(data, objects=None):
-    object_inds = get_object_inds(objects)
-    positions = get_positions(data, object_inds=object_inds)
-    radii = [np.sqrt((pos**2).sum(axis=2)) for pos in positions]
-    return radii
 
 
 def avg_max_radius(data, objects=None):
@@ -286,5 +296,55 @@ def support_std(data):
     return np.sqrt(m * (1 - m))
 
 
+#=====
+model_funcs = [avg_len, 
+               len_std,
+               len_inverse_sharpe_ratio,
+               (obj_final_position_std, {'objects': 'drop'}),
+               (obj_final_position_std, {'objects': 'target'}),
+               (avg_final_radius, {'objects': 'drop'}),
+               (avg_final_radius, {'objects': 'target'}),
+               (avg_max_radius, {'objects': 'drop'}),
+               (avg_max_radius, {'objects': 'target'}),
+               (max_radius_std, {'objects': 'drop'}),
+               (max_radius_std, {'objects': 'target'}),
+               (normed_velocity_std_after_first_collision, {'objects': 'drop'}),
+               (normed_velocity_std_after_first_collision, {'objects': 'target'}),
+               support_probability,
+               support_std
+              ]
+
+
+def get_stats(dirn):
+    L = os.listdir(dirn)
+    paths = [os.path.join(dirn, l) for l in L]
+    data = [h5py.File(path, mode='r') for path in paths]
+    outcomes = {}
+    for m in model_funcs:
+        if hasattr(m, '__len__'):
+            mf, kwargs = m
+            argk = list(kwargs.keys())
+            argk.sort()
+            argstr = '_'.join([str(k) + '=' + str(arg[k]) for k in argk])
+            name = mf.__name__ + '_' + argstr
+        else:
+            mf = m
+            kwargs = {}
+            name = mf.__name__
+        outcomes[name] = mf(data, **kwargs)
+    return outcomes
+
+
+def get_all_stats(base_dir, out_dir):
+    if not os.path.exists(out_dir):
+        os.mkdirs(out_dir)
+    scenarios = get_drop_target_pairs(SCENARIOS)
+    for ((sd, st), tp) in scenarios:
+        sname = scenario_pathname(sd, st, tp)
+        path = os.path.join(base_dir, sname)
+        outcomes = get_stats(path)
+        outpath = os.path.join(out_dir, sname)
+        with open(outpath, 'w') as _f:
+            pickle.dump(outcomes, _f)
 
 
