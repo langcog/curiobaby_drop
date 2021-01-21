@@ -6,6 +6,10 @@ import drop #how are we dealing with the fact that we might want to reuse contro
 
 OBJECT_INFO = {}
 
+
+#OCT_ROT = 90
+OCT_ROT = 0
+
 CONTAIN_SCENARIOS = [(('torus', {"x": 0, "y": 0, "z": 0}, 0.8), 
                       [('cone', {"x": 0, "y": 0, "z": 0}, 0.9), 
                        ('dumbbell', {"x": 0, "y": 0, "z": 0}, 0.5)]),
@@ -14,7 +18,7 @@ CONTAIN_SCENARIOS = [(('torus', {"x": 0, "y": 0, "z": 0}, 0.8),
                        ('triangular_prism', {"x": 0, "y": 90., "z": 0}, 1)]),
                      (('cone', {"x": 0, "y": 0, "z": 180}, 0.9),
                       [('torus', {"x": 0, "y": 0, "z": 0}, 0.8), 
-                      ('octahedron', {"x": 0, "y": 0, "z": 90}, 1)]),
+                      ('octahedron', {"x": 0, "y": 0, "z": OCT_ROT}, 1)]),
                      (('dumbbell', {"x": 90, "y": 0, "z": 0}, .5), 
                       [('pipe', 
                         {"x": 0, "y": 0, "z": 0}, 
@@ -36,7 +40,7 @@ CONTAIN_SCENARIOS = [(('torus', {"x": 0, "y": 0, "z": 0}, 0.8),
                         {"x": 0, "y": 0, "z": 0}, 
                         {"x": 1, "y": 0.35, "z": 1}),
                       [('cone', {"x": 0, "y": 0, "z": 0}, 0.9), 
-                      ('octahedron', {"x": 0, "y": 0, "z": 90.}, 1)]),
+                      ('octahedron', {"x": 0, "y": 0, "z": OCT_ROT}, 1)]),
                      (('pyramid', {"x": 0, "y": 0, "z": 180}, 1), 
                       [('torus', {"x": 0, "y": 0, "z": 0}, 0.8),
                        ('dumbbell', {"x": 0, "y": 0, "z": 0}, 0.5)]),
@@ -69,7 +73,7 @@ SUPPORT_SCENARIOS = [
                         {"x": 0, "y": 0, "z": 0}, 
                         {"x": 1, "y": 0.7, "z": 1}),
                       'octahedron']),
-                     (('octahedron', {"x": 0, "y": 0, "z": 90.}, 1), 
+                     (('octahedron', {"x": 0, "y": 0, "z": OCT_ROT}, 1), 
                      [('pentagon', 
                         {"x": 0, "y": 0, "z": 0}, 
                         {"x": 1, "y": 0.7, "z": 1}), 
@@ -174,7 +178,7 @@ def main(output_dir, num, launch_build=True, port=1071):
                        seed=0,
                        height_range=[2.1, 2.1],
                        drop_scale_range=drop_scale,
-                       drop_jitter=0.4,
+                       drop_jitter=0.35,
                        drop_rotation_range=drop_rotation_range,
                        drop_objects = [drop_obj],
                        target_objects = [target_obj],
