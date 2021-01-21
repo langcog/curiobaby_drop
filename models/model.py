@@ -325,7 +325,7 @@ def get_stats(dirn):
             mf, kwargs = m
             argk = list(kwargs.keys())
             argk.sort()
-            argstr = '_'.join([str(k) + '=' + str(argk[k]) for k in argk])
+            argstr = '_'.join([str(k) + '=' + str(kwargs[k]) for k in argk])
             name = mf.__name__ + '_' + argstr
         else:
             mf = m
