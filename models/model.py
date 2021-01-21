@@ -361,7 +361,7 @@ def get_all_stats(base_dir, out_dir):
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
     scenarios = get_drop_target_pairs(SCENARIOS)
-    pool = multiprocessing.Pool()
+    pool = Pool()
     for i in range(len(scenarios)):
         ((sd, st), tp) = scenarios[i]
         pool.apply_async(get_and_save_stats, (sd, st, tp, base_dir, out_dir))
