@@ -337,7 +337,7 @@ def get_stats(dirn):
 
 def get_all_stats(base_dir, out_dir):
     if not os.path.exists(out_dir):
-        os.mkdirs(out_dir)
+        os.makedirs(out_dir)
     scenarios = get_drop_target_pairs(SCENARIOS)
     for ((sd, st), tp) in scenarios:
         sname = scenario_pathname(sd, st, tp)
