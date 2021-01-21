@@ -368,6 +368,7 @@ def get_all_stats(base_dir, out_dir):
         out = pool.apply_async(get_and_save_stats, (sd, st, tp, base_dir, out_dir))
         outs.append(out)
     done = [out.get() for out in outs]
+    pool.close()
     pool.join()
 
 
