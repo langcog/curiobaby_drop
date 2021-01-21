@@ -306,7 +306,7 @@ def nonlinearity_of_support_dependence_on_initial_pos(data):
     cls = svm.LinearSVC()
     cls.fit(radii, supports)
     preds = cls.predict(radii)
-    return sk_metrics.f1_score(preds, supports), preds, support
+    return sk_metrics.f1_score(preds, supports), preds, supports
 
 
 ########################
