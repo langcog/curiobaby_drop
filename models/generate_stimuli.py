@@ -172,7 +172,7 @@ def main(output_dir, num, launch_build=True, port=1071):
                        port=port,
                        randomize=0,
                        seed=0,
-                       height_range=[2.6, 2.6],
+                       height_range=[2.1, 2.1],
                        drop_scale_range=drop_scale,
                        drop_jitter=0.4,
                        drop_rotation_range=drop_rotation_range,
