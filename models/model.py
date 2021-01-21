@@ -299,14 +299,14 @@ def support_std(data):
     return np.sqrt(m * (1 - m))
 
 
-def nonlinearity_of_support_dependence_on_initial_pos(data):
+def sharpness_of_support_posjitter_response(data):
     supports = list(map(get_support, data))
     radfunc = lambda x: np.linalg.norm(x['static']['drop_position'][[0, 2]])
     radii = np.array(list(map(radfunc, data))).reshape((-1, 1))
     cls = svm.LinearSVC()
     cls.fit(radii, supports)
     preds = cls.predict(radii)
-    return sk_metrics.f1_score(preds, supports), preds, supports
+    return sk_metrics.f1_score(preds, supports)
 
 
 ########################
@@ -327,7 +327,8 @@ model_funcs = [avg_len,
                (normed_velocity_std_after_first_collision, {'objects': 'drop'}),
                (normed_velocity_std_after_first_collision, {'objects': 'target'}),
                support_probability,
-               support_std
+               support_std,
+               sharpness_of_support_posjitter_response
               ]
 
 
