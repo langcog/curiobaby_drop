@@ -331,6 +331,7 @@ def get_stats(dirn):
             mf = m
             kwargs = {}
             name = mf.__name__
+        print('... getting %s' % name)
         outcomes[name] = mf(data, **kwargs)
     return outcomes
 
