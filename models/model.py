@@ -269,7 +269,7 @@ def get_support(d):
     return support  
 
 
-def percentage_supports(data):
+def support_probability(data):
     """model expressing empirical likelihood of a support relationship
     arising at the end of a trial
     """
@@ -281,8 +281,7 @@ def support_std(data):
     """model expressing empirical standard deviation in the distribution of
     whether a support relationship will arise at the end of a trial
     """
-    supports = list(map(get_support, data))
-    m = np.mean(supports)
+    m = support_probability(data)
     #std for binomial variable is sqrt(mean * (1 - mean))
     return np.sqrt(m * (1 - m))
 
