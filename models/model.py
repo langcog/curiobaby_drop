@@ -1,6 +1,7 @@
 import numpy as np
 import h5py
 import os
+from multiprocessing import Pool
 try:
     import cPickle as pickle
 except:
@@ -333,28 +334,37 @@ def get_stats(dirn):
             name = mf.__name__
         print('... getting %s' % name)
         outcomes[name] = mf(data, **kwargs)
+    for d in data:
+        d.close()
     return outcomes
+
+
+def get_and_save_stats(sd, st, tp, base_dir, out_dir):
+    if isinstance(sd, str):
+        drop_obj = sd 
+    else:
+        drop_obj = sd[0]
+    if isinstance(st, str):
+        target_obj = st
+    else:
+        target_obj = st[0]
+    sname = scenario_pathname(drop_obj, target_obj, tp)
+    path = os.path.join(base_dir, sname)
+    print('Getting stats for %s' % sname)
+    outcomes = get_stats(path)
+    outpath = os.path.join(out_dir, sname)
+    with open(outpath, 'wb') as _f:
+        pickle.dump(outcomes, _f)
 
 
 def get_all_stats(base_dir, out_dir):
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
     scenarios = get_drop_target_pairs(SCENARIOS)
-    for ((sd, st), tp) in scenarios:
-        if isinstance(sd, str):
-            drop_obj = sd 
-        else:
-            drop_obj = sd[0]
-        if isinstance(st, str):
-            target_obj = st
-        else:
-            target_obj = st[0]
-        sname = scenario_pathname(drop_obj, target_obj, tp)
-        path = os.path.join(base_dir, sname)
-        print('Getting stats for %s' % sname)
-        outcomes = get_stats(path)
-        outpath = os.path.join(out_dir, sname)
-        with open(outpath, 'wb') as _f:
-            pickle.dump(outcomes, _f)
+    pool = multiprocessing.Pool()
+    for i in range(len(scenarios)):
+        ((sd, st), tp) = scenarios[i]
+        pool.apply_async(get_and_save_stats, (sd, st, tp, base_dir, out_dir))
+    pool.join()
 
 
