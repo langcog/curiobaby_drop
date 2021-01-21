@@ -342,6 +342,7 @@ def get_all_stats(base_dir, out_dir):
     for ((sd, st), tp) in scenarios:
         sname = scenario_pathname(sd, st, tp)
         path = os.path.join(base_dir, sname)
+        print('Getting stats for %s' % sname)
         outcomes = get_stats(path)
         outpath = os.path.join(out_dir, sname)
         with open(outpath, 'w') as _f:
