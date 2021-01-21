@@ -239,3 +239,25 @@ def normed_velocity_std_after_first_collision(data, objects=None, window=5):
     return np.sqrt(W.var(axis=0).sum())
 
 
+def get_collision_types(d)
+	fn = d['frames'].keys()
+	fn.sort()
+    ct = [d['frames'][k]['collisions']['states'][:].flatten().tolist() for k in fn]
+    ct1 = np.asarray(list((map(lambda x: x[0].decode('utf-8') if len(x) else '', ct))))
+    return ct1
+
+
+def percentage_stay_collision(data):
+	stays = []
+	for d in data:
+		ct = get_collision_types(d)
+		stay = ct[-2] == 'stay'
+		stays.append(stay)
+	stays = np.array(stays)
+	return np.mean(stays)
+
+
+
+
+
+
