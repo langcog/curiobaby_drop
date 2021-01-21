@@ -6,6 +6,8 @@ try:
     import cPickle as pickle
 except:
     import pickle
+import sklearn.svm as svm
+import sklearn.metrics as sk_metrics
 
 from experimental import (SCENARIOS, 
                           scenario_pathname,
@@ -184,7 +186,7 @@ def get_radii(data, objects=None):
     """helper function"""
     object_inds = get_object_inds(objects)
     positions = get_positions(data, object_inds=object_inds)
-    radii = [np.sqrt((pos**2).sum(axis=2)) for pos in positions]
+    radii = [np.sqrt(((pos**2)[:, :, [0, 2]]).sum(axis=2)) for pos in positions]
     return radii
 
 
@@ -297,7 +299,20 @@ def support_std(data):
     return np.sqrt(m * (1 - m))
 
 
-#=====
+def nonlinearity_of_support_dependence_on_initial_pos(data):
+    supports = list(map(get_support, data))
+    radfunc = lambda x: np.linalg.norm(x['static']['drop_position'][[0, 2]])
+    radii = np.array(list(map(radfunc, data))).reshape((-1, 1))
+    cls = svm.LinearSVC()
+    cls.fit(radii, supports)
+    preds = cls.predict(radii)
+    return sk_metrics.f1_score(preds, supports)
+
+
+########################
+#####INFRASTRUCTURE#####
+########################
+
 model_funcs = [avg_len, 
                len_std,
                len_inverse_sharpe_ratio,
@@ -365,10 +380,13 @@ def get_all_stats(base_dir, out_dir):
     outs = []
     for i in range(len(scenarios)):
         ((sd, st), tp) = scenarios[i]
-        out = pool.apply_async(get_and_save_stats, (sd, st, tp, base_dir, out_dir))
+        out = pool.apply_async(get_and_save_stats, 
+                               (sd, st, tp, base_dir, out_dir))
         outs.append(out)
     done = [out.get() for out in outs]
     pool.close()
     pool.join()
+
+
 
 
