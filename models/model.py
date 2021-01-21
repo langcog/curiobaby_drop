@@ -340,7 +340,15 @@ def get_all_stats(base_dir, out_dir):
         os.makedirs(out_dir)
     scenarios = get_drop_target_pairs(SCENARIOS)
     for ((sd, st), tp) in scenarios:
-        sname = scenario_pathname(sd, st, tp)
+        if isinstance(sd, str):
+            drop_obj = sd 
+        else:
+            drop_obj = sd[0]
+        if isinstance(st, str):
+            target_obj = st
+        else:
+            target_obj = st[0]
+        sname = scenario_pathname(drop_obj, target_obj, tp)
         path = os.path.join(base_dir, sname)
         print('Getting stats for %s' % sname)
         outcomes = get_stats(path)
