@@ -172,15 +172,15 @@ def main(output_dir, num, launch_build=True, port=1071):
                        port=port,
                        randomize=0,
                        seed=0,
-                       height_range=[1.9, 1.9],
+                       height_range=[2.6, 2.6],
                        drop_scale_range=drop_scale,
-                       drop_jitter=0.2,
+                       drop_jitter=0.3,
                        drop_rotation_range=drop_rotation_range,
                        drop_objects = [drop_obj],
                        target_objects = [target_obj],
                        target_scale_range=target_scale,
                        target_rotation_range=target_rotation,
-                       camera_radius=1.5,
+                       camera_radius=2.5,
                        camera_min_angle=0,
                        camera_max_angle=0)
 
