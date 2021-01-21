@@ -95,7 +95,7 @@ def get_last_frame_positions(data):
     posvecs = []
     for d in data:
         lf = get_last_frame_id(d)
-        posvec = np.asarray(f['frames'][lf]['objects']['positions'][:])
+        posvec = np.asarray(d['frames'][lf]['objects']['positions'][:])
         posvecs.append(posvec)
     #shape is (num_trials, num_objects, 3)
     posvecs = np.array(posvecs)
