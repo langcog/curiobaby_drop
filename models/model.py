@@ -238,7 +238,7 @@ def normed_velocity_std_after_first_collision(data, objects=None, window=5):
 
 
 def get_collision_types(d, collision_key='collisions'):
-    fn = d['frames'].keys()
+    fn = list(d['frames'].keys())
     fn.sort()
     ct = [d['frames'][k][collision_key]['states'][:].flatten().tolist() for k in fn]
     ct1 = np.asarray(list((map(lambda x: x[0].decode('utf-8') if len(x) else '', ct))))
@@ -249,7 +249,7 @@ def get_collision_ids(d, collision_key='collisions'):
     """
     helper function returning the ids of objects in collisions at each frame within a trial
     """
-    fn = d['frames'].keys()
+    fn = list(d['frames'].keys())
     fn.sort()
     ids = [np.unique(d['frames'][k][collision_key]['object_ids'][:]) for k in fn]
     return ids
