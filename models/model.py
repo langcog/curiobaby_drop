@@ -84,7 +84,7 @@ def len_inverse_sharpe_ratio(data):
 def get_last_frame_id(d):
     """helper function getting last frame number of trial
     """
-    fnames = list(map(int, list(d['frames'].keys())))
+    fnames = list(d['frames'].keys())
     fnames.sort()
     return fnames[-1]
 
