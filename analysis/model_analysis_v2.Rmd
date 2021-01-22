@@ -30,7 +30,9 @@ mdat <- mdat %>% rename(drop = drop_object,
                         target = target_object,
                         relation = condition) %>%
   mutate(drop = replace(drop, drop=="triangular_prism", "trig prism"),
-         target = replace(target, target=="triangular_prism", "trig prism"))
+         target = replace(target, target=="triangular_prism", "trig prism")) %>%
+  select(-`obj_final_position_std_objects=drop`, -`obj_final_position_std_objects=target`)
+# these cols are all 0...
 
 # selects given feature and returns wide df that can be compared with behavioral data
 get_feature_df <- function(mdat, fname) {
@@ -81,13 +83,14 @@ evalFit <- function(feat_df, hum_df, beta) {
 
 require(DEoptim)
 
-feat_names = names(mdat)[1:(ncol(mdat)-3)]
+feat_names = names(mdat)[1:(ncol(mdat)-4)]
 # for each feature, want to fit beta to maximize correlation between human and model choices
 #feat_df <- get_feature_df(mdat, feat_names[1])
 
 adult_fits = list()
 for(feat in feat_names) {
   feat_df <- get_feature_df(mdat, feat)
+  #paste(feat, evalFit(feat_df, adult_trial_agg, 1))
   adult_fits[[feat]] = DEoptim(evalFit, lower=.01, upper=2, DEoptim.control(reltol=.001, NP=20, itermax=50), 
                 feat_df=feat_df, hum_df=adult_trial_agg)
 }
@@ -104,8 +107,42 @@ child_trial_agg <- child_long %>% group_by(relation, drop, target) %>% # alt,
 child_fits = list()
 for(feat in feat_names) {
   feat_df <- get_feature_df(mdat, feat)
-  adult_fits[[feat]] = DEoptim(evalFit, lower=.01, upper=2, DEoptim.control(reltol=.001, NP=20, itermax=50), 
+  child_fits[[feat]] = DEoptim(evalFit, lower=.01, upper=2, DEoptim.control(reltol=.001, NP=30, itermax=50), 
                 feat_df=feat_df, hum_df=child_trial_agg)
 }
+```
+
+
+```{r}
+adult_mfit <- tibble()
+child_mfit <- tibble()
+
+for(f in names(adult_fits)) {
+  adult_mfit = bind_rows(adult_mfit, c(feature=f, 
+                                       beta=as.numeric(unlist(adult_fits[[f]]$optim$bestmem)), 
+                                       r=-adult_fits[[f]]$optim$bestval))
+  child_mfit = bind_rows(child_mfit, c(feature=f, 
+                                       beta=as.numeric(unlist(child_fits[[f]]$optim$bestmem)), 
+                                       r=-child_fits[[f]]$optim$bestval))
+}
+
+adult_mfit <- adult_mfit %>% 
+  mutate(beta = as.numeric(beta),
+         r = as.numeric(r)) %>%
+  arrange(desc(r))
+
+adult_mfit
+```
+
+```{r children}
+child_mfit <- child_mfit %>% 
+  mutate(beta = as.numeric(beta),
+         r = as.numeric(r)) %>%
+  arrange(desc(r))
+
+child_mfit
+```
+```{r}
+save(mdat, child_mfit, adult_mfit, file=here("models/model_data.RData"))
 ```
 
