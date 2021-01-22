@@ -183,6 +183,14 @@ def obj_final_position_std(data, objects=None):
     return total_std
 
 
+def obj_final_position_invstd(data, objects=None):
+    """
+    model expressing 1 - total std in final positions 
+    of objects (can be subselected for specific object)
+    """
+    return 1 - obj_final_position_std(data, objects=objects)
+
+
 def get_radii(data, objects=None):
     """helper function"""
     object_inds = get_object_inds(objects)
@@ -300,13 +308,13 @@ def support_std(data):
     return np.sqrt(m * (1 - m))
 
 
-def sharpness_of_support_posjitter_response(data):
+def sharpness_of_support_posjitter_response(data, C=1):
     supports = list(map(get_support, data))
     if len(np.unique(supports)) == 1:
         return 0
     radfunc = lambda x: np.linalg.norm(x['static']['drop_position'][[0, 2]])
     radii = np.array(list(map(radfunc, data))).reshape((-1, 1))
-    cls = svm.LinearSVC()
+    cls = svm.LinearSVC(C=C)
     cls.fit(radii, supports)
     preds = cls.predict(radii)
     return sk_metrics.f1_score(preds, supports)
@@ -321,6 +329,8 @@ model_funcs = [avg_len,
                len_inverse_sharpe_ratio,
                (obj_final_position_std, {'objects': 'drop'}),
                (obj_final_position_std, {'objects': 'target'}),
+               (obj_final_position_invstd, {'objects': 'drop'}),
+               (obj_final_position_invstd, {'objects': 'target'}),
                (avg_final_radius, {'objects': 'drop'}),
                (avg_final_radius, {'objects': 'target'}),
                (avg_max_radius, {'objects': 'drop'}),
@@ -332,6 +342,8 @@ model_funcs = [avg_len,
                support_probability,
                support_std,
                sharpness_of_support_posjitter_response
+               (sharpness_of_support_posjitter_response, {'C': 1e-5}),
+               (sharpness_of_support_posjitter_response, {'C': 1e5}),
               ]
 
 
