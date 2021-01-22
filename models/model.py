@@ -392,7 +392,7 @@ def get_object_names(sd, st):
         drop_obj = sd[0]
     if isinstance(st, str):
         target_obj = st
-    else:quit()
+    else:
         target_obj = st[0]
     return drop_obj, target_obj
 
