@@ -301,6 +301,8 @@ def support_std(data):
 
 def sharpness_of_support_posjitter_response(data):
     supports = list(map(get_support, data))
+    if np.unique(supports) == 1:
+        return 0
     radfunc = lambda x: np.linalg.norm(x['static']['drop_position'][[0, 2]])
     radii = np.array(list(map(radfunc, data))).reshape((-1, 1))
     cls = svm.LinearSVC()
@@ -387,7 +389,5 @@ def get_all_stats(base_dir, out_dir):
     done = [out.get() for out in outs]
     pool.close()
     pool.join()
-
-
 
 
