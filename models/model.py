@@ -9,6 +9,7 @@ import h5py
 import pandas as pd
 import sklearn.svm as svm
 import sklearn.metrics as sk_metrics
+import scipy.stats as stats
 
 from experimental import (SCENARIOS, 
                           scenario_pathname,
