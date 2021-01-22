@@ -178,7 +178,7 @@ def obj_final_position_std(data, objects=None):
     object_inds = get_object_inds(objects)
     posvecs = get_last_frame_positions(data)
     if object_inds is not None:
-        posvecs = posvecs[object_inds]
+        posvecs = posvecs[:, object_inds]
     total_std = np.sqrt(posvecs.var(axis=0).sum(axis=0).sum(axis=0))
     return total_std
 
