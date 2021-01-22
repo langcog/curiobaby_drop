@@ -324,7 +324,7 @@ def sharpness_of_support_posjitter_response(data, C=1):
 def nonlinearity_of_support_posjitter_response(data):
     supports = list(map(get_support, data))
     if len(np.unique(supports)) == 1:
-        return 0, 0
+        return {'r': 0, 'pv': 0}
     radfunc = lambda x: np.linalg.norm(x['static']['drop_position'][[0, 2]])
     radii = list(map(radfunc, data))
     out = stats.linregress(radii, supports)
