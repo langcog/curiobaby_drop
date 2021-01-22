@@ -378,7 +378,7 @@ def get_stats(dirn):
             name = mf.__name__
         print('... getting %s' % name)
         result = mf(data, **kwargs)
-        if hasttr(result, 'keys'):
+        if hasattr(result, 'keys'):
             new_d = {name + '_' + k: v for k, v in result.items()}
             outcomes.update(new_d)
         else:
