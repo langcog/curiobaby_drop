@@ -320,6 +320,18 @@ def sharpness_of_support_posjitter_response(data, C=1):
     return sk_metrics.f1_score(preds, supports)
 
 
+def nonlinearity_of_support_posjitter_response(data):
+    supports = list(map(get_support, data))
+    if len(np.unique(supports)) == 1:
+        return 0
+    radfunc = lambda x: np.linalg.norm(x['static']['drop_position'][[0, 2]])
+    radii = list(map(radfunc, data))
+    out = stats.linregress(radii, supports)
+    r = out.value
+    pv = 1 - out.pvalue
+    return {'r': r, 'pv': pv}
+
+
 ########################
 #####INFRASTRUCTURE#####
 ########################
@@ -344,6 +356,7 @@ model_funcs = [avg_len,
                sharpness_of_support_posjitter_response,
                (sharpness_of_support_posjitter_response, {'C': 1e-5}),
                (sharpness_of_support_posjitter_response, {'C': 1e5}),
+               nonlinearity_of_support_posjitter_response
               ]
 
 
@@ -364,7 +377,12 @@ def get_stats(dirn):
             kwargs = {}
             name = mf.__name__
         print('... getting %s' % name)
-        outcomes[name] = mf(data, **kwargs)
+        result = mf(data, **kwargs)
+        if hasttr(result, 'keys'):
+            new_d = {name + '_' + k: v for k, v in result.items()}
+            outcomes.update(new_d)
+        else:
+            outcomes[name] = result
     for d in data:
         d.close()
     return outcomes
