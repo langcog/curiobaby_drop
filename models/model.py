@@ -396,6 +396,7 @@ def collect_stats(dirn, outpath):
     scenarios = get_drop_target_pairs(SCENARIOS)
     records = []
     for i in range(len(scenarios)):
+        print(i)
         ((sd, st), tp) = scenarios[i]
         if isinstance(sd, str):
             drop_obj = sd 
