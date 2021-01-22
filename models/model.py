@@ -292,45 +292,43 @@ def get_support(d):
     return support  
 
 
-def support_probability(data):
+def support(data):
     """model expressing empirical likelihood of a support relationship
     arising at the end of a trial
     """
     supports = list(map(get_support, data))
-    return np.mean(supports)
 
+    #basic statistics
+    m = np.mean(supports)
+    s = np.sqrt(m * (1 - m))
+    result = {'probability': m, 'std': s}
 
-def support_std(data):
-    """model expressing empirical standard deviation in the distribution of
-    whether a support relationship will arise at the end of a trial
-    """
-    m = support_probability(data)
-    #std for binomial variable is sqrt(mean * (1 - mean))
-    return np.sqrt(m * (1 - m))
-
-
-def sharpness_of_support_posjitter_response(data, C=1):
-    supports = list(map(get_support, data))
-    if len(np.unique(supports)) == 1:
-        return 0
-    radfunc = lambda x: np.linalg.norm(x['static']['drop_position'][[0, 2]])
-    radii = np.array(list(map(radfunc, data))).reshape((-1, 1))
-    cls = svm.LinearSVC(C=C)
-    cls.fit(radii, supports)
-    preds = cls.predict(radii)
-    return sk_metrics.f1_score(preds, supports)
-
-
-def nonlinearity_of_support_posjitter_response(data):
-    supports = list(map(get_support, data))
-    if len(np.unique(supports)) == 1:
-        return {'r': 0, 'pv': 0}
+    #sharpness as measured by categorization accuracy
     radfunc = lambda x: np.linalg.norm(x['static']['drop_position'][[0, 2]])
     radii = list(map(radfunc, data))
-    out = stats.linregress(radii, supports)
-    absr = np.abs(out.rvalue)
-    pv = 1 - out.pvalue
-    return {'r': absr, 'pv': pv}
+    radii_rs = np.array(radii).reshape((-1, 1)) 
+    Cs = [1, 1e-5, 1e5]
+    for C in Cs:
+        if len(np.unique(supports)) == 1:
+            score = 0
+        else:
+            cls = svm.LinearSVC(C=C)
+            cls.fit(radii_rs, supports)
+            preds = cls.predict(radii)
+            score = sk_metrics.f1_score(preds, supports)
+        result['response_sharpness_C=%s' % str(C)] = score
+
+    #sharpness as measured by linearity
+    if len(np.unique(supports)) == 1:
+        absr = pv = 0
+    else:
+        out = stats.linregress(radii, supports)
+        absr = np.abs(out.rvalue)
+        pv = 1 - out.pvalue
+    result['response_linearity_r'] = absr
+    result['response_linearity_pv'] = pv
+
+    return result
 
 
 ########################
@@ -352,12 +350,7 @@ model_funcs = [avg_len,
                (max_radius_std, {'objects': 'target'}),
                (normed_velocity_std_after_first_collision, {'objects': 'drop'}),
                (normed_velocity_std_after_first_collision, {'objects': 'target'}),
-               support_probability,
-               support_std,
-               sharpness_of_support_posjitter_response,
-               (sharpness_of_support_posjitter_response, {'C': 1e-5}),
-               (sharpness_of_support_posjitter_response, {'C': 1e5}),
-               nonlinearity_of_support_posjitter_response
+               support
               ]
 
 
