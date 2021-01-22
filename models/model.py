@@ -327,9 +327,9 @@ def nonlinearity_of_support_posjitter_response(data):
     radfunc = lambda x: np.linalg.norm(x['static']['drop_position'][[0, 2]])
     radii = list(map(radfunc, data))
     out = stats.linregress(radii, supports)
-    r = out.value
+    absr = np.abs(out.rvalue)
     pv = 1 - out.pvalue
-    return {'r': r, 'pv': pv}
+    return {'r': absr, 'pv': pv}
 
 
 ########################
