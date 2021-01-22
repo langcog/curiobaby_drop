@@ -314,7 +314,7 @@ def support(data):
         else:
             cls = svm.LinearSVC(C=C)
             cls.fit(radii_rs, supports)
-            preds = cls.predict(radii)
+            preds = cls.predict(radii_rs)
             score = sk_metrics.f1_score(preds, supports)
         result['response_sharpness_C=%s' % str(C)] = score
 
