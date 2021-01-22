@@ -394,7 +394,7 @@ def get_all_stats(base_dir, out_dir):
 
 def collect_stats(dirn, outpath):
     scenarios = get_drop_target_pairs(SCENARIOS)
-    records = {}
+    records = []
     for i in range(len(scenarios)):
         ((sd, st), tp) = scenarios[i]
         if isinstance(sd, str):
