@@ -411,7 +411,7 @@ def collect_stats(dirn, outpath):
             outcomes = pickle.loads(_f.read())
             records.append(outcomes)
     features = pd.DataFrame(records)
-    features.to_csv(outpath, index=False))
+    features.to_csv(outpath, index=False)
 
 
 
