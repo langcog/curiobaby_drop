@@ -409,6 +409,9 @@ def collect_stats(dirn, outpath):
         pth = os.path.join(dirn, sname)
         with open(pth, 'rb') as _f:
             outcomes = pickle.loads(_f.read())
+            outcomes['drop_object'] = drop_obj
+            outcomes['target_object'] = target_obj
+            outcomes['condition'] = tp
             records.append(outcomes)
     features = pd.DataFrame(records)
     features.to_csv(outpath, index=False)
