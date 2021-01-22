@@ -341,7 +341,7 @@ model_funcs = [avg_len,
                (normed_velocity_std_after_first_collision, {'objects': 'target'}),
                support_probability,
                support_std,
-               sharpness_of_support_posjitter_response
+               sharpness_of_support_posjitter_response,
                (sharpness_of_support_posjitter_response, {'C': 1e-5}),
                (sharpness_of_support_posjitter_response, {'C': 1e5}),
               ]
