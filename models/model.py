@@ -359,14 +359,7 @@ def get_stats(dirn):
 
 
 def get_and_save_stats(sd, st, tp, base_dir, out_dir):
-    if isinstance(sd, str):
-        drop_obj = sd 
-    else:
-        drop_obj = sd[0]
-    if isinstance(st, str):
-        target_obj = st
-    else:
-        target_obj = st[0]
+    drop_obj, target_obj = get_object_names(sd, st)
     sname = scenario_pathname(drop_obj, target_obj, tp)
     path = os.path.join(base_dir, sname)
     print('Getting stats for %s' % sname)
@@ -392,19 +385,24 @@ def get_all_stats(base_dir, out_dir):
     pool.join()
 
 
+def get_object_names(sd, st):
+    if isinstance(sd, str):
+        drop_obj = sd 
+    else:
+        drop_obj = sd[0]
+    if isinstance(st, str):
+        target_obj = st
+    else:quit()
+        target_obj = st[0]
+    return drop_obj, target_obj
+
+
 def collect_stats(dirn, outpath):
     scenarios = get_drop_target_pairs(SCENARIOS)
     records = []
     for i in range(len(scenarios)):
         ((sd, st), tp) = scenarios[i]
-        if isinstance(sd, str):
-            drop_obj = sd 
-        else:
-            drop_obj = sd[0]
-        if isinstance(st, str):
-            target_obj = st
-        else:
-            target_obj = st[0]
+        drop_obj, target_obj = get_object_names(sd, st)
         sname = scenario_pathname(drop_obj, target_obj, tp)
         pth = os.path.join(dirn, sname)
         with open(pth, 'rb') as _f:
