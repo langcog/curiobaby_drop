@@ -396,7 +396,6 @@ def collect_stats(dirn, outpath):
     scenarios = get_drop_target_pairs(SCENARIOS)
     records = []
     for i in range(len(scenarios)):
-        print(i)
         ((sd, st), tp) = scenarios[i]
         if isinstance(sd, str):
             drop_obj = sd 
@@ -407,8 +406,8 @@ def collect_stats(dirn, outpath):
         else:
             target_obj = st[0]
         sname = scenario_pathname(drop_obj, target_obj, tp)
-        outpath = os.path.join(dirn, sname)
-        with open(outpath, 'rb') as _f:
+        pth = os.path.join(dirn, sname)
+        with open(pth, 'rb') as _f:
             outcomes = pickle.loads(_f.read())
             records.append(outcomes)
     features = pd.DataFrame(records)
