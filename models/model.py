@@ -90,7 +90,7 @@ def get_last_frame_id(d):
     """
     fnames = list(d['frames'].keys())
     fnames.sort()
-    return fnames[-1]
+    return fnames[-2]
 
 
 def get_last_frame_positions(data):
