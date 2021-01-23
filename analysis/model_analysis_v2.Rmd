@@ -41,7 +41,6 @@ get_feature_df <- function(mdat, fname) {
     arrange(relation,drop)
 }
 
-save(mdat, file=here("models/model_data.RData"))
 ```
 
 # Fit to adult choice proportions
@@ -146,7 +145,7 @@ fit_tab <- child_mfit %>% rename(child_mse = mse, child_beta = beta) %>%
   left_join(adult_mfit %>% rename(adult_mse = mse, adult_beta = beta)) %>% 
   arrange(adult_mse)
 
-knitr::kable(fit_tab, digits = 2)
+knitr::kable(fit_tab, digits = 3)
 ```
 
 
@@ -161,7 +160,7 @@ save(mdat, fits, file=here("models/model_data.RData"))
 ```{r, eval=F}
 fits %>% ggplot(aes(x=beta, y=mse, color=AgeGroup)) +
   #geom_text(aes(label=feature)) + 
-  geom_point() +
+  geom_point(alpha=.5) +
   theme_minimal()
 ```
 So generally, children's choices are best explained by small values of beta (.5, the minimum tested).
