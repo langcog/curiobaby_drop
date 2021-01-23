@@ -30,8 +30,8 @@ mdat <- mdat %>% rename(drop = drop_object,
                         target = target_object,
                         relation = condition) %>%
   mutate(drop = replace(drop, drop=="triangular_prism", "trig prism"),
-         target = replace(target, target=="triangular_prism", "trig prism")) %>%
-  select(-`obj_final_position_std_objects=drop`, -`obj_final_position_std_objects=target`)
+         target = replace(target, target=="triangular_prism", "trig prism")) 
+  #select(-`obj_final_position_std_objects=drop`, -`obj_final_position_std_objects=target`)
 # these cols are all 0...
 
 # selects given feature and returns wide df that can be compared with behavioral data
@@ -58,8 +58,10 @@ adult_trial_agg <- adult_long %>% group_by(relation, drop, target) %>% # alt,
 #  pivot_wider(id_cols = c("drop","relation"), names_from = "target", values_from = chose_target) %>%
 #  arrange(relation,drop)
 
-softmax <- function(weights, beta=1) {
-  num <- exp(beta * weights)
+softmax <- function(weights, beta=1, smooth=1e-7) {
+  weights = weights + smooth
+  probs = (weights / sum(weights)) # normalize first
+  num <- exp(beta * probs)
   return(num / sum(num))
 }
 
@@ -77,8 +79,9 @@ get_model_target_choice_props <- function(feat_df, hum_df, beta) {
 
 evalFit <- function(feat_df, hum_df, beta) {
   hum_df <- get_model_target_choice_props(feat_df, hum_df, beta)
-  r = with(hum_df, cor(chose_target, Model_targ_prop))
-  return(-r) # return negative cor since DEoptim minimizes
+  #r = with(hum_df, cor(chose_target, Model_targ_prop))
+  mse = with(hum_df, sum((chose_target - Model_targ_prop)^2)) / nrow(hum_df)
+  return(mse) # return negative cor since DEoptim minimizes
 }
 
 require(DEoptim)
@@ -91,7 +94,7 @@ adult_fits = list()
 for(feat in feat_names) {
   feat_df <- get_feature_df(mdat, feat)
   #paste(feat, evalFit(feat_df, adult_trial_agg, 1))
-  adult_fits[[feat]] = DEoptim(evalFit, lower=.01, upper=2, DEoptim.control(reltol=.001, NP=20, itermax=50), 
+  adult_fits[[feat]] = DEoptim(evalFit, lower=.5, upper=5, DEoptim.control(reltol=.001, NP=20, itermax=50), 
                 feat_df=feat_df, hum_df=adult_trial_agg)
 }
 ```
@@ -107,7 +110,7 @@ child_trial_agg <- child_long %>% group_by(relation, drop, target) %>% # alt,
 child_fits = list()
 for(feat in feat_names) {
   feat_df <- get_feature_df(mdat, feat)
-  child_fits[[feat]] = DEoptim(evalFit, lower=.01, upper=2, DEoptim.control(reltol=.001, NP=30, itermax=50), 
+  child_fits[[feat]] = DEoptim(evalFit, lower=.5, upper=5, DEoptim.control(reltol=.001, NP=20, itermax=50), 
                 feat_df=feat_df, hum_df=child_trial_agg)
 }
 ```
@@ -120,29 +123,91 @@ child_mfit <- tibble()
 for(f in names(adult_fits)) {
   adult_mfit = bind_rows(adult_mfit, c(feature=f, 
                                        beta=as.numeric(unlist(adult_fits[[f]]$optim$bestmem)), 
-                                       r=-adult_fits[[f]]$optim$bestval))
+                                       mse=adult_fits[[f]]$optim$bestval))
   child_mfit = bind_rows(child_mfit, c(feature=f, 
                                        beta=as.numeric(unlist(child_fits[[f]]$optim$bestmem)), 
-                                       r=-child_fits[[f]]$optim$bestval))
+                                       mse=child_fits[[f]]$optim$bestval))
 }
 
 adult_mfit <- adult_mfit %>% 
   mutate(beta = as.numeric(beta),
-         r = as.numeric(r)) %>%
-  arrange(desc(r))
+         mse = as.numeric(mse)) %>%
+  arrange(mse)
 
-adult_mfit
 ```
 
 ```{r children}
 child_mfit <- child_mfit %>% 
   mutate(beta = as.numeric(beta),
-         r = as.numeric(r)) %>%
-  arrange(desc(r))
+         mse = as.numeric(mse)) %>%
+  arrange(mse)
 
-child_mfit
+fit_tab <- child_mfit %>% rename(child_mse = mse, child_beta = beta) %>%
+  left_join(adult_mfit %>% rename(adult_mse = mse, adult_beta = beta)) %>% 
+  arrange(adult_mse)
+
+knitr::kable(fit_tab, digits = 2)
 ```
+
+
+
 ```{r}
-save(mdat, child_mfit, adult_mfit, file=here("models/model_data.RData"))
+fits <- child_mfit %>% mutate(AgeGroup = "children") %>% 
+  bind_rows(adult_mfit %>% mutate(AgeGroup = "adults"))
+
+save(mdat, fits, file=here("models/model_data.RData"))
+```
+
+```{r, eval=F}
+fits %>% ggplot(aes(x=beta, y=mse, color=AgeGroup)) +
+  #geom_text(aes(label=feature)) + 
+  geom_point() +
+  theme_minimal()
+```
+So generally, children's choices are best explained by small values of beta (.5, the minimum tested).
+
+
+What do the predicted choice proportions from the best feature for each age group look like?
+
+```{r}
+require(ggpubr)
+
+plot_model_preds <- function(feat_name, fits, hum_data, age="adults") {
+  beta = subset(fits, AgeGroup==age & feature==feat_name)$beta
+  md <- get_model_target_choice_props(get_feature_df(mdat, feat_name), hum_data, beta)
+  md %>% ggplot(aes(x=chose_target, y=Model_targ_prop, color=relation)) +
+    geom_abline(slope=1, intercept=0, linetype="dashed") +
+    geom_point(alpha=.5) + 
+    xlab("Human Choice Probability") + 
+    ylab("Model Choice Probability") +
+    ggtitle(paste0(feat_name,": ",age)) + theme_minimal() + 
+    xlim(0,1) + ylim(0,1)
+}
+
+ad_supp <- plot_model_preds("support_probability", fits, adult_trial_agg, age="adults")
+ch_supp <- plot_model_preds("support_probability", fits, child_trial_agg, age="children")
+
+ggarrange(ad_supp, ch_supp, nrow=1, common.legend = T)
+```
+
+```{r}
+ad <- plot_model_preds("sharpness_of_support_posjitter_response", fits, adult_trial_agg, age="adults")
+ch <- plot_model_preds("sharpness_of_support_posjitter_response", fits, child_trial_agg, age="children")
+
+ggarrange(ad, ch, nrow=1, common.legend = T)
+```
+
+```{r}
+ad <- plot_model_preds("support_std", fits, adult_trial_agg, age="adults")
+ch <- plot_model_preds("support_std", fits, child_trial_agg, age="children")
+
+ggarrange(ad, ch, nrow=1, common.legend = T)
+```
+
+```{r}
+ad <- plot_model_preds("len_inverse_sharpe_ratio", fits, adult_trial_agg, age="adults")
+ch <- plot_model_preds("len_inverse_sharpe_ratio", fits, child_trial_agg, age="children")
+
+ggarrange(ad, ch, nrow=1, common.legend = T)
 ```
 
