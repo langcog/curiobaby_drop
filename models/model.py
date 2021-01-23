@@ -10,6 +10,7 @@ import pandas as pd
 import sklearn.svm as svm
 import sklearn.metrics as sk_metrics
 import scipy.stats as stats
+import matplotlib.pyplot as plt
 
 from experimental import (SCENARIOS, 
                           scenario_pathname,
@@ -421,7 +422,7 @@ def get_object_names(sd, st):
     return drop_obj, target_obj
 
 
-def collect_stats(dirn, outpath):
+def collect_stats(dirn, featpath, figpath):
     scenarios = get_drop_target_pairs(SCENARIOS)
     records = []
     for i in range(len(scenarios)):
@@ -436,8 +437,15 @@ def collect_stats(dirn, outpath):
             outcomes['condition'] = tp
             records.append(outcomes)
     features = pd.DataFrame(records)
-    features.to_csv(outpath, index=False)
-
+    features.to_csv(featpath, index=False)
+    K = list(filter(lambda x: x not in ['drop_object', 'target_object', 'condition'],
+               features.columns))
+    C = np.array([[stats.pearsonr(x[k1], x[k2])[0] for k1 in K] for k2 in K])
+    cbar = plt.matshow(C)
+    plt.colorbar(cbar)
+    plt.xticks(np.arange(C.shape[0]), K, rotation=90)
+    plt.yticks(np.arange(C.shape[0]), K, rotation=0)
+    plt.savefig(figpath)
 
 
 
