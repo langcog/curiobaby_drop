@@ -440,7 +440,8 @@ def collect_stats(dirn, featpath, figpath):
     features.to_csv(featpath, index=False)
     K = list(filter(lambda x: x not in ['drop_object', 'target_object', 'condition'],
                features.columns))
-    C = np.array([[stats.pearsonr(x[k1], x[k2])[0] for k1 in K] for k2 in K])
+    C = np.array([[stats.pearsonr(features[k1],
+                                  features[k2])[0] for k1 in K] for k2 in K])
     cbar = plt.matshow(C)
     plt.colorbar(cbar)
     plt.xticks(np.arange(C.shape[0]), K, rotation=90)
