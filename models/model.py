@@ -11,6 +11,8 @@ import sklearn.svm as svm
 import sklearn.metrics as sk_metrics
 import scipy.stats as stats
 import matplotlib.pyplot as plt
+from matplotlib import rcParams
+rcParams.update({'figure.autolayout': True})
 
 from experimental import (SCENARIOS, 
                           scenario_pathname,
@@ -446,7 +448,7 @@ def collect_stats(dirn, featpath, figpath):
     plt.colorbar(cbar)
     plt.xticks(np.arange(C.shape[0]), K, rotation=90)
     plt.yticks(np.arange(C.shape[0]), K, rotation=0)
-    plt.savefig(figpath)
+    plt.savefig(figpath, bbox_inches='tight')
 
 
 
