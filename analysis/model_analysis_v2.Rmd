@@ -141,7 +141,7 @@ adult_fits = list()
 for(feat in feat_names) {
   feat_df <- get_feature_df(mdat, feat)
   #paste(feat, evalFit(feat_df, adult_trial_agg, 1))
-  adult_fits[[feat]] = DEoptim(evalFit, lower=.5, upper=5, DEoptim.control(reltol=.001, NP=20, itermax=50), 
+  adult_fits[[feat]] = DEoptim(evalFit, lower=.7, upper=5, DEoptim.control(reltol=.001, NP=30, itermax=70), 
                 feat_df=feat_df, hum_df=adult_trial_agg)
 }
 ```
@@ -157,7 +157,7 @@ child_trial_agg <- child_long %>% group_by(relation, drop, target) %>% # alt,
 child_fits = list()
 for(feat in feat_names) {
   feat_df <- get_feature_df(mdat, feat)
-  child_fits[[feat]] = DEoptim(evalFit, lower=.5, upper=5, DEoptim.control(reltol=.001, NP=20, itermax=50), 
+  child_fits[[feat]] = DEoptim(evalFit, lower=.7, upper=5, DEoptim.control(reltol=.001, NP=30, itermax=70), 
                 feat_df=feat_df, hum_df=child_trial_agg)
 }
 ```
@@ -170,9 +170,9 @@ feat_names2 = names(mdat_eng)[5:ncol(mdat_eng)]
 for(feat in feat_names2) {
   feat_df <- get_feature_df(mdat_eng, feat)
   #paste(feat, evalFit(feat_df, adult_trial_agg, 1))
-  adult_fits[[feat]] = DEoptim(evalFit, lower=.5, upper=5, DEoptim.control(reltol=.001, NP=20, itermax=50), 
+  adult_fits[[feat]] = DEoptim(evalFit, lower=.7, upper=5, DEoptim.control(reltol=.001, NP=30, itermax=70), 
                 feat_df=feat_df, hum_df=adult_trial_agg)
-  child_fits[[feat]] = DEoptim(evalFit, lower=.5, upper=5, DEoptim.control(reltol=.001, NP=20, itermax=50), 
+  child_fits[[feat]] = DEoptim(evalFit, lower=.7, upper=5, DEoptim.control(reltol=.001, NP=30, itermax=70), 
                 feat_df=feat_df, hum_df=child_trial_agg)
 }
 
@@ -219,7 +219,7 @@ knitr::kable(fit_tab, digits = 3)
 fits <- child_mfit %>% mutate(AgeGroup = "children") %>% 
   bind_rows(adult_mfit %>% mutate(AgeGroup = "adults"))
 
-save(mdat, fits, file=here("models/model_data.RData"))
+save(mdat, mdat_eng, fits, file=here("models/model_data.RData"))
 ```
 
 ```{r, eval=F}
@@ -237,7 +237,7 @@ What do the predicted choice proportions from the best feature for each age grou
 require(ggpubr)
 
 plot_model_preds <- function(feat_name, fits, hum_data, age="adults", mdat) {
-  beta = subset(fits, AgeGroup==age & feature==feat_name)$beta
+  beta = 1 #subset(fits, AgeGroup==age & feature==feat_name)$beta
   md <- get_model_target_choice_props(get_feature_df(mdat, feat_name), hum_data, beta)
   md %>% ggplot(aes(x=chose_target, y=Model_targ_prop, color=relation)) +
     geom_abline(slope=1, intercept=0, linetype="dashed") +
@@ -283,3 +283,10 @@ ch <- plot_model_preds("len_inverse_sharpe_ratio", fits, child_trial_agg, age="c
 ggarrange(ad, ch, nrow=1, common.legend = T)
 ```
 
+
+```{r}
+ad <- plot_model_preds("avg_final_radius_objects=target", fits, adult_trial_agg, age="adults", mdat)
+ch <- plot_model_preds("avg_final_radius_objects=target", fits, child_trial_agg, age="children", mdat)
+
+ggarrange(ad, ch, nrow=1, common.legend = T)
+```
