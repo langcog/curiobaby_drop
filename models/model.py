@@ -8,6 +8,7 @@ import numpy as np
 import h5py
 import pandas as pd
 import sklearn.svm as svm
+from sklearn.model_selection import GridSearchCV
 import sklearn.metrics as sk_metrics
 import scipy.stats as stats
 import matplotlib.pyplot as plt
@@ -308,7 +309,7 @@ def support(data):
     radfunc = lambda x: np.linalg.norm(x['static']['drop_position'][[0, 2]])
     radii = list(map(radfunc, data))
     radii_rs = np.array(radii).reshape((-1, 1)) 
-    Cs = [1, 1e-5, 1e5]
+    Cs = [1, 1e-1, 1e1, 1e-2, 1e2, 1e-3, 1e3, 1e-4, 1e4, 1e-5, 1e5]
     for C in Cs:
         if len(np.unique(supports)) == 1:
             score = 0
@@ -318,6 +319,13 @@ def support(data):
             preds = cls.predict(radii_rs)
             score = sk_metrics.f1_score(preds, supports)
         result['response_sharpness_C=%s' % str(C)] = score
+    svc = svm.LinerSVC()
+    cls = GridSearchCV(svc, {'C': Cs})
+    cls.fit(radii_rs, supports)
+    preds = cls.predict(radii_rs)
+    score = sk_metrics.f1_score(preds, supports)
+    best_C = cls.best_params_['C']
+    result['response_sharpness_GridSearchCV_C=%s' % str(C)] = score
 
     #sharpness as measured by linearity
     if len(np.unique(supports)) == 1:
