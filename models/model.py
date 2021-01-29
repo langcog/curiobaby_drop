@@ -321,7 +321,7 @@ def support(data):
             preds = cls.predict(radii_rs)
             score = sk_metrics.f1_score(preds, supports)
         result['response_sharpness_C=%s' % str(C)] = score
-    svc = svm.LinerSVC()
+    svc = svm.LinearSVC()
     cls = GridSearchCV(svc, {'C': Cs})
     cls.fit(radii_rs, supports)
     preds = cls.predict(radii_rs)
