@@ -325,7 +325,7 @@ def support(data):
     preds = cls.predict(radii_rs)
     score = sk_metrics.f1_score(preds, supports)
     best_C = cls.best_params_['C']
-    result['response_sharpness_GridSearchCV_C=%s' % str(C)] = score
+    result['response_sharpness_GridSearchCV_C=%s' % str(best_C)] = score
 
     #sharpness as measured by linearity
     if len(np.unique(supports)) == 1:
