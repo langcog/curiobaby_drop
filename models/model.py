@@ -298,6 +298,7 @@ def support(data):
     """model expressing empirical likelihood of a support relationship
     arising at the end of a trial
     """
+    print('... getting supports')
     supports = list(map(get_support, data))
 
     #basic statistics
@@ -306,6 +307,7 @@ def support(data):
     result = {'probability': m, 'std': s}
 
     #sharpness as measured by categorization accuracy
+    print('... getting svc results')
     radfunc = lambda x: np.linalg.norm(x['static']['drop_position'][[0, 2]])
     radii = list(map(radfunc, data))
     radii_rs = np.array(radii).reshape((-1, 1)) 
@@ -313,21 +315,35 @@ def support(data):
     for C in Cs:
         if len(np.unique(supports)) == 1:
             score = 0
+            acc = 0
         else:
+            print('... getting svc results C = %s' % str(C))
             cls = svm.LinearSVC(C=C)
             cls.fit(radii_rs, supports)
             preds = cls.predict(radii_rs)
             score = sk_metrics.f1_score(preds, supports)
+            acc = sk_metrics.accuracy_score(preds, supports)
         result['response_sharpness_C=%s' % str(C)] = score
-    svc = svm.LinearSVC()
-    cls = GridSearchCV(svc, {'C': Cs})
-    cls.fit(radii_rs, supports)
-    preds = cls.predict(radii_rs)
-    score = sk_metrics.f1_score(preds, supports)
-    best_C = cls.best_params_['C']
-    result['response_sharpness_GridSearchCV_C=%s' % str(best_C)] = score
+        result['response_sharpness_accuracy_C=%s' str(C)] = acc
+    print('... getting gridsearch svc results')
+    if len(np.unique(supports)) == 1:
+        score = 0
+        acc = 0
+        result['response_sharpness_GridSearchCV'] = score
+        result['response_sharpness_accuacy_GridSearchCV'] = acc
+    else:
+        svc = svm.LinearSVC()
+        cls = GridSearchCV(svc, {'C': Cs})
+        cls.fit(radii_rs, supports)
+        preds = cls.predict(radii_rs)
+        score = sk_metrics.f1_score(preds, supports)
+        acc = sk_metrics.accuracy_score(preds, supports)
+        best_C = cls.best_params_['C']
+        result['response_sharpness_GridSearchCV_C=%s' % str(best_C)] = score
+        result['response_sharpness_accuacy_GridSearchCV_C=%s' % str(best_C)] = acc
 
     #sharpness as measured by linearity
+    print('... getting linearity results')
     if len(np.unique(supports)) == 1:
         absr = pv = 0
     else:
