@@ -67,11 +67,49 @@ age <- child_long %>% distinct(ID, Age) %>% group_by(Age) %>%
 
 # Introduction 
 
-<!-- Curiosity is important... end with core question about what gives rise to curiosity. -->
 Curiosity is a hallmark aspect of human intelligence. 
 From infants exploring the objects in their environment to scientists exploring the frontiers of our solar system, humans are highly motivated to seek out new knowledge and experiences. 
 However, although such exploratory behavior has long been recognized as a critical component of human learning [@james1983talks] and cognitive development [@Gopnik2009; @Piaget1952], formal theories that explain human curiosity and how it drives exploratory behavior have remained elusive [@Kidd2015]. 
 Moreover, extant theories have rarely provided quantitatively precise enough predictions to be directly compared to empirical measurements of curiosity-driven behavior in humans.
+
+
+The goal of the current paper is to help close this gap by proposing a novel paradigm to advance our theoretical understanding of curiosity, specifically within the domain of physical object interactions [@kubricht2017intuitive].
+First, we present an empirical investigation of the pattern of actions taken by children and adults in a novel physical exploration task. 
+We then present a set of heuristic models of curiosity based on a variety of metrics of simulated interactions (e.g., measuring likelihood of a dropped object coming to rest on a target object), and test the degree to which these features predict children and adults' behaviors in the same task.
+<!-- Finally, we evaluate the quantitative correspondence between the exploratory actions taken by an artificial agent that instantiates our computational theory and those taken by human children on the same set of tasks.  -->
+
+We take inspiration from a large body of prior work in developmental psychology investigating the development of knowledge about physical objects, their properties, and how they interact [@hespos2012physics; @smith2018developing; @Baillargeon2007]. 
+Children both spend a remarkably amount of time across exploring how different objects and surfaces interact during naturalistic play [@fenson1976] and spend longer time exploring objects that appear to violate physical laws (e.g., an object that appears to pass through a wall; @Stahl2015; @Baillargeon2007).  
+ In other words, children seem to actively learn about physical interactions by intervening on the world and observing the consequences of their actions [@needham2000improvements; @Gopnik2009; @gureckis2012self]. 
+However, relatively little work has examined what types of physical interactions children are most interested in testing, or linked children's actions to formal theories of physical interactions or exploratory behavior.
+Instead, most work that has investigated exploratory behavior in children has done so by examining how they play with relatively complex objects -- for example, documenting the number of functions discovered while playing with a novel toy [e.g., @Cook2011; @Bonawitz2012; @Gweon2014].  
+We developed a novel physical exploration task in which children, adults, or AI agents choose which series of physical experiments to perform and observe the results of each in real time.
+
+
+<!-- High-level statement of our approach -->
+In sum, this paper presents a paradigm and model for testing theories of curiosity about physical interactions. 
+<!-- and defining its role in guiding the development of knowledge about the physical world.  -->
+First, we measured adults' and children's (3-7 years of age) preferences in a novel physical exploration task; participants were asked to choose one of two objects (e.g., a sphere, a dumbbell, see Figure 1) to drop onto a target object (e.g., a pyramid) with the goal of the creating the most interesting physical interaction (see Figure 2). 
+We then explore the predictive power of a variety of heuristic models of curiosity that operate on simulations of this same task with these same objects in a 3D environment. 
+We propose that using task-performing computational models and detailed measurement of human action selection on the same tasks has the promise to lead to more robust and precise theories of our curiosity about the physical world.
+
+<!-- presents learners (children or the agent) with a set of objects from which they can select one to drop in a bin containing a set of target objects, with the potential to create one or more collisions during the drop. -->
+
+<!-- What we've learned from prior theoretical work, and how it falls short -->
+<!-- A limitation of past theories of curiosity is that they are large part verbal descriptions, without formal, testable, mechanisms. -->
+<!-- An exception to this: @Schmidhuber2010 and @Oudeyer2013 --similar but different, and critically not evaluated against same children's behavior in the same situations -->
+
+<!-- What we've learned from prior behavioral work, and how our approach is different -->
+<!-- Looking time people: @Baillargeon2007 and other studies of infants' surprisal at physical events (occlusion, containment,  -->
+<!-- Ullman -- not about curiosity, but about intuitive physics learning from observation in simplified 2D domains (e.g., colliding hockey pucks)  -->
+
+<!-- Highlight main contributions of the paper -->
+<!-- One rich domain that young children are in the midst of learning about is the properties and affordances of physical objects.  -->
+<!-- A study of 9- to 16-month-olds found that infants' violation of expectations about a novel toy's hidden properties (e.g., making a sound) drives them to explore similar toys for longer [@Baldwin1993]. -->
+
+
+
+<!-- OLD INTRO: delete all?
 
 The goal of the current paper is to help close this gap by proposing a framework for advancing our theoretical understanding of curiosity. 
 First, we present an empirical investigation of the pattern of actions taken by children and adults in a novel physical exploration task. 
@@ -86,27 +124,12 @@ Moreover, these studies have yet to directly constrain theories that predict whi
 What both of the standard looking-time and toy-exploration measures fail to capture when characterizing children's curiosity are the ways in which children actively learn by intervening on the world and observing the consequences of their actions [@Gopnik2009; @gureckis2012self]. 
 To address these limitations, we developed a novel physical exploration task in which children, adults, or AI agents choose which series of physical experiments to perform and observe the results of each in real time. 
 
-<!-- High-level statement of our approach -->
+
 In sum, this paper presents a paradigm for testing and building theories of curiosity, and defining its role in guiding the development of knowledge about the physical world. 
 We present a study that measures adults' (Experiment 1) and children's (Experiment 2) preferences in a novel physical exploration task, a set of 20 heuristic models of curiosity that operate on simulations of this same task in a 3D environment, and comparisons between the preferences of children, adults, and these heuristic models on the same set of trials.
 Overall, our approach of coordinating the development of task-performing computational models and detailed measurement of human action selection on the same tasks has the promise to lead to more robust and precise theories of how curiosity guides cognitive development.
+-->
 
-<!-- presents learners (children or the agent) with a set of objects from which they can select one to drop in a bin containing a set of target objects, with the potential to create one or more collisions during the drop. -->
-
-<!-- What we've learned from prior theoretical work, and how it falls short -->
-
-<!-- A limitation of past theories of curiosity is that they are large part verbal descriptions, without formal, testable, mechanisms. -->
-<!-- An exception to this: @Schmidhuber2010 and @Oudeyer2013 --similar but different, and critically not evaluated against same children's behavior in the same situations -->
-
-<!-- What we've learned from prior behavioral work, and how our approach is different -->
-
-<!-- Looking time people: @Baillargeon2007 and other studies of infants' surprisal at physical events (occlusion, containment,  -->
-<!-- Ullman -- not about curiosity, but about intuitive physics learning from observation in simplified 2D domains (e.g., colliding hockey pucks)  -->
-
-<!-- Highlight main contributions of the paper -->
-
-<!-- One rich domain that young children are in the midst of learning about is the properties and affordances of physical objects.  -->
-<!-- A study of 9- to 16-month-olds found that infants' violation of expectations about a novel toy's hidden properties (e.g., making a sound) drives them to explore similar toys for longer [@Baldwin1993]. -->
 
 <!-- move this paragraph to GD if we want to discuss goals?
 ## Computational Models of Curiosity
@@ -258,6 +281,8 @@ chtab <- xtable::xtable(trial_tab, digits=2,
 
 print(chtab, type="latex", comment = F, include.rownames = F, table.placement = "H")
 ```
+
+<!-- Maybe code the type of goals stated by the parents? -->
 
 
 # Experiment 2: Children
@@ -424,10 +449,8 @@ ggplot(uniq, aes(x=Age_Group, y=mean)) + geom_point() +
 ```{r load-model-data}
 load(here("models/model_data.RData")) # mdat, mdat_eng, fits
 ```
-
-Can children's and adults' preferences be predicted by heuristic models of the simulated physical interactions?
-Using a physics engine and 3D models of the objects we showed to participants, we constructed a simulation of each trial of the experiment.
-For each trial's the two possible drop object choices, we ran 100 simulated drops, and for each drop calculated a variety of features measuring the state of the model after the drop was completed.
+Using a physics engine and 3D models of the objects that were shown to participants, we constructed a simulation of each trial of the experiment and attempted to predict children's and adults' choices using a variety of heuristic models of the simulated physical interactions.
+For each trial's two possible drop object choices, we ran 250 simulated drops, and for each drop calculated a variety of features measuring the state of the model after the drop was completed.
 We selected features that we thought may provide good metrics for what people would found interesting. 
 For example, we collected for each drop the mean length of time before both objects come to rest (*avg_len*), as well as the standard deviation (SD) of that time (*len_std*).
 Some features were calculated separately for drop and target objects, such as: the SD of the object's final position (*obj_final_position_std_objects*) as well as the inverse of that (*obj_final_position_invstd_objects*), the mean final distance from the drop location (*avg_final_radius_objects*), the maximum final distance from the drop location (*avg_max_radius_objects*), the ... (*max_radius_std_objects*), ... (*normed_velocity_std_after_first_collision_objects*)
