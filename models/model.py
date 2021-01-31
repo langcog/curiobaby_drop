@@ -347,13 +347,13 @@ def get_splits(n, k, seed=0):
     splits = []
     for i in range(k):
         p = rng.permutation(n)
-        lsplit = p[: n / 2]
-        rsplit = p[n / 2: ]
+        lsplit = p[: n // 2]
+        rsplit = p[n // 2: ]
         splits.append((lsplit, rsplit))
     return splits
 
 
-def get_result(mf, data, kwargs, splits):
+def get_result(mf, data, kwargs, name, splits):
     output = mf(data, **kwargs)
     if hasattr(output, 'keys'):
         result = {name + '_' + k: {'all': v, 'splits': []} for k, v in output.items()}
@@ -377,7 +377,7 @@ def get_stats(dirn, num_splits=100):
     paths = [os.path.join(dirn, l) for l in L]
     data = [h5py.File(path, mode='r') for path in paths]
     outcomes = {}
-    splits = get_splits(len(data), num_splits=num_splits)
+    splits = get_splits(len(data), num_splits)
     for m in model_funcs:
         if hasattr(m, '__len__'):
             mf, kwargs = m
@@ -390,25 +390,25 @@ def get_stats(dirn, num_splits=100):
             kwargs = {}
             name = mf.__name__
         print('... getting %s' % name)
-        result = get_result(mf, data, kwargs, splits)
+        result = get_result(mf, data, kwargs, name, splits)
         outcomes.update(result)
     for d in data:
         d.close()
     return outcomes
 
 
-def get_and_save_stats(sd, st, tp, base_dir, out_dir):
+def get_and_save_stats(sd, st, tp, base_dir, out_dir, num_splits=100):
     drop_obj, target_obj = get_object_names(sd, st)
     sname = scenario_pathname(drop_obj, target_obj, tp)
     path = os.path.join(base_dir, sname)
     print('Getting stats for %s' % sname)
-    outcomes = get_stats(path)
+    outcomes = get_stats(path, num_splits=num_splits)
     outpath = os.path.join(out_dir, sname)
     with open(outpath, 'wb') as _f:
         pickle.dump(outcomes, _f)
 
 
-def get_all_stats(base_dir, out_dir):
+def get_all_stats(base_dir, out_dir, num_splits=100):
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
     scenarios = get_drop_target_pairs(SCENARIOS)
@@ -417,7 +417,7 @@ def get_all_stats(base_dir, out_dir):
     for i in range(len(scenarios)):
         ((sd, st), tp) = scenarios[i]
         out = pool.apply_async(get_and_save_stats, 
-                               (sd, st, tp, base_dir, out_dir))
+                               (sd, st, tp, base_dir, out_dir, num_splits))
         outs.append(out)
     done = [out.get() for out in outs]
     pool.close()
