@@ -17,56 +17,23 @@ from experimental import (SCENARIOS,
                           scenario_pathname,
                           get_drop_target_pairs)
 
-################
-#####BASICS#####
-################
-
-def softmax(x, beta=1):
-    numerator = np.exp(beta * x)
-    denominator = numerator.sum()
-    return numerator / denominator
-
-
-class CuriosityBinaryChoice(object):
-    def __init__(self,
-                 curiosity_function,
-                 linking_function=softmax,
-                 curiosity_kwargs=None,
-                 linking_kwargs=None):
-        if curiosity_kwargs is None:
-            curiosity_kwargs = {}
-        if linking_kwargs is None:
-            linking_kwargs = {}
-        self.curiosity_function = curiosity_function
-        self.linking_function = linking_function
-        self.curiosity_kwargs = curiosity_kwargs
-        self.linking_kwargs = linking_kwargs
-
-    def judgement(self, data):
-        data_left, data_right = data
-        m0 = self.curiosity_function(data_left, **self.curiosity_kwargs)
-        m1 = self.curiosity_function(data_right, **self.curiosity_kwargs)
-        judgement = self.linking_function([m0, m1], **self.linking_kwargs)
-        return {'curiosity_left': m0,
-                'curiosity_right': m1,
-                'judgement': judgement}
-
 
 ##############
 #####TIME#####
 ##############
 
-def avg_len(data):
-    """mean length of time before objects come to rest
-    """
-    time_list = [len(d['frames'].keys()) for d in data]
+def get_time_list(data):
+    return [len(d['frames'].keys()) for d in data]
+
+
+def avg_len(time_list):
+    """mean length of time before objects come to rest"""
     return np.mean(time_list)
 
 
-def len_std(data):
+def len_std(time_list):
     """std in length of time before objects come to rest
     """
-    time_list = [len(d['frames'].keys()) for d in data]
     return np.std(time_list)
 
 
@@ -74,14 +41,12 @@ def sharpe_ratio(x):
     return np.mean(x) / np.std(x)
 
 
-def len_inverse_sharpe_ratio(data):
+def len_inverse_sharpe_ratio(time_list):
     """
     length std normalized by mean length
     see https://en.wikipedia.org/wiki/Sharpe_ratio
     """
-    time_list = [len(d['frames'].keys()) for d in data]
     return 1./sharpe_ratio(time_list)
-
 
 
 ###################
@@ -173,25 +138,29 @@ def get_object_inds(objects):
     return object_inds
 
 
-def obj_final_position_std(data, objects=None):
-    """
-    model expressing total std in final positions 
-    of objects (can be subselected for specific object)
-    """
+def get_posvecs(data, objects=None):
     object_inds = get_object_inds(objects)
     posvecs = get_last_frame_positions(data)
     if object_inds is not None:
         posvecs = posvecs[:, object_inds]
-    total_std = np.sqrt(posvecs.var(axis=0).sum(axis=0).sum(axis=0))
-    return total_std
+    return posvecs
 
 
-def obj_final_position_invstd(data, objects=None):
+def obj_final_position_std(posvecs):
+    """
+    model expressing total std in final positions 
+    of objects (can be subselected for specific object)
+    """
+    posvecs = np.array(posvecs)
+    return np.sqrt(posvecs.var(axis=0).sum(axis=0).sum(axis=0))
+
+
+def obj_final_position_invstd(posvecs):
     """
     model expressing 1 - total std in final positions 
     of objects (can be subselected for specific object)
     """
-    return 1 - obj_final_position_std(data, objects=objects)
+    return 1 - obj_final_position_std(posvecs)
 
 
 def get_radii(data, objects=None):
@@ -202,30 +171,27 @@ def get_radii(data, objects=None):
     return radii
 
 
-def avg_final_radius(data, objects=None):
+def avg_final_radius(radii):
     """model expressing avg final radius of objects
        mean is taken over trials and objects of radius of objects at last time point
     """
-    radii = get_radii(data, objects=objects)
     return np.mean([rad[-1].mean() for rad in radii])
 
 
-def avg_max_radius(data, objects=None):
+def avg_max_radius(radii):
     """model expressing avg maximum radius achieved by objects during trial
        max is taken over all objects and all frames with each trial, then
        mean is taken of that over all trials
     """
-    radii = get_radii(data, objects=objects)
     max_radii = [r.max() for r in radii]
     return np.mean(max_radii)
 
 
-def max_radius_std(data, objects=None):
+def max_radius_std(radii):
     """model expressing avg maximum radius achieved by objects during trial
        max is taken over all objects and all frames with each trial, then
        std is taken of that over all trials
     """
-    radii = get_radii(data, objects=objects)
     max_radii = [r.max() for r in radii]
     return np.std(max_radii)
 
@@ -250,16 +216,28 @@ def get_collision_frames(d):
     return collision_frames
 
 
-def normed_velocity_std_after_first_collision(data, objects=None, window=5):
+def onelist(*k):
+    return np.ones(k).tolist()
+
+
+def normed_velocity_after_first_collision(data, objects=None, window=5):
     fcfs = list(map(get_first_collision_frame, data))
     object_inds = get_object_inds(objects)
     vels = get_velocities(data, object_inds=object_inds)
     #V is of shape (num_trials, window, num_objects, 3)
-    V = np.array([v[fcf:fcf + window] for v, fcf in zip(vels, fcfs) if fcf is not None])
-    Vm = V.mean(axis=1)
-    Vn = np.linalg.norm(Vm, axis=2)
-    W = Vm / Vn[:, :, np.newaxis]
-    return np.sqrt(W.var(axis=0).sum())
+    V = np.array([v[fcf:fcf + window] if fcf is not None else onelist(window, len(object_inds), 3) for v, fcf in zip(vels, fcfs)])
+    return V
+
+
+def normed_velocity_std_after_first_collision(V):
+    V = np.array(V)
+    #V is of shape (num_trials, window, num_objects, 3)
+    Vm = V.mean(axis=1) #mean over window, so Vm is of shape (num_trials, num_objects, 3)
+    Vn = np.linalg.norm(Vm, axis=2) #norm over vector components
+    W = Vm / Vn[:, :, np.newaxis] 
+    Wvar = W.var(axis=0).sum() #total variance over trials, summed over objects
+    Wstd = np.sqrt(Wvar) #get std
+    return Wstd
 
 
 def get_collision_types(d, collision_key='collisions'):
@@ -294,12 +272,20 @@ def get_support(d):
     return support  
 
 
-def support(data):
+def get_supports_and_radii(data):
+    print('... getting supports and radii')
+    radfunc = lambda x: np.linalg.norm(x['static']['drop_position'][[0, 2]])
+    radii = list(map(radfunc, data))
+    supports = list(map(get_support, data))
+    return [{'radius': r, 'support': s} for r, s in zip(radii, supports)]
+
+
+def support(supports_and_radii):
     """model expressing empirical likelihood of a support relationship
     arising at the end of a trial
-    """
-    print('... getting supports')
-    supports = list(map(get_support, data))
+    """    
+    supports = [sr['support'] for sr in supports_and_radii]
+    radii = [sr['radius'] for sr in supports_and_radii]
 
     #basic statistics
     m = np.mean(supports)
@@ -308,8 +294,6 @@ def support(data):
 
     #sharpness as measured by categorization accuracy
     print('... getting svc results')
-    radfunc = lambda x: np.linalg.norm(x['static']['drop_position'][[0, 2]])
-    radii = list(map(radfunc, data))
     radii_rs = np.array(radii).reshape((-1, 1)) 
     Cs = [1, 1e-1, 1e1, 1e-2, 1e2, 1e-3, 1e3, 1e-4, 1e4, 1e-5, 1e5]
     for C in Cs:
@@ -357,65 +341,107 @@ def support(data):
 #####INFRASTRUCTURE#####
 ########################
 
-model_funcs = [avg_len, 
-               len_std,
-               len_inverse_sharpe_ratio,
-               (obj_final_position_std, {'objects': 'drop'}),
-               (obj_final_position_std, {'objects': 'target'}),
-               (obj_final_position_invstd, {'objects': 'drop'}),
-               (obj_final_position_invstd, {'objects': 'target'}),
-               (avg_final_radius, {'objects': 'drop'}),
-               (avg_final_radius, {'objects': 'target'}),
-               (avg_max_radius, {'objects': 'drop'}),
-               (avg_max_radius, {'objects': 'target'}),
-               (max_radius_std, {'objects': 'drop'}),
-               (max_radius_std, {'objects': 'target'}),
-               (normed_velocity_std_after_first_collision, {'objects': 'drop'}),
-               (normed_velocity_std_after_first_collision, {'objects': 'target'}),
-               support
+model_funcs = [{'func': (avg_len, get_time_list)}, 
+               {'func': (len_std, get_time_list)},
+               {'func': (len_inverse_sharpe_ratio, get_time_list)},
+               {'func': (obj_final_position_std, get_posvecs),
+                'args': {'objects': 'drop'}},
+               {'func': (obj_final_position_std, get_posvecs), 
+                'args': {'objects': 'target'}},
+               {'func': (obj_final_position_invstd, get_posvecs), 
+                'args': {'objects': 'drop'}},
+               {'func': (obj_final_position_invstd, get_posvecs), 
+                'args': {'objects': 'target'}},
+               {'func': (avg_final_radius, get_radii), 
+                'args': {'objects': 'drop'}},
+               {'func': (avg_final_radius, get_radii), 
+                'args': {'objects': 'target'}},
+               {'func': (avg_max_radius, get_radii),
+                'args': {'objects': 'drop'}},
+               {'func': (avg_max_radius, get_radii), 
+                'args': {'objects': 'target'}},
+               {'func': (max_radius_std, get_radii), 
+                'args': {'objects': 'drop'}},
+               {'func': (max_radius_std, get_radii), 
+                'args': {'objects': 'target'}},
+               {'func': (normed_velocity_std_after_first_collision, 
+                         normed_velocity_after_first_collision),
+                'args': {'objects': 'drop'}},
+               {'func': (normed_velocity_std_after_first_collision, 
+                         normed_velocity_after_first_collision),
+                'args': {'objects': 'target'}},
+               {'func': (support, get_supports_and_radii)}
               ]
 
 
-def get_stats(dirn):
+def get_splits(n, k, seed=0):
+    rng = np.random.RandomState(seed=seed)
+    splits = []
+    for i in range(k):
+        p = rng.permutation(n)
+        lsplit = p[: n // 2]
+        rsplit = p[n // 2: ]
+        splits.append((lsplit, rsplit))
+    return splits
+
+
+def get_result(mf, df, data, kwargs, name, splits):
+    data_out = df(data, **kwargs)
+    output = mf(data_out)
+    if hasattr(output, 'keys'):
+        result = {name + '_' + k: {'all': v, 'splits': []} for k, v in output.items()}
+    else:
+        result = {name: {'all': output, 'splits': []}}
+    for lsplit, rsplit in splits:
+        ldata_out = [data_out[i] for i in lsplit]
+        rdata_out = [data_out[i] for i in rsplit]
+        loutput = mf(ldata_out)
+        routput = mf(rdata_out)
+        if hasattr(loutput, 'keys'):
+            for k in loutput:
+                result[name + '_' + k]['splits'].append((loutput[k], routput[k]))
+        else:
+            result[name]['splits'].append((loutput, routput))
+    return result
+
+
+def get_stats(dirn, num_splits=100):
     L = os.listdir(dirn)
     paths = [os.path.join(dirn, l) for l in L]
     data = [h5py.File(path, mode='r') for path in paths]
     outcomes = {}
+    splits = get_splits(len(data), num_splits)
     for m in model_funcs:
-        if hasattr(m, '__len__'):
-            mf, kwargs = m
+        mf, df = m['func']
+        if 'args' in m:
+            kwargs = m['args']
             argk = list(kwargs.keys())
             argk.sort()
             argstr = '_'.join([str(k) + '=' + str(kwargs[k]) for k in argk])
             name = mf.__name__ + '_' + argstr
         else:
-            mf = m
             kwargs = {}
             name = mf.__name__
         print('... getting %s' % name)
-        result = mf(data, **kwargs)
-        if hasattr(result, 'keys'):
-            new_d = {name + '_' + k: v for k, v in result.items()}
-            outcomes.update(new_d)
-        else:
-            outcomes[name] = result
+        result = get_result(mf, df, data, kwargs, name, splits)
+        outcomes.update(result)
     for d in data:
         d.close()
     return outcomes
 
 
-def get_and_save_stats(sd, st, tp, base_dir, out_dir):
+def get_and_save_stats(sd, st, tp, base_dir, out_dir, num_splits=100):
     drop_obj, target_obj = get_object_names(sd, st)
     sname = scenario_pathname(drop_obj, target_obj, tp)
     path = os.path.join(base_dir, sname)
     print('Getting stats for %s' % sname)
-    outcomes = get_stats(path)
+    outcomes = get_stats(path, num_splits=num_splits)
     outpath = os.path.join(out_dir, sname)
     with open(outpath, 'wb') as _f:
         pickle.dump(outcomes, _f)
 
 
-def get_all_stats(base_dir, out_dir):
+def get_all_stats(base_dir, out_dir, num_splits=100):
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
     scenarios = get_drop_target_pairs(SCENARIOS)
@@ -424,7 +450,8 @@ def get_all_stats(base_dir, out_dir):
     for i in range(len(scenarios)):
         ((sd, st), tp) = scenarios[i]
         out = pool.apply_async(get_and_save_stats, 
-                               (sd, st, tp, base_dir, out_dir))
+                               (sd, st, tp, base_dir, out_dir),
+                               {'num_splits': num_splits})
         outs.append(out)
     done = [out.get() for out in outs]
     pool.close()
@@ -443,9 +470,11 @@ def get_object_names(sd, st):
     return drop_obj, target_obj
 
 
-def collect_stats(dirn, featpath, figpath):
+def collect_stats(dirn, featpath, featstdpath, corrpath, figpath):
     scenarios = get_drop_target_pairs(SCENARIOS)
     records = []
+    std_records = []
+    corr_records = [] 
     for i in range(len(scenarios)):
         ((sd, st), tp) = scenarios[i]
         drop_obj, target_obj = get_object_names(sd, st)
@@ -453,12 +482,39 @@ def collect_stats(dirn, featpath, figpath):
         pth = os.path.join(dirn, sname)
         with open(pth, 'rb') as _f:
             outcomes = pickle.loads(_f.read())
-            outcomes['drop_object'] = drop_obj
-            outcomes['target_object'] = target_obj
-            outcomes['condition'] = tp
-            records.append(outcomes)
+            all_outcomes = {k: v['all'] for k, v in outcomes.items()}    
+            all_outcomes['drop_object'] = drop_obj
+            all_outcomes['target_object'] = target_obj
+            all_outcomes['condition'] = tp
+            records.append(all_outcomes)
+            split_outcomes = {k: v['splits'] for k, v in outcomes.items()}
+            std_outcomes = {}
+            corr_outcomes = {}
+            for k, v in split_outcomes.items():
+                w0, w1 = list(zip(*v))
+                w = np.array(w0 + w1)
+                wstd = w.std()
+                std_outcomes[k] = wstd
+                corr_rec = (np.mean(w0), np.mean(w1))
+                corr_outcomes[k] = corr_rec
+            
+            std_outcomes['drop_object'] = drop_obj
+            std_outcomes['target_object'] = target_obj
+            std_outcomes['condition'] = tp
+            std_records.append(std_outcomes)
+            corr_records.append(corr_outcomes)
+            
     features = pd.DataFrame(records)
     features.to_csv(featpath, index=False)
+
+    std_features = pd.DataFrame(std_records)
+    std_features.to_csv(featstdpath, index=False)
+
+    ks = list(corr_records[0].keys())
+    corrs = {k: stats.pearsonr([c[k][0] for c in corr_records], [c[k][1] for c in corr_records])[0] for k in ks}
+    corrframe = pd.DataFrame([corrs])
+    corrframe.to_csv(corrpath, index=False) 
+
     K = list(filter(lambda x: x not in ['drop_object', 'target_object', 'condition'],
                features.columns))
     C = np.array([[stats.pearsonr(features[k1],
