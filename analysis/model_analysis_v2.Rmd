@@ -9,15 +9,13 @@ output: html_document
 knitr::opts_chunk$set(echo = F)
 require(tidyverse)
 require(here)
+
+FIT_MODELS = F
 ```
 
 ## Load data
 
-```{r, load-data}
-
-
-colMeans(mdat[,1:22])
-# obj_final_position_invstd_objects=drop = -0.2980893  should that be negative?
+```{r, load-data, echo=F}
 
 load_data <- function(fname) {
   raw <- read.table(here(paste0("models/",fname,".csv")), sep=',')
@@ -110,7 +108,7 @@ mdat_eng <- mdat %>%
          len_combo,
          drop, target, relation)
 
-
+mdat <- mdat %>% left_join(mdat_eng)
 
 # selects given feature and returns wide df that can be compared with behavioral data
 get_feature_df <- function(mdat, fname) {
@@ -123,7 +121,7 @@ get_feature_df <- function(mdat, fname) {
 
 # Fit to adult choice proportions
 
-```{r}
+```{r, echo=F}
 load(file=here("paper/processed_data.RData")) 
 
 # ToDo: hold out half the subjects and CV on other half
@@ -147,100 +145,184 @@ get_model_target_choice_props <- function(feat_df, hum_df, beta) {
   hum_df <- hum_df %>% arrange(relation, drop) # same order as model df
   hum_df$Model_targ_prop = 0
   for(i in 1:nrow(hum_df)) {
-    mod_cols = which(!is.na(feat_df[i,1:ncol(feat_df)]))[3:4]
+    mod_cols = which(!is.na(feat_df[i,1:ncol(feat_df)]))[3:4] # CHECK THIS
     mod_choice = softmax(feat_df[i,mod_cols], beta=beta)
     hum_df[i,]$Model_targ_prop = as.numeric(mod_choice[hum_df[i,]$target] / sum(mod_choice))
   }
   return(hum_df)
 }
 
-evalFit <- function(feat_df, hum_df, beta) {
+
+evalFit <- function(feat_df, hum_df, beta, cor_objective=F, relation=NA) {
   hum_df <- get_model_target_choice_props(feat_df, hum_df, beta)
-  #r = with(hum_df, cor(chose_target, Model_targ_prop))
-  mse = with(hum_df, sum((chose_target - Model_targ_prop)^2)) / nrow(hum_df)
+  if(!is.na(relation)) {
+    hum_df <- subset(hum_df, relation==relation)
+  }
+  r = with(hum_df, cor(chose_target, Model_targ_prop))
+  mse = with(hum_df, sum((chose_target - Model_targ_prop)^2)) / nrow(hum_df) 
+  if(cor_objective) mse = mse - r # also try to minimize -correlation
   return(mse) # return negative cor since DEoptim minimizes
 }
 
 require(DEoptim)
 
-feat_names = names(mdat)[1:(ncol(mdat)-4)]
+feat_names = setdiff(names(mdat), c("drop","target","relation","trial"))
 # for each feature, want to fit beta to maximize correlation between human and model choices
 #feat_df <- get_feature_df(mdat, feat_names[1])
 
 child_trial_agg <- child_long %>% group_by(relation, drop, target) %>% # alt, 
   summarize(chose_target=mean(chose_target, na.rm=T), n=n())
+```
 
-adult_fits = list()
-child_fits = list()
+## Fit models to all trials (MSE objective)
+
+Find best-fitting betas per feature for children and adults, contain and support trials together.
+
+```{r fit-models-to-all-trials-mse, echo=F, eval=FIT_MODELS}
+#adult_fits = list()
+#child_fits = list()
+all_trials_mse <- tibble()
+
 for(feat in feat_names) {
   feat_df <- get_feature_df(mdat, feat)
   #paste(feat, evalFit(feat_df, adult_trial_agg, 1))
-  adult_fits[[feat]] = DEoptim(evalFit, lower=.5, upper=10, DEoptim.control(reltol=.001, NP=30, itermax=20), 
+  adult_fit = DEoptim(evalFit, lower=.5, upper=10, DEoptim.control(reltol=.001, NP=30, itermax=20), 
                 feat_df=feat_df, hum_df=adult_trial_agg)
-  child_fits[[feat]] = DEoptim(evalFit, lower=.5, upper=10, DEoptim.control(reltol=.001, NP=30, itermax=20), 
+  child_fit = DEoptim(evalFit, lower=.5, upper=10, DEoptim.control(reltol=.001, NP=30, itermax=20), 
                 feat_df=feat_df, hum_df=child_trial_agg)
+  all_trials_mse <- bind_rows(all_trials_mse, c(Age = "adults", feature=feat, beta=as.numeric(unlist(adult_fit$optim$bestmem)), 
+                          mse = adult_fit$optim$bestval))
+  all_trials_mse <- bind_rows(all_trials_mse, c(Age = "children", feature=feat, 
+                          beta = as.numeric(unlist(child_fit$optim$bestmem)), 
+                          mse = child_fit$optim$bestval))
 }
+
+all_trials_mse_r <- all_trials_mse_r %>% mutate(beta = as.numeric(beta),
+                                                mse = as.numeric(mse))
+
+save(all_trials_mse, file=here("models/all_trials_mse.RData"))
 ```
 
-## Now try engineered features
+## Fit models to all trials (MSE + r objective)
 
-```{r adult-eng-feats}
-feat_names2 = names(mdat_eng)[1:(ncol(mdat_eng)-3)]
 
-for(feat in feat_names2) {
-  feat_df <- get_feature_df(mdat_eng, feat)
+```{r fit-models-to-all-trials-mse-and-r, echo=F, eval=FIT_MODELS}
+all_trials_mse_r <- tibble()
+
+for(feat in feat_names) {
+  feat_df <- get_feature_df(mdat, feat)
   #paste(feat, evalFit(feat_df, adult_trial_agg, 1))
-  adult_fits[[feat]] = DEoptim(evalFit, lower=.5, upper=10, DEoptim.control(reltol=.001, NP=30, itermax=20), 
-                feat_df=feat_df, hum_df=adult_trial_agg)
-  child_fits[[feat]] = DEoptim(evalFit, lower=.5, upper=10, DEoptim.control(reltol=.001, NP=30, itermax=20), 
-                feat_df=feat_df, hum_df=child_trial_agg)
+  adult_fit = DEoptim(evalFit, lower=.5, upper=10, DEoptim.control(reltol=.001, NP=30, itermax=20), 
+                feat_df=feat_df, hum_df=adult_trial_agg, cor_objective=T)
+  child_fit = DEoptim(evalFit, lower=.5, upper=10, DEoptim.control(reltol=.001, NP=30, itermax=20), 
+                feat_df=feat_df, hum_df=child_trial_agg, cor_objective=T)
+  all_trials_mse_r <- bind_rows(all_trials_mse_r, c(Age = "adults", feature=feat, beta=as.numeric(unlist(adult_fit$optim$bestmem)), 
+                          mse = adult_fit$optim$bestval))
+  all_trials_mse_r <- bind_rows(all_trials_mse_r, c(Age = "children", feature=feat, 
+                          beta = as.numeric(unlist(child_fit$optim$bestmem)), 
+                          mse = child_fit$optim$bestval))
 }
+
+all_trials_mse_r <- all_trials_mse_r %>% mutate(beta = as.numeric(beta),
+                                                mse = as.numeric(mse))
 
 ```
 
+## Fit separately to contain and support trials (MSE)
 
+```{r fit-models-to-supp-cont-trials-mse, echo=F, eval=FIT_MODELS}
+supp_trials_mse <- tibble()
+cont_trials_mse <- tibble()
+
+for(feat in feat_names) {
+  feat_df <- get_feature_df(mdat, feat)
+  #paste(feat, evalFit(feat_df, adult_trial_agg, 1))
+  adult_fit = DEoptim(evalFit, lower=.5, upper=10, DEoptim.control(reltol=.001, NP=30, itermax=20), 
+                feat_df=feat_df, hum_df=adult_trial_agg, relation="support")
+  child_fit = DEoptim(evalFit, lower=.5, upper=10, DEoptim.control(reltol=.001, NP=30, itermax=20), 
+                feat_df=feat_df, hum_df=child_trial_agg, relation="support")
+  supp_trials_mse <- bind_rows(supp_trials_mse, c(Age = "adults", feature=feat, beta=as.numeric(unlist(adult_fit$optim$bestmem)), 
+                          mse = adult_fit$optim$bestval))
+  supp_trials_mse <- bind_rows(supp_trials_mse, c(Age = "children", feature=feat, 
+                          beta = as.numeric(unlist(child_fit$optim$bestmem)), 
+                          mse = child_fit$optim$bestval))
+}
+
+supp_trials_mse <- supp_trials_mse %>% mutate(beta = as.numeric(beta),
+                                                mse = as.numeric(mse))
+
+
+for(feat in feat_names) {
+  feat_df <- get_feature_df(mdat, feat)
+  adult_fit = DEoptim(evalFit, lower=.5, upper=10, DEoptim.control(reltol=.001, NP=30, itermax=20), 
+                feat_df=feat_df, hum_df=adult_trial_agg, relation="contain")
+  child_fit = DEoptim(evalFit, lower=.5, upper=10, DEoptim.control(reltol=.001, NP=30, itermax=20), 
+                feat_df=feat_df, hum_df=child_trial_agg, relation="contain")
+  cont_trials_mse <- bind_rows(cont_trials_mse, c(Age = "adults", feature=feat, beta=as.numeric(unlist(adult_fit$optim$bestmem)), 
+                          mse = adult_fit$optim$bestval))
+  cont_trials_mse <- bind_rows(cont_trials_mse, c(Age = "children", feature=feat, 
+                          beta = as.numeric(unlist(child_fit$optim$bestmem)), 
+                          mse = child_fit$optim$bestval))
+}
+
+cont_trials_mse <- cont_trials_mse %>% mutate(beta = as.numeric(beta),
+                                                mse = as.numeric(mse))
+
+save(mdat, all_trials_mse, all_trials_mse_r, 
+     supp_trials_mse, cont_trials_mse, file=here("models/model_data.RData"))
+```
+
+
+## Fit separately to contain and support trials (MSE + r)
+
+NOT DONE
 
 ```{r}
-adult_mfit <- tibble()
-child_mfit <- tibble()
-
-for(f in names(adult_fits)) {
-  adult_mfit = bind_rows(adult_mfit, c(feature=f, 
-                                       beta=as.numeric(unlist(adult_fits[[f]]$optim$bestmem)), 
-                                       mse=adult_fits[[f]]$optim$bestval))
-  child_mfit = bind_rows(child_mfit, c(feature=f, 
-                                       beta=as.numeric(unlist(child_fits[[f]]$optim$bestmem)), 
-                                       mse=child_fits[[f]]$optim$bestval))
-}
-
-adult_mfit <- adult_mfit %>% 
-  mutate(beta = as.numeric(beta),
-         mse = as.numeric(mse)) %>%
-  arrange(mse)
-
+load(here("models/model_data.RData"))
 ```
 
-```{r children}
-child_mfit <- child_mfit %>% 
-  mutate(beta = as.numeric(beta),
-         mse = as.numeric(mse)) %>%
-  arrange(mse)
 
-fit_tab <- child_mfit %>% rename(child_mse = mse, child_beta = beta) %>%
-  left_join(adult_mfit %>% rename(adult_mse = mse, adult_beta = beta)) %>% 
-  arrange(adult_mse)
+## Fits to all trials
+
+```{r, echo=F}
+fit_tab <- all_trials_mse %>% pivot_wider( names_from = Age, values_from = c(beta, mse)) %>%
+  arrange(mse_adults)
 
 knitr::kable(fit_tab, digits = 3)
 ```
 
 
+## Fits to all trials (MSE + r)
 
-```{r}
-fits <- child_mfit %>% mutate(AgeGroup = "children") %>% 
-  bind_rows(adult_mfit %>% mutate(AgeGroup = "adults"))
+```{r, echo=F}
+all_trials_mse_r <- all_trials_mse_r %>% mutate(beta = as.numeric(beta),
+                                                mse = as.numeric(mse))
 
-save(mdat, mdat_eng, fits, file=here("models/model_data.RData"))
+fit_tab <- all_trials_mse_r %>% pivot_wider( names_from = Age, values_from = c(beta, mse)) %>%
+  arrange(mse_adults)
+
+knitr::kable(fit_tab, digits = 3)
 ```
+
+
+## Fits to support trials (MSE)
+
+```{r, echo=F}
+fit_tab <- supp_trials_mse %>% pivot_wider( names_from = Age, values_from = c(beta, mse)) %>%
+  arrange(mse_adults)
+
+knitr::kable(fit_tab, digits = 3)
+```
+
+## Fits to support trials (MSE)
+
+```{r, echo=F}
+fit_tab <- cont_trials_mse %>% pivot_wider(names_from = Age, values_from = c(beta, mse)) %>%
+  arrange(mse_adults)
+
+knitr::kable(fit_tab, digits = 3)
+```
+
 
 ```{r, eval=F}
 fits %>% ggplot(aes(x=beta, y=mse, color=AgeGroup)) +
@@ -283,15 +365,15 @@ ggarrange(ad, ch, nrow=1, common.legend = T)
 ```
 
 ```{r}
-ad <- plot_model_preds("support_response_sharpness_C=1e-05", fits, adult_trial_agg, age="adults", mdat)
-ch <- plot_model_preds("support_response_sharpness_C=1e-05", fits, child_trial_agg, age="children", mdat)
+ad <- plot_model_preds("support_std", fits, adult_trial_agg, age="adults", mdat)
+ch <- plot_model_preds("support_std", fits, child_trial_agg, age="children", mdat)
 
 ggarrange(ad, ch, nrow=1, common.legend = T)
 ```
 
 ```{r}
-ad <- plot_model_preds("support_std", fits, adult_trial_agg, age="adults", mdat)
-ch <- plot_model_preds("support_std", fits, child_trial_agg, age="children", mdat)
+ad <- plot_model_preds("support_response_sharpness_C=0.0001", fits, adult_trial_agg, age="adults", mdat)
+ch <- plot_model_preds("support_response_sharpness_C=0.0001", fits, child_trial_agg, age="children", mdat)
 
 ggarrange(ad, ch, nrow=1, common.legend = T)
 ```
@@ -307,6 +389,20 @@ ggarrange(ad, ch, nrow=1, common.legend = T)
 ```{r}
 ad <- plot_model_preds("avg_final_radius_objects=target", fits, adult_trial_agg, age="adults", mdat)
 ch <- plot_model_preds("avg_final_radius_objects=target", fits, child_trial_agg, age="children", mdat)
+
+ggarrange(ad, ch, nrow=1, common.legend = T)
+```
+
+```{r}
+ad <- plot_model_preds("support_response_linearity_r", fits, adult_trial_agg, age="adults", mdat)
+ch <- plot_model_preds("support_response_linearity_r", fits, child_trial_agg, age="children", mdat)
+
+ggarrange(ad, ch, nrow=1, common.legend = T)
+```
+
+```{r}
+ad <- plot_model_preds("support_sharpness_mean", fits, adult_trial_agg, age="adults", mdat_eng)
+ch <- plot_model_preds("support_sharpness_mean", fits, child_trial_agg, age="children", mdat_eng)
 
 ggarrange(ad, ch, nrow=1, common.legend = T)
 ```
