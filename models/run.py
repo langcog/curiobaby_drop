@@ -21,7 +21,22 @@ def get_args():
     parser.add_argument("--feature_path",
                         type=str,
                         default=None,
-                        help="file where stats are collected into a csv") 
+                        help="file where stats are collected into a csv")
+
+    parser.add_argument("--feature_std_path",
+                        type=str,
+                        default=None,
+                        help="file where stats stds are collected into a csv") 
+
+    parser.add_argument("--corr_path",
+                        type=str,
+                        default=None,
+                        help="file where split-half reliabilities are saved") 
+
+    parser.add_argument("--fig_path",
+                        type=str,
+                        default=None,
+                        help="file where statistics correlation figure is saved") 
 
     parser.add_argument("--num_trials",
                         type=int,
@@ -36,8 +51,15 @@ if __name__ == "__main__":
     stimulus_dir = args.stimulus_dir
     stats_dir = args.stats_dir
     feature_path = args.feature_path
+    feature_std_path = args.feature_std_path
+    corr_path = args.corr_path
+    fig_path = args.fig_path
     num_trials = args.num_trials
     generate_stimuli.main(stimulus_dir, num_trials)
     model.get_all_stats(stimulus_dir, stats_dir)
-    model.collect_stats(stimulus_dir, feature_path)
+    model.collect_stats(stimulus_dir,
+                        feature_path,
+                        feat_std_path,
+                        corr_path,
+                        fig_path)
     

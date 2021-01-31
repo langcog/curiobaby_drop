@@ -340,6 +340,15 @@ def support(supports_and_radii):
 ########################
 #####INFRASTRUCTURE#####
 ########################
+"""all data processing statistics are described with two functions
+    (f, g)
+where:
+   -- g takes a list of hdf5s and produces a per-trial statistic
+
+and
+
+   -- f takes the outcomes of the per-trial statistics and returns a final summary scalar
+"""
 
 model_funcs = [{'func': (avg_len, get_time_list)}, 
                {'func': (len_std, get_time_list)},
@@ -375,6 +384,8 @@ model_funcs = [{'func': (avg_len, get_time_list)},
 
 
 def get_splits(n, k, seed=0):
+    """constructs splits for computing split-half reliability
+    """
     rng = np.random.RandomState(seed=seed)
     splits = []
     for i in range(k):
@@ -386,6 +397,18 @@ def get_splits(n, k, seed=0):
 
 
 def get_result(mf, df, data, kwargs, name, splits):
+    """
+    computes statistics for all trials as well as a set of split-halfs of trials
+    return is a dictionary:
+         {statistics_name: {'all': value_for_all_trials,
+                            'splits': [(a_0, b_0), (a_1, b_1) ...]
+                           }
+         }
+
+         where a_i / b_i = statistic for left / right split i
+
+    """
+
     data_out = df(data, **kwargs)
     output = mf(data_out)
     if hasattr(output, 'keys'):
