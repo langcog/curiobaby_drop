@@ -19,40 +19,6 @@ from experimental import (SCENARIOS,
                           scenario_pathname,
                           get_drop_target_pairs)
 
-################
-#####BASICS#####
-################
-
-def softmax(x, beta=1):
-    numerator = np.exp(beta * x)
-    denominator = numerator.sum()
-    return numerator / denominator
-
-
-class CuriosityBinaryChoice(object):
-    def __init__(self,
-                 curiosity_function,
-                 linking_function=softmax,
-                 curiosity_kwargs=None,
-                 linking_kwargs=None):
-        if curiosity_kwargs is None:
-            curiosity_kwargs = {}
-        if linking_kwargs is None:
-            linking_kwargs = {}
-        self.curiosity_function = curiosity_function
-        self.linking_function = linking_function
-        self.curiosity_kwargs = curiosity_kwargs
-        self.linking_kwargs = linking_kwargs
-
-    def judgement(self, data):
-        data_left, data_right = data
-        m0 = self.curiosity_function(data_left, **self.curiosity_kwargs)
-        m1 = self.curiosity_function(data_right, **self.curiosity_kwargs)
-        judgement = self.linking_function([m0, m1], **self.linking_kwargs)
-        return {'curiosity_left': m0,
-                'curiosity_right': m1,
-                'judgement': judgement}
-
 
 ##############
 #####TIME#####
@@ -381,11 +347,42 @@ model_funcs = [avg_len,
               ]
 
 
-def get_stats(dirn):
+def get_splits(n, k, seed=0):
+    rng = np.random.RandomState(seed=seed)
+    splits = []
+    for i in range(k):
+        p = rng.permutation(n)
+        lsplit = p[: n / 2]
+        rsplit = p[n / 2: ]
+        splits.append((lsplit, rsplit))
+    return splits
+
+
+def get_result(mf, data, kwargs, splits):
+    output = mf(data, **kwargs)
+    if hasattr(output, 'keys'):
+        result = {name + '_' + k: {'all': v, 'splits': []} for k, v in output.items()}
+    else:
+        result = {name: {'all': output, 'splits': []}}
+    for lsplit, rsplit in splits:
+        ldata = [data[i] for i in lsplit]
+        rdata = [data[i] for i in rsplit]
+        loutput = mf(ldata, **kwargs)
+        routput = mf(rdata, **kwargs)
+        if hasattr(loutput, 'keys'):
+            for k in loutput:
+                result[name + '_' + k]['splits'].append((loutput[k], routput[k]))
+        else:
+            result[name]['splits'].append((loutput, routput))
+    return result
+
+
+def get_stats(dirn, num_splits=100):
     L = os.listdir(dirn)
     paths = [os.path.join(dirn, l) for l in L]
     data = [h5py.File(path, mode='r') for path in paths]
     outcomes = {}
+    splits = get_splits(len(data), num_splits=num_splits)
     for m in model_funcs:
         if hasattr(m, '__len__'):
             mf, kwargs = m
@@ -398,12 +395,8 @@ def get_stats(dirn):
             kwargs = {}
             name = mf.__name__
         print('... getting %s' % name)
-        result = mf(data, **kwargs)
-        if hasattr(result, 'keys'):
-            new_d = {name + '_' + k: v for k, v in result.items()}
-            outcomes.update(new_d)
-        else:
-            outcomes[name] = result
+        result = get_result(mf, data, kwargs, splits)
+        outcomes.update(result)
     for d in data:
         d.close()
     return outcomes
