@@ -1,5 +1,7 @@
 ---
-title: "What if you drop that? Developmental changes in curiosity about physical interactions"
+# Mike has a better title git stashed but G can't remember it..
+# old: What if you drop that? Developmental changes in curiosity about physical interactions
+title: "Using physical simulations to predict children's and adults' preference for physical interactions"
 bibliography: library.bib
 csl: apa6.csl
 document-params: "10pt, letterpaper"
@@ -21,7 +23,7 @@ abstract: >
      enough to allow room for curiosity, but also constrained enough to make detailed behavioral 
      comparisons. We compared children's choices (N=66; 3-7 years of age) to those of adults (N=155), 
      and find increasingly strong preference for choices affording particular relations (e.g., 
-     containment) across development, as well as an adult bias for choosing support relations.
+     containment) across development, as well as an adult bias for choosing a support relation.
     
 keywords: >
     curiosity; novel objects; object interactions; intuitive physics
@@ -65,25 +67,56 @@ age <- child_long %>% distinct(ID, Age) %>% group_by(Age) %>%
 
 # Introduction 
 
-<!-- Curiosity is important... end with core question about what gives rise to curiosity. -->
 Curiosity is a hallmark aspect of human intelligence. 
 From infants exploring the objects in their environment to scientists exploring the frontiers of our solar system, humans are highly motivated to seek out new knowledge and experiences. 
 However, although such exploratory behavior has long been recognized as a critical component of human learning [@james1983talks] and cognitive development [@Gopnik2009; @Piaget1952], formal theories that explain human curiosity and how it drives exploratory behavior have remained elusive [@Kidd2015]. 
 Moreover, extant theories have rarely provided quantitatively precise enough predictions to be directly compared to empirical measurements of curiosity-driven behavior in humans.
 
+
+The goal of the current paper is to help close this gap by proposing a novel paradigm to advance our theoretical understanding of curiosity, specifically within the domain of physical object interactions [@kubricht2017intuitive].
+First, we present an empirical investigation of the pattern of actions taken by children and adults in a novel physical exploration task. 
+We then present a set of heuristic models of curiosity based on a variety of metrics of simulated interactions (e.g., measuring likelihood of a dropped object coming to rest on a target object), and test the degree to which these features predict children and adults' behaviors in the same task.
+<!-- Finally, we evaluate the quantitative correspondence between the exploratory actions taken by an artificial agent that instantiates our computational theory and those taken by human children on the same set of tasks.  -->
+
+We take inspiration from a large body of prior work in developmental psychology investigating the development of knowledge about physical objects, their properties, and how they interact [@hespos2012physics; @smith2018developing; @Baillargeon2007]. 
+Children both spend a remarkably amount of time across exploring how different objects and surfaces interact during naturalistic play [@fenson1976] and spend longer time exploring objects that appear to violate physical laws (e.g., an object that appears to pass through a wall; @Stahl2015; @Baillargeon2007).  
+ In other words, children seem to actively learn about physical interactions by intervening on the world and observing the consequences of their actions [@needham2000improvements; @Gopnik2009; @gureckis2012self]. 
+However, relatively little work has examined what types of physical interactions children are most interested in testing, or linked children's actions to formal theories of physical interactions or exploratory behavior.
+Instead, most work that has investigated exploratory behavior in children has done so by examining how they play with relatively complex objects -- for example, documenting the number of functions discovered while playing with a novel toy [e.g., @Cook2011; @Bonawitz2012; @Gweon2014].  
+We developed a novel physical exploration task in which children, adults, or AI agents choose which series of physical experiments to perform and observe the results of each in real time.
+
+
+<!-- High-level statement of our approach -->
+In sum, this paper presents a paradigm and model for testing theories of curiosity about physical interactions. 
+<!-- and defining its role in guiding the development of knowledge about the physical world.  -->
+First, we measured adults' and children's (3-7 years of age) preferences in a novel physical exploration task; participants were asked to choose one of two objects (e.g., a sphere, a dumbbell, see Figure 1) to drop onto a target object (e.g., a pyramid) with the goal of the creating the most interesting physical interaction (see Figure 2). 
+We then explore the predictive power of a variety of heuristic models of curiosity that operate on simulations of this same task with these same objects in a 3D environment. 
+We propose that using task-performing computational models and detailed measurement of human action selection on the same tasks has the promise to lead to more robust and precise theories of our curiosity about the physical world.
+
+<!-- presents learners (children or the agent) with a set of objects from which they can select one to drop in a bin containing a set of target objects, with the potential to create one or more collisions during the drop. -->
+
+<!-- What we've learned from prior theoretical work, and how it falls short -->
+<!-- A limitation of past theories of curiosity is that they are large part verbal descriptions, without formal, testable, mechanisms. -->
+<!-- An exception to this: @Schmidhuber2010 and @Oudeyer2013 --similar but different, and critically not evaluated against same children's behavior in the same situations -->
+
+<!-- What we've learned from prior behavioral work, and how our approach is different -->
+<!-- Looking time people: @Baillargeon2007 and other studies of infants' surprisal at physical events (occlusion, containment,  -->
+<!-- Ullman -- not about curiosity, but about intuitive physics learning from observation in simplified 2D domains (e.g., colliding hockey pucks)  -->
+
+<!-- Highlight main contributions of the paper -->
+<!-- One rich domain that young children are in the midst of learning about is the properties and affordances of physical objects.  -->
+<!-- A study of 9- to 16-month-olds found that infants' violation of expectations about a novel toy's hidden properties (e.g., making a sound) drives them to explore similar toys for longer [@Baldwin1993]. -->
+
+
+
+<!-- OLD INTRO: delete all?
+
 The goal of the current paper is to help close this gap by proposing a framework for advancing our theoretical understanding of curiosity. 
 First, we present an empirical investigation of the pattern of actions taken by children and adults in a novel physical exploration task. 
-We then present a computational theory of how a learner's knowledge state interacts with ongoing perceptual experiences to give rise to curiosity-driven exploratory behavior.
+We then present a set of heuristic models of curiosity based on a variety of metrics of simulated interactions (e.g., measuring likelihood of a dropped object coming to rest on a target object), and test whether these features predict people's preferences in the same task.
 Finally, we evaluate the quantitative correspondence between the exploratory actions taken by an artificial agent that instantiates our computational theory and those taken by human children on the same set of tasks. 
 
-Our computational theory is inspired by classic descriptive theories that posited that curiosity-driven behavior was the consequence of attentional capture by novel stimuli [e.g., @Berlyne1954; @Fantz1964], as well as theories providing qualitative explanations for curiosity-driven behavior as the result of learners' preferences for stimuli that are "moderately discrepant" in relation to their current knowledge state, and thereby provide opportunities to learn [@Kinney1976]. 
-Recent studies have provided empirical support for this basic idea: 7- to 8-month-old infants are sensitive to stimulus complexity and prefer to look at moderately complex stimuli rather than simple or highly-complex stimuli [@Kidd2012; @Kidd2014].
-According to these theories, curiosity-driven behavior reflects a gap between the learner's knowledge and the state of the world [@Loewenstein1994], and thus they predict that as a learner gains additional knowledge, their preferences will shift toward more complex stimuli [@Dember1957].
-Although these theories have provided important qualitative insights, one of their major limitations is that they do not provide precise ways to characterize a learner's current knowledge state, how physical states of the world are represented in their mind, nor how discrepancies between a learner's knowledge and such states are compared.  
-Our approach leverages theory and insights from reinforcement learning (RL), including the value of mechanisms that equip RL agents with "intrinsic motivation" — a drive to explore the state space even when rewards are sparse or absent, and favor actions with uncertain outcomes, because they may result in the discovery of new policies with high expected values [@Schmidhuber2010].
-Our modeling approach is resonant with recent work that has instantiated such intrinsic-motivation mechanisms in robots to help them learn robust ways to predict physical events in the world world [@Oudeyer2007; @Oudeyer2013], although this work typically involves pretraining models on a separate physical prediction task before implementing curiosity-driven learning, and has not yet been directly compared to human behavior in the same prediction tasks.
-
-Our empirical study is motivated by a large body of prior work in developmental psychology investigating the development of knowledge about physical objects, their properties, and how they interact (CITE Spelke, Baillargeon..), thus making exploration of physical objects a natural choice of domain to explore the implications of our theory. 
+Our empirical study is motivated by a large body of prior work in developmental psychology investigating the development of knowledge about physical objects, their properties, and how they interact (CITE Spelke, @Baillargeon2007), thus making exploration of physical objects a natural choice of domain to explore the implications of our theory. 
 However, the measures used in this literature have typically focused on either children's ability to discriminate types of events, or their ability to carry out particular tasks (e.g., shape sorting), but have not examined which types of interactions children are most interested in testing.
 For instance, a typical measure of physical curiosity has been longer looking times to surprising events than to expected events (e.g., objects appearing to pass through a wall; @Stahl2015; @Baillargeon2007). 
 Other work that has investigated exploratory behavior in children have used more granular measures, such as counting the number of functions discovered while playing with novel and complex toy [e.g., @Cook2011; @Bonawitz2012; @Gweon2014]. 
@@ -91,29 +124,14 @@ Moreover, these studies have yet to directly constrain theories that predict whi
 What both of the standard looking-time and toy-exploration measures fail to capture when characterizing children's curiosity are the ways in which children actively learn by intervening on the world and observing the consequences of their actions [@Gopnik2009; @gureckis2012self]. 
 To address these limitations, we developed a novel physical exploration task in which children, adults, or AI agents choose which series of physical experiments to perform and observe the results of each in real time. 
 
-<!-- High-level statement of our approach -->
-In sum, this paper presents a unified paradigm for advancing theories of curiosity and its role in guiding the development of knowledge about the physical world. 
-We present: (1) a computational theory of intrinsic motivation instantiated in an artificial reinforcement-learning agent that explores a simulated 3D environment; (2) two datasets that measure adults' and children's actions in a novel physical exploration task; and (3) quantitative comparisons between the actions taken by the artificial agent and children on the same set of tasks. 
+
+In sum, this paper presents a paradigm for testing and building theories of curiosity, and defining its role in guiding the development of knowledge about the physical world. 
+We present a study that measures adults' (Experiment 1) and children's (Experiment 2) preferences in a novel physical exploration task, a set of 20 heuristic models of curiosity that operate on simulations of this same task in a 3D environment, and comparisons between the preferences of children, adults, and these heuristic models on the same set of trials.
 Overall, our approach of coordinating the development of task-performing computational models and detailed measurement of human action selection on the same tasks has the promise to lead to more robust and precise theories of how curiosity guides cognitive development.
+-->
 
-<!-- presents learners (children or the agent) with a set of objects from which they can select one to drop in a bin containing a set of target objects, with the potential to create one or more collisions during the drop. -->
 
-<!-- What we've learned from prior theoretical work, and how it falls short -->
-
-<!-- A limitation of past theories of curiosity is that they are large part verbal descriptions, without formal, testable, mechanisms. -->
-<!-- An exception to this: @Schmidhuber2010 and @Oudeyer2013 --similar but different, and critically not evaluated against same children's behavior in the same situations -->
-
-<!-- What we've learned from prior behavioral work, and how our approach is different -->
-
-<!-- Looking time people: @Baillargeon2007 and other studies of infants' surprisal at physical events (occlusion, containment,  -->
-<!-- Ullman -- not about curiosity, but about intuitive physics learning from observation in simplified 2D domains (e.g., colliding hockey pucks)  -->
-
-<!-- Highlight main contributions of the paper -->
-
-<!-- One rich domain that young children are in the midst of learning about is the properties and affordances of physical objects.  -->
-<!-- A study of 9- to 16-month-olds found that infants' violation of expectations about a novel toy's hidden properties (e.g., making a sound) drives them to explore similar toys for longer [@Baldwin1993]. -->
-
-<!--
+<!-- move this paragraph to GD if we want to discuss goals?
 ## Computational Models of Curiosity
 
 Building on prior work that showed deep neural networks are capable of learning forward and inverse physical dynamics (i.e., "intuitive physics") from images when given the ability to "poke" the objects in the scene [@Agrawal2016], we use and extend a deep RL architecture for constructing intrinsically-motivated artificial agents introduced in @Haber2018learning.
@@ -176,7 +194,7 @@ The goal of the catch trials was to encourage participants to attend to the obje
 Finally, there were two free response explanation trials mixed among the drop trials, querying participants, "Why did you make that choice?"
 These free responses were examined to determine if participants had particular goals in mind when making a choice, and how prevalent those goals were among participants.
 
-```{r fig2-task, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.25, fig.height=3.25, set.cap.width=T, num.cols.cap=1, fig.cap = "Example trial from Experiment 1 with adults. Trials in Experiment 2 (for children) were similar, but arranged for Zoom with the experimenter's face in the center."}
+```{r fig2-task, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.25, fig.height=3.25, set.cap.width=T, num.cols.cap=1, fig.cap = "Example of a trial given to adults in Experiment 1."}
 img <- png::readPNG("figs/2AFC_DropTaskFig.png")
 grid::grid.raster(img)
 ```
@@ -186,9 +204,9 @@ grid::grid.raster(img)
 ## Results
 
 We analyzed data from the `r Nad` adults who completed the experiment and got at least 3 of the 4 catch trials correct (45 participants were excluded for not meeting this criterion).
-The main questions of interest are 1) are adults consistent in their preference of drop-target combinations? 2) are they more consistent with trials that afford support or containment relations? and 3) are there other apparent factors that drive their preferences?
-Our analysis addresses each question in turn.
-Table 1 shows the proportion of participants that chose the designed target relation for each of the 20 trials [should also show alternative target object?]. 
+<!-- The main questions of interest are 1) are adults consistent in their preference of drop-target combinations? 2) are they more consistent with trials that afford support or containment relations? and 3) are there other apparent factors that drive their preferences?
+Our analysis addresses each question in turn. -->
+Table 1 shows the proportion of participants that chose the designed target relation for each of the 20 trials. <!-- [should also show alternative target object?]. -->
 Based on the binomial distribution, any of the trials on which more than 90 of the 155 participants agree (i.e., >0.59 or <0.41) significantly differ from chance [adjust criterion for multiple comparisons?].
 As can be seen in Table 1, adults participants ("adult" column) significantly preferred the target relation for all 10 of the containment trials, and significantly preferred five targets on the 10 support trials; the other five support trials did not significantly differ from chance.
 
@@ -212,8 +230,8 @@ ad_subj_agg <- adult_long %>% group_by(ResponseId, relation) %>% # alt,
 
 ad_rel_means <- ad_subj_agg %>% group_by(relation) %>% summarize(M=mean(chose_target))
 
-ad_supp_cont <- t.test(subset(ad_subj_agg, relation=="contain")$chose_target -
-         subset(ad_subj_agg, relation=="support")$chose_target)
+ad_supp_cont <- t.test(x=subset(ad_subj_agg, relation=="contain")$chose_target, 
+                       y=subset(ad_subj_agg, relation=="support")$chose_target, paired=T)
 ```
 
 
@@ -248,9 +266,13 @@ ch_subj_agg <- child_long %>% group_by(ID, relation) %>% # alt,
 
 ch_rel_means <- ch_subj_agg %>% group_by(relation) %>% summarize(M=mean(chose_target))
 
-ch_supp_cont <- t.test(subset(ad_subj_agg, relation=="contain")$chose_target -
-         subset(ad_subj_agg, relation=="support")$chose_target)
+ch_supp_cont <- t.test(x=subset(ad_subj_agg, relation=="contain")$chose_target,
+                       y=subset(ad_subj_agg, relation=="support")$chose_target, paired=T)
 ```
+
+Were adults more consistent in their choices on support or containment trials?
+Averaging each subject's binary responses (1=target relation, 0=alternative) for each trial type revealed a stronger preference for containment relations ($M=$ `r round(ad_rel_means[1,]$M,2)`) than support relations ($M=$ `r round(ad_rel_means[2,]$M,2)`; paired `r t_apa(ad_supp_cont, format="rmarkdown", print=F)`).
+<!--For the five support trials for which adults showed no significant preference, we will return to discuss alternative hypotheses after looking at children's preferences in Experiment 2.-->
 
 ```{r child-table, results="asis"}
 # how to do 2-col table? , fig.env = "figure*" 
@@ -260,22 +282,21 @@ chtab <- xtable::xtable(trial_tab, digits=2,
 print(chtab, type="latex", comment = F, include.rownames = F, table.placement = "H")
 ```
 
-Were adults more consistent in their choices on support or containment trials?
-Averaging each subject's binary responses (1=target relation, 0=alternative) for each trial type revealed a stronger preference for containment relations (M=`r round(ad_rel_means[1,]$M,2)`) than support relations (M=`r round(ad_rel_means[2,]$M,2)`; one-sample `r t_apa(ad_supp_cont, format="rmarkdown", print=F)`).
-For the five support trials for which adults showed no significant preference, we will return to discuss alternative hypotheses after looking at children's preferences in Experiment 2.
+<!-- Maybe code the type of goals stated by the parents? -->
+
 
 # Experiment 2: Children
 
-Experiment 1 demonstrated that adults show remarkably consistent preferences for dropping objects on target objects that afford containment relations, and to a lesser extent support relations. 
+Experiment 1 demonstrated that adults show consistent preferences for dropping objects on target objects that afford containment relations, and to a lesser extent support relations. 
 Experiment 2 investigates whether these strong preferences are present even in young children, recognizing that children may find different types of physical interactions (e.g., rolling, bouncing, unpredictability) of greater interest.
 
 ## Method
 We adapted the same materials and procedure used in Experiment 1 for use in an online experiment with children, in order to directly compare the results for children and adults.
 
 ### Participants
-Participants were 73 children recruited online via Bing Nursery School and targeted Facebook Ads.
+Participants were 73 children recruited online via outreach through a local nursery school and targeted Facebook Ads.
 Participant exclusions were made based on cases where i) the participant did not complete more than half of the study play session or ii) the parent did not consent for video recording of study. 
-After exclusions [based on?], results from `r Nch` were analyzed, including `r age[1,]$N` 3-year-olds, `r age[2,]$N` 4-year-olds, `r age[3,]$N` 5-year-olds, `r age[4,]$N` 6-year-olds, and `r age[5,]$N` 7-year-olds.
+After exclusions, results from `r Nch` were analyzed, including `r age[1,]$N` 3-year-olds, `r age[2,]$N` 4-year-olds, `r age[3,]$N` 5-year-olds, `r age[4,]$N` 6-year-olds, and `r age[5,]$N` 7-year-olds. <!-- Sama: notes on exclusions? -->
 
 ### Materials
 The materials were the same as those used in Experiment 1, except that the trials were adapted for presentation via Zoom in a Keynote. 
@@ -302,14 +323,14 @@ The child was asked to verbally select target object and then to indicate whethe
 
 We examined children's choice of target objects to determine if children were choosing randomly, or had consistent preferences for some objects. 
 Table 1 shows the proportion of children ("child" column) choosing the designed target relation for each of the 20 trials, alongside the adult choice proportions from Experiment 1 [maybe just drop Table 1?]. 
-Based on the binomial distribution, any of the trials on which more than 41 of the 66 participants agree (i.e., >0.64 or <0.36) significantly differ (*p*<.05 [use stricter for mult comparisons? Bonf=.0025]) from chance.
+Based on the binomial distribution, any of the trials on which more than 41 of the 66 participants agree (i.e., >0.64 or <0.36) significantly differ (*p*<.05) from chance. <!-- stricter crit for mult comparisons? Bonf=.0025 -->
 Children significantly preferred the designed relation on eight of the 10 containment trials, while only significantly preferring two of the 10 support relation choices.
 On the remaining two containment trials and the other eight support trials, children's preferences also did not significantly differ from chance against the designed relation.
 
 Were children more consistent in their choices on support or containment trials?
-As for adults, averaging each child's binary responses for each trial type revealed a stronger preference for containment relations (M=`r round(ch_rel_means[1,]$M,2)`) than support relations (M=`r round(ch_rel_means[2,]$M,2)`; one-sample `r t_apa(ch_supp_cont, format="rmarkdown", print=F)`).
+As for adults, averaging each child's binary responses for each trial type revealed a stronger preference for containment relations ($M=$ `r round(ch_rel_means[1,]$M,2)`) than support relations ($M=$ `r round(ch_rel_means[2,]$M,2)`; paired `r t_apa(ch_supp_cont, format="rmarkdown", print=F)`).
 Overall, children did not show a significant preference for choosing the support relation [should we add a regression with trial_type * age (3 - 18=adult)?].
-Figure 4 shows the proportion of participants' choice of the designed target relation broken down by relation type and age group, showing a preference for the designed relations that grows with age, and that is stronger for containment.
+Figure 4 shows the proportion of participants' choice of the designed target relation broken down by relation type and age group, showing a preference for the designed relations that increased with age, and that was stronger for containment.
 
 ```{r adults-vs-children-relational-choices, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.5, fig.height=3.25, set.cap.width=T, num.cols.cap=1, fig.cap = "Comparison of children's vs. adults' choices for each type of trial, with bootstrapped 95\\% confidence intervals."}
 pos = position_dodge(width = .9)
@@ -428,10 +449,8 @@ ggplot(uniq, aes(x=Age_Group, y=mean)) + geom_point() +
 ```{r load-model-data}
 load(here("models/model_data.RData")) # mdat, mdat_eng, fits
 ```
-
-Can children's and adults' preferences be predicted by heuristic models of the simulated physical interactions?
-Using a physics engine and 3D models of the objects we showed to participants, we constructed a simulation of each trial of the experiment.
-For each trial's the two possible drop object choices, we ran 100 simulated drops, and for each drop calculated a variety of features measuring the state of the model after the drop was completed.
+Using a physics engine and 3D models of the objects that were shown to participants, we constructed a simulation of each trial of the experiment and attempted to predict children's and adults' choices using a variety of heuristic models of the simulated physical interactions.
+For each trial's two possible drop object choices, we ran 250 simulated drops, and for each drop calculated a variety of features measuring the state of the model after the drop was completed.
 We selected features that we thought may provide good metrics for what people would found interesting. 
 For example, we collected for each drop the mean length of time before both objects come to rest (*avg_len*), as well as the standard deviation (SD) of that time (*len_std*).
 Some features were calculated separately for drop and target objects, such as: the SD of the object's final position (*obj_final_position_std_objects*) as well as the inverse of that (*obj_final_position_invstd_objects*), the mean final distance from the drop location (*avg_final_radius_objects*), the maximum final distance from the drop location (*avg_max_radius_objects*), the ... (*max_radius_std_objects*), ... (*normed_velocity_std_after_first_collision_objects*)
@@ -453,6 +472,14 @@ Is containment inherently more satisfying, or is there greater interest because 
 Are children less interested in relations that are more difficult to achieve with more motor noise?
 Or are they less aware (or simply less interested in) support?
 Or do children find some other goal relatively more enticing?
+
+<!-- moved from old Intro: rewrite to discuss Haber et al. more -->
+Thexe results will serve as a test set for evaluating computational theories of curiosity, which in turn are inspired by classic descriptive theories positing that curiosity-driven behavior was the consequence of attentional capture by novel stimuli [e.g., @Berlyne1954; @Fantz1964], as well as theories providing qualitative explanations for curiosity-driven behavior as the result of learners' preferences for stimuli that are "moderately discrepant" in relation to their current knowledge state, and thereby provide opportunities to learn [@Kinney1976]. 
+Recent studies have provided empirical support for this basic idea: 7- to 8-month-old infants are sensitive to stimulus complexity and prefer to look at moderately complex stimuli rather than simple or highly-complex stimuli [@Kidd2012; @Kidd2014].
+According to these theories, curiosity-driven behavior reflects a gap between the learner's knowledge and the state of the world [@Loewenstein1994], and thus they predict that as a learner gains additional knowledge, their preferences will shift toward more complex stimuli [@Dember1957].
+Although these theories have provided important qualitative insights, one of their major limitations is that they do not provide precise ways to characterize a learner's current knowledge state, how physical states of the world are represented in their mind, nor how discrepancies between a learner's knowledge and such states are compared.  
+Our approach leverages theory and insights from reinforcement learning (RL), including the value of mechanisms that equip RL agents with "intrinsic motivation" — a drive to explore the state space even when rewards are sparse or absent, and favor actions with uncertain outcomes, because they may result in the discovery of new policies with high expected values [@Schmidhuber2010].
+Our modeling approach is resonant with recent work that has instantiated such intrinsic-motivation mechanisms in robots to help them learn robust ways to predict physical events in the world world [@Oudeyer2007; @Oudeyer2013], although this work typically involves pretraining models on a separate physical prediction task before implementing curiosity-driven learning, and has not yet been directly compared to human behavior in the same prediction tasks.
 
 # Acknowledgements
 

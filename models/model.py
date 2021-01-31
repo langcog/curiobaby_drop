@@ -12,8 +12,6 @@ from sklearn.model_selection import GridSearchCV
 import sklearn.metrics as sk_metrics
 import scipy.stats as stats
 import matplotlib.pyplot as plt
-from matplotlib import rcParams
-rcParams.update({'figure.autolayout': True})
 
 from experimental import (SCENARIOS, 
                           scenario_pathname,
@@ -292,13 +290,11 @@ def support(data):
             score = sk_metrics.f1_score(preds, supports)
             acc = sk_metrics.accuracy_score(preds, supports)
         result['response_sharpness_C=%s' % str(C)] = score
-        result['response_sharpness_accuracy_C=%s' str(C)] = acc
+        result['response_sharpness_accuracy_C=%s' % str(C)] = acc
     print('... getting gridsearch svc results')
     if len(np.unique(supports)) == 1:
         score = 0
         acc = 0
-        result['response_sharpness_GridSearchCV'] = score
-        result['response_sharpness_accuacy_GridSearchCV'] = acc
     else:
         svc = svm.LinearSVC()
         cls = GridSearchCV(svc, {'C': Cs})
@@ -306,9 +302,8 @@ def support(data):
         preds = cls.predict(radii_rs)
         score = sk_metrics.f1_score(preds, supports)
         acc = sk_metrics.accuracy_score(preds, supports)
-        best_C = cls.best_params_['C']
-        result['response_sharpness_GridSearchCV_C=%s' % str(best_C)] = score
-        result['response_sharpness_accuacy_GridSearchCV_C=%s' % str(best_C)] = acc
+    result['response_sharpness_GridSearchCV'] = score
+    result['response_sharpness_accuracy_GridSearchCV'] = acc
 
     #sharpness as measured by linearity
     print('... getting linearity results')

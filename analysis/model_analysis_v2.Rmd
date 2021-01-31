@@ -14,71 +14,101 @@ require(here)
 ## Load data
 
 ```{r, load-data}
-raw <- read.table(here("models/model_stats.csv"), sep=',')
-cnames <- raw[1,]
-mdat <- raw[2:nrow(raw),]
-names(mdat) = cnames
-for(c in 1:(ncol(mdat)-3)) {
-  mdat[,c] = as.numeric(mdat[,c])
-}
-mdat$trial = rep(1:20, each=2)
-# right now, each trial is 2 rows, 
-# uniquely identified with drop_object x condition
-#mdat %>% distinct(drop_object, condition)
 
-mdat <- mdat %>% rename(drop = drop_object,
-                        target = target_object,
-                        relation = condition) %>%
-  mutate(drop = replace(drop, drop=="triangular_prism", "trig prism"),
-         target = replace(target, target=="triangular_prism", "trig prism"))
 
 colMeans(mdat[,1:22])
 # obj_final_position_invstd_objects=drop = -0.2980893  should that be negative?
 
+load_data <- function(fname) {
+  raw <- read.table(here(paste0("models/",fname,".csv")), sep=',')
+  cnames <- raw[1,]
+  mdat <- raw[2:nrow(raw),]
+  names(mdat) = cnames
+  for(c in 1:(ncol(mdat)-3)) {
+    mdat[,c] = as.numeric(mdat[,c])
+    if(min(mdat[,c]) < 0) mdat[,c] = mdat[,c] + min(mdat[,c])
+    print(paste("shifting",c,"so minimum is 0"))
+  }
+  mdat$trial = rep(1:20, each=2)
+  # right now, each trial is 2 rows, 
+  # uniquely identified with drop_object x condition
+  #mdat %>% distinct(drop_object, condition)
+
+  mdat <- mdat %>% rename(drop = drop_object,
+                          target = target_object,
+                          relation = condition) %>%
+    mutate(drop = replace(drop, drop=="triangular_prism", "trig prism"),
+         target = replace(target, target=="triangular_prism", "trig prism"))
+  return(mdat)
+}
+
+# just 100 drops per trial
+mdat100 <- load_data("model_stats")
+
+mdat <- load_data("model_stats250")
+
+sort(colMeans(mdat[,1:43]))
+# mean of obj_final_position_invstd_objects=drop is negative..
+# mean of avg_len is 235, and len_std is 45 (much larger than typical feature mean on order of .1 - 1.0)
+# scale these cols? (only matters for their combination)
+mdat$avg_len = mdat$avg_len / max(mdat$avg_len)
+mdat$len_std = mdat$len_std / max(mdat$len_std)
+
 # engineer some features: 
 # combine target + drop target features
 mdat_eng <- mdat %>%
-  mutate(obj_final_position_std = 
-           `obj_final_position_std_objects=drop` + 
-           `obj_final_position_std_objects=target`,
+  rowwise() %>%
+  mutate(obj_final_position_std = mean(`obj_final_position_std_objects=drop`,
+                                       `obj_final_position_std_objects=target`),
          normed_velocity_std_after_first_collision_objects = 
-           `normed_velocity_std_after_first_collision_objects=drop` + 
-           `normed_velocity_std_after_first_collision_objects=target`,
-         avg_final_radius_objects = 
-           `avg_final_radius_objects=drop` + 
-           `avg_final_radius_objects=target`,
-         avg_max_radius_objects = 
-           `avg_max_radius_objects=drop` + 
-           `avg_max_radius_objects=target`,
-         max_radius_std_objects = 
-           `max_radius_std_objects=drop` + 
-           `max_radius_std_objects=target`,
-         support_combo = 
-           support_probability + 
-           support_std + 
-           `support_response_sharpness_C=1e-05`, # add one of support_response_linearity_r or _pv ?
-         len_combo = avg_len + len_std + len_inverse_sharpe_ratio
+           mean(`normed_velocity_std_after_first_collision_objects=drop`,
+                `normed_velocity_std_after_first_collision_objects=target`),
+         avg_final_radius_objects = mean(`avg_final_radius_objects=drop`, 
+                                         `avg_final_radius_objects=target`),
+         avg_max_radius_objects = mean(`avg_max_radius_objects=drop`,
+                                       `avg_max_radius_objects=target`),
+         max_radius_std_objects = mean(`max_radius_std_objects=drop`,
+                                       `max_radius_std_objects=target`),
+         support_combo = mean(support_probability, support_std, 
+                              `support_response_sharpness_C=1`, # add support_response_linearity_r or _pv ?
+                              `support_response_sharpness_accuracy_C=1`),
+         support_sharpness_mean = mean(`support_response_sharpness_C=1e-05`,
+                                       `support_response_sharpness_C=0.0001`,
+                                       `support_response_sharpness_C=0.001`,
+                                       `support_response_sharpness_C=0.01`,
+                                       `support_response_sharpness_C=0.1`,
+                                       `support_response_sharpness_C=1`,
+                                       `support_response_sharpness_C=10.0`,
+                                       `support_response_sharpness_C=100.0`,
+                                       `support_response_sharpness_C=1000.0`,
+                                       `support_response_sharpness_C=10000.0`,
+                                       `support_response_sharpness_C=100000.0`),
+         support_sharpness_accuracy_mean = mean(
+            `support_response_sharpness_accuracy_C=1e-05`,
+             `support_response_sharpness_accuracy_C=0.0001`,
+             `support_response_sharpness_accuracy_C=0.001`,
+             `support_response_sharpness_accuracy_C=0.01`,
+             `support_response_sharpness_accuracy_C=0.1`,
+             `support_response_sharpness_accuracy_C=1`,
+             `support_response_sharpness_accuracy_C=10.0`,
+             `support_response_sharpness_accuracy_C=100.0`,
+             `support_response_sharpness_accuracy_C=1000.0`,
+             `support_response_sharpness_accuracy_C=10000.0`,
+             `support_response_sharpness_accuracy_C=100000.0`),
+         support_response_linearity_mean = mean(support_response_linearity_pv, 
+                                                support_response_linearity_r),
+         len_combo = mean(avg_len, len_std, len_inverse_sharpe_ratio)
          ) %>%
-  select(-`obj_final_position_std_objects=drop`, 
-         -`obj_final_position_std_objects=target`,
-         -`normed_velocity_std_after_first_collision_objects=drop`,
-         -`normed_velocity_std_after_first_collision_objects=target`,
-         -`avg_final_radius_objects=drop`,
-         -`avg_final_radius_objects=target`,
-         -`avg_max_radius_objects=drop`,
-         -`avg_max_radius_objects=target`,
-         -`max_radius_std_objects=drop`,
-         -`max_radius_std_objects=target`,
-         -support_probability, 
-         -support_std,
-         -`support_response_sharpness_C=1`,
-         -`support_response_sharpness_C=1e-05`,
-         -`support_response_sharpness_C=100000.0`,
-         -avg_len, -len_inverse_sharpe_ratio, -len_std,
-         -support_response_linearity_pv, -support_response_linearity_r,
-         -`obj_final_position_invstd_objects=target`,
-         -`obj_final_position_invstd_objects=drop`
-         )
+  select(obj_final_position_std, 
+         normed_velocity_std_after_first_collision_objects, 
+         avg_final_radius_objects,
+         avg_max_radius_objects,
+         max_radius_std_objects,
+         support_combo, 
+         support_sharpness_mean,
+         support_sharpness_accuracy_mean,
+         len_combo,
+         drop, target, relation)
 
 
 
@@ -111,7 +141,7 @@ softmax <- function(weights, beta=1, smooth=1e-7) {
   num <- exp(beta * probs)
   return(num / sum(num))
 }
-
+# softmax(c(.7,.3), beta=2)
 
 get_model_target_choice_props <- function(feat_df, hum_df, beta) {
   hum_df <- hum_df %>% arrange(relation, drop) # same order as model df
@@ -137,27 +167,17 @@ feat_names = names(mdat)[1:(ncol(mdat)-4)]
 # for each feature, want to fit beta to maximize correlation between human and model choices
 #feat_df <- get_feature_df(mdat, feat_names[1])
 
-adult_fits = list()
-for(feat in feat_names) {
-  feat_df <- get_feature_df(mdat, feat)
-  #paste(feat, evalFit(feat_df, adult_trial_agg, 1))
-  adult_fits[[feat]] = DEoptim(evalFit, lower=.7, upper=5, DEoptim.control(reltol=.001, NP=30, itermax=70), 
-                feat_df=feat_df, hum_df=adult_trial_agg)
-}
-```
-
-
-
-# Compare to children's choices
-
-```{r}
 child_trial_agg <- child_long %>% group_by(relation, drop, target) %>% # alt, 
   summarize(chose_target=mean(chose_target, na.rm=T), n=n())
 
+adult_fits = list()
 child_fits = list()
 for(feat in feat_names) {
   feat_df <- get_feature_df(mdat, feat)
-  child_fits[[feat]] = DEoptim(evalFit, lower=.7, upper=5, DEoptim.control(reltol=.001, NP=30, itermax=70), 
+  #paste(feat, evalFit(feat_df, adult_trial_agg, 1))
+  adult_fits[[feat]] = DEoptim(evalFit, lower=.5, upper=10, DEoptim.control(reltol=.001, NP=30, itermax=20), 
+                feat_df=feat_df, hum_df=adult_trial_agg)
+  child_fits[[feat]] = DEoptim(evalFit, lower=.5, upper=10, DEoptim.control(reltol=.001, NP=30, itermax=20), 
                 feat_df=feat_df, hum_df=child_trial_agg)
 }
 ```
@@ -165,14 +185,14 @@ for(feat in feat_names) {
 ## Now try engineered features
 
 ```{r adult-eng-feats}
-feat_names2 = names(mdat_eng)[5:ncol(mdat_eng)]
+feat_names2 = names(mdat_eng)[1:(ncol(mdat_eng)-3)]
 
 for(feat in feat_names2) {
   feat_df <- get_feature_df(mdat_eng, feat)
   #paste(feat, evalFit(feat_df, adult_trial_agg, 1))
-  adult_fits[[feat]] = DEoptim(evalFit, lower=.7, upper=5, DEoptim.control(reltol=.001, NP=30, itermax=70), 
+  adult_fits[[feat]] = DEoptim(evalFit, lower=.5, upper=10, DEoptim.control(reltol=.001, NP=30, itermax=20), 
                 feat_df=feat_df, hum_df=adult_trial_agg)
-  child_fits[[feat]] = DEoptim(evalFit, lower=.7, upper=5, DEoptim.control(reltol=.001, NP=30, itermax=70), 
+  child_fits[[feat]] = DEoptim(evalFit, lower=.5, upper=10, DEoptim.control(reltol=.001, NP=30, itermax=20), 
                 feat_df=feat_df, hum_df=child_trial_agg)
 }
 
