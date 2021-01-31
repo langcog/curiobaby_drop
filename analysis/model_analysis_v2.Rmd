@@ -13,9 +13,9 @@ require(here)
 FIT_MODELS = F
 ```
 
-## Load data
+## Preprocessing
 
-```{r, load-data, echo=F}
+```{r, load-data, echo=F, FIT_MODELS=F}
 
 load_data <- function(fname) {
   raw <- read.table(here(paste0("models/",fname,".csv")), sep=',')
@@ -109,7 +109,13 @@ mdat_eng <- mdat %>%
          drop, target, relation)
 
 mdat <- mdat %>% left_join(mdat_eng)
+```
 
+# Load human data
+
+Define helper functions
+
+```{r, echo=F}
 # selects given feature and returns wide df that can be compared with behavioral data
 get_feature_df <- function(mdat, fname) {
   fdf <- mdat[,c(fname,"drop","target","relation")] %>%
@@ -117,11 +123,6 @@ get_feature_df <- function(mdat, fname) {
     arrange(relation,drop)
 }
 
-```
-
-# Fit to adult choice proportions
-
-```{r, echo=F}
 load(file=here("paper/processed_data.RData")) 
 
 # ToDo: hold out half the subjects and CV on other half
@@ -156,15 +157,13 @@ get_model_target_choice_props <- function(feat_df, hum_df, beta) {
 evalFit <- function(feat_df, hum_df, beta, cor_objective=F, relation=NA) {
   hum_df <- get_model_target_choice_props(feat_df, hum_df, beta)
   if(!is.na(relation)) {
-    hum_df <- subset(hum_df, relation==relation)
+    hum_df <- hum_df[which(hum_df$relation==relation),]
   }
   r = with(hum_df, cor(chose_target, Model_targ_prop))
   mse = with(hum_df, sum((chose_target - Model_targ_prop)^2)) / nrow(hum_df) 
   if(cor_objective) mse = mse - r # also try to minimize -correlation
   return(mse) # return negative cor since DEoptim minimizes
 }
-
-require(DEoptim)
 
 feat_names = setdiff(names(mdat), c("drop","target","relation","trial"))
 # for each feature, want to fit beta to maximize correlation between human and model choices
@@ -174,13 +173,14 @@ child_trial_agg <- child_long %>% group_by(relation, drop, target) %>% # alt,
   summarize(chose_target=mean(chose_target, na.rm=T), n=n())
 ```
 
+
 ## Fit models to all trials (MSE objective)
 
 Find best-fitting betas per feature for children and adults, contain and support trials together.
 
 ```{r fit-models-to-all-trials-mse, echo=F, eval=FIT_MODELS}
-#adult_fits = list()
-#child_fits = list()
+require(DEoptim)
+
 all_trials_mse <- tibble()
 
 for(feat in feat_names) {
@@ -273,9 +273,8 @@ save(mdat, all_trials_mse, all_trials_mse_r,
 ```
 
 
-## Fit separately to contain and support trials (MSE + r)
+Could also fit separately to contain and support trials with MSE - r objective...
 
-NOT DONE
 
 ```{r}
 load(here("models/model_data.RData"))
@@ -292,7 +291,7 @@ knitr::kable(fit_tab, digits = 3)
 ```
 
 
-## Fits to all trials (MSE + r)
+## Fits to all trials (MSE - r)
 
 ```{r, echo=F}
 all_trials_mse_r <- all_trials_mse_r %>% mutate(beta = as.numeric(beta),
@@ -308,13 +307,13 @@ knitr::kable(fit_tab, digits = 3)
 ## Fits to support trials (MSE)
 
 ```{r, echo=F}
-fit_tab <- supp_trials_mse %>% pivot_wider( names_from = Age, values_from = c(beta, mse)) %>%
+fit_tab <- supp_trials_mse %>% pivot_wider(names_from = Age, values_from = c(beta, mse)) %>%
   arrange(mse_adults)
 
 knitr::kable(fit_tab, digits = 3)
 ```
 
-## Fits to support trials (MSE)
+## Fits to containment trials (MSE)
 
 ```{r, echo=F}
 fit_tab <- cont_trials_mse %>% pivot_wider(names_from = Age, values_from = c(beta, mse)) %>%
@@ -324,85 +323,85 @@ knitr::kable(fit_tab, digits = 3)
 ```
 
 
-```{r, eval=F}
-fits %>% ggplot(aes(x=beta, y=mse, color=AgeGroup)) +
-  #geom_text(aes(label=feature)) + 
-  geom_point(alpha=.5) +
-  theme_minimal()
-```
-So generally, children's choices are best explained by small values of beta (.5, the minimum tested).
+What do the predicted choice proportions from the best features for each age group look like?
+Let's look at the best feature for each each group from each fit method.
 
-
-What do the predicted choice proportions from the best feature for each age group look like?
-
-```{r}
+```{r, echo=F, message=F}
 require(ggpubr)
 
 plot_model_preds <- function(feat_name, fits, hum_data, age="adults", mdat) {
-  beta = 1 #subset(fits, AgeGroup==age & feature==feat_name)$beta
+  this_dat = subset(fits, Age==age & feature==feat_name)
   md <- get_model_target_choice_props(get_feature_df(mdat, feat_name), hum_data, beta)
   md %>% ggplot(aes(x=chose_target, y=Model_targ_prop, color=relation)) +
     geom_abline(slope=1, intercept=0, linetype="dashed") +
-    geom_point(alpha=.5) + geom_smooth(method='lm') + 
+    geom_point(alpha=.5) + geom_smooth(method='lm', formula=y ~ x) + 
     xlab("Human Choice Probability") + 
     ylab("Model Choice Probability") +
     ggtitle(paste0(feat_name,": ",age)) + theme_minimal() + 
-    xlim(0,1) + ylim(0,1)
+    xlim(0,1) + ylim(0,1) +
+    annotate("text", x=.5, y=0.05, 
+             label = paste0("beta = ",round(this_dat$beta,2),", MSE = ",round(this_dat$mse, 3))) # 
 }
+```
 
-ad_supp <- plot_model_preds("support_probability", fits, adult_trial_agg, age="adults", mdat)
-ch_supp <- plot_model_preds("support_probability", fits, child_trial_agg, age="children", mdat)
+
+
+## Plots of other best-fitting features for all trials (MSE fits)
+
+```{r, echo=F, message=F}
+ad_supp <- plot_model_preds("support_probability", all_trials_mse, adult_trial_agg, age="adults", mdat)
+ch_supp <- plot_model_preds("support_probability", all_trials_mse, child_trial_agg, age="children", mdat)
 
 ggarrange(ad_supp, ch_supp, nrow=1, common.legend = T)
 ```
 
 
-```{r}
-ad <- plot_model_preds("support_combo", fits, adult_trial_agg, age="adults", mdat_eng)
-ch <- plot_model_preds("support_combo", fits, child_trial_agg, age="children", mdat_eng)
+```{r,  echo=F, message=F}
+ad <- plot_model_preds("support_combo", all_trials_mse, adult_trial_agg, age="adults", mdat)
+ch <- plot_model_preds("support_combo", all_trials_mse, child_trial_agg, age="children", mdat)
 
 ggarrange(ad, ch, nrow=1, common.legend = T)
 ```
 
-```{r}
-ad <- plot_model_preds("support_std", fits, adult_trial_agg, age="adults", mdat)
-ch <- plot_model_preds("support_std", fits, child_trial_agg, age="children", mdat)
+```{r, echo=F, message=F}
+ad <- plot_model_preds("support_std", all_trials_mse, adult_trial_agg, age="adults", mdat)
+ch <- plot_model_preds("support_std", all_trials_mse, child_trial_agg, age="children", mdat)
 
 ggarrange(ad, ch, nrow=1, common.legend = T)
 ```
 
-```{r}
-ad <- plot_model_preds("support_response_sharpness_C=0.0001", fits, adult_trial_agg, age="adults", mdat)
-ch <- plot_model_preds("support_response_sharpness_C=0.0001", fits, child_trial_agg, age="children", mdat)
+```{r,  echo=F, message=F}
+ad <- plot_model_preds("support_response_sharpness_C=0.01", all_trials_mse, adult_trial_agg, age="adults", mdat)
+ch <- plot_model_preds("support_response_sharpness_C=0.01", all_trials_mse, child_trial_agg, age="children", mdat)
 
 ggarrange(ad, ch, nrow=1, common.legend = T)
 ```
 
-```{r}
-ad <- plot_model_preds("len_inverse_sharpe_ratio", fits, adult_trial_agg, age="adults", mdat)
-ch <- plot_model_preds("len_inverse_sharpe_ratio", fits, child_trial_agg, age="children", mdat)
+```{r,  echo=F, message=F}
+ad <- plot_model_preds("len_inverse_sharpe_ratio", all_trials_mse, adult_trial_agg, age="adults", mdat)
+ch <- plot_model_preds("len_inverse_sharpe_ratio", all_trials_mse, child_trial_agg, age="children", mdat)
 
 ggarrange(ad, ch, nrow=1, common.legend = T)
 ```
 
 
-```{r}
-ad <- plot_model_preds("avg_final_radius_objects=target", fits, adult_trial_agg, age="adults", mdat)
-ch <- plot_model_preds("avg_final_radius_objects=target", fits, child_trial_agg, age="children", mdat)
+```{r,  echo=F, message=F}
+ad <- plot_model_preds("avg_final_radius_objects=target", all_trials_mse, adult_trial_agg, age="adults", mdat)
+ch <- plot_model_preds("avg_final_radius_objects=target", all_trials_mse, child_trial_agg, age="children", mdat)
 
 ggarrange(ad, ch, nrow=1, common.legend = T)
 ```
 
-```{r}
-ad <- plot_model_preds("support_response_linearity_r", fits, adult_trial_agg, age="adults", mdat)
-ch <- plot_model_preds("support_response_linearity_r", fits, child_trial_agg, age="children", mdat)
+```{r,  echo=F, message=F}
+ad <- plot_model_preds("support_response_linearity_r", all_trials_mse, adult_trial_agg, age="adults", mdat)
+ch <- plot_model_preds("support_response_linearity_r", all_trials_mse, child_trial_agg, age="children", mdat)
 
 ggarrange(ad, ch, nrow=1, common.legend = T)
 ```
 
-```{r}
-ad <- plot_model_preds("support_sharpness_mean", fits, adult_trial_agg, age="adults", mdat_eng)
-ch <- plot_model_preds("support_sharpness_mean", fits, child_trial_agg, age="children", mdat_eng)
+```{r,  echo=F, message=F}
+ad <- plot_model_preds("support_sharpness_mean", all_trials_mse, adult_trial_agg, age="adults", mdat)
+ch <- plot_model_preds("support_sharpness_mean", all_trials_mse, child_trial_agg, age="children", mdat)
 
 ggarrange(ad, ch, nrow=1, common.legend = T)
 ```
