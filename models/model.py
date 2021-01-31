@@ -160,7 +160,7 @@ def obj_final_position_invstd(posvecs):
     model expressing 1 - total std in final positions 
     of objects (can be subselected for specific object)
     """
-    return 1 - obj_final_position_std(posvecs, objects=objects)
+    return 1 - obj_final_position_std(posvecs)
 
 
 def get_radii(data, objects=None):
@@ -216,20 +216,28 @@ def get_collision_frames(d):
     return collision_frames
 
 
+def onelist(*k):
+    return np.ones(k).tolist()
+
+
 def normed_velocity_after_first_collision(data, objects=None, window=5):
     fcfs = list(map(get_first_collision_frame, data))
     object_inds = get_object_inds(objects)
     vels = get_velocities(data, object_inds=object_inds)
     #V is of shape (num_trials, window, num_objects, 3)
-    V = np.array([v[fcf:fcf + window] for v, fcf in zip(vels, fcfs) if fcf is not None])
+    V = np.array([v[fcf:fcf + window] if fcf is not None else onelist(window, len(object_inds), 3) for v, fcf in zip(vels, fcfs)])
     return V
 
 
 def normed_velocity_std_after_first_collision(V):
-    Vm = V.mean(axis=1)
-    Vn = np.linalg.norm(Vm, axis=2)
-    W = Vm / Vn[:, :, np.newaxis]
-    return np.sqrt(W.var(axis=0).sum())
+    V = np.array(V)
+    #V is of shape (num_trials, window, num_objects, 3)
+    Vm = V.mean(axis=1) #mean over window, so Vm is of shape (num_trials, num_objects, 3)
+    Vn = np.linalg.norm(Vm, axis=2) #norm over vector components
+    W = Vm / Vn[:, :, np.newaxis] 
+    Wvar = W.var(axis=0).sum() #total variance over trials, summed over objects
+    Wstd = np.sqrt(Wvar) #get std
+    return Wstd
 
 
 def get_collision_types(d, collision_key='collisions'):
@@ -258,7 +266,6 @@ def get_support(d):
     relationships, but ignores situations when one object is leaning the other but is 
     also supported by the floor.  
     """
-    print('... getting supports')
     c_ids = get_collision_ids(d)
     c_ids_env = get_collision_ids(d, collision_key='env_collisions')
     support = ((len(c_ids[-2]) == 2) and (len(c_ids_env[-2]) <= 1))
@@ -266,6 +273,7 @@ def get_support(d):
 
 
 def get_supports_and_radii(data):
+    print('... getting supports and radii')
     radfunc = lambda x: np.linalg.norm(x['static']['drop_position'][[0, 2]])
     radii = list(map(radfunc, data))
     supports = list(map(get_support, data))
@@ -277,7 +285,7 @@ def support(supports_and_radii):
     arising at the end of a trial
     """    
     supports = [sr['support'] for sr in supports_and_radii]
-    radii = [sr['radii'] for sr in supports_and_radii]
+    radii = [sr['radius'] for sr in supports_and_radii]
 
     #basic statistics
     m = np.mean(supports)
@@ -356,11 +364,11 @@ model_funcs = [{'func': (avg_len, get_time_list)},
                 'args': {'objects': 'drop'}},
                {'func': (max_radius_std, get_radii), 
                 'args': {'objects': 'target'}},
-               {'func': (normed_velocity_after_first_collision, 
-                         normed_velocity_std_after_first_collision),
+               {'func': (normed_velocity_std_after_first_collision, 
+                         normed_velocity_after_first_collision),
                 'args': {'objects': 'drop'}},
-               {'func': (normed_velocity_after_first_collision, 
-                         normed_velocity_std_after_first_collision),
+               {'func': (normed_velocity_std_after_first_collision, 
+                         normed_velocity_after_first_collision),
                 'args': {'objects': 'target'}},
                {'func': (support, get_supports_and_radii)}
               ]
@@ -387,8 +395,8 @@ def get_result(mf, df, data, kwargs, name, splits):
     for lsplit, rsplit in splits:
         ldata_out = [data_out[i] for i in lsplit]
         rdata_out = [data_out[i] for i in rsplit]
-        loutput = mf(ldata_out, **kwargs)
-        routput = mf(rdata_out, **kwargs)
+        loutput = mf(ldata_out)
+        routput = mf(rdata_out)
         if hasattr(loutput, 'keys'):
             for k in loutput:
                 result[name + '_' + k]['splits'].append((loutput[k], routput[k]))
@@ -442,7 +450,8 @@ def get_all_stats(base_dir, out_dir, num_splits=100):
     for i in range(len(scenarios)):
         ((sd, st), tp) = scenarios[i]
         out = pool.apply_async(get_and_save_stats, 
-                               (sd, st, tp, base_dir, out_dir, num_splits))
+                               (sd, st, tp, base_dir, out_dir),
+                               {'num_splits': num_splits})
         outs.append(out)
     done = [out.get() for out in outs]
     pool.close()
@@ -461,9 +470,11 @@ def get_object_names(sd, st):
     return drop_obj, target_obj
 
 
-def collect_stats(dirn, featpath, figpath):
+def collect_stats(dirn, featpath, featstdpath, corrpath, figpath):
     scenarios = get_drop_target_pairs(SCENARIOS)
     records = []
+    std_records = []
+    corr_records = [] 
     for i in range(len(scenarios)):
         ((sd, st), tp) = scenarios[i]
         drop_obj, target_obj = get_object_names(sd, st)
@@ -471,12 +482,39 @@ def collect_stats(dirn, featpath, figpath):
         pth = os.path.join(dirn, sname)
         with open(pth, 'rb') as _f:
             outcomes = pickle.loads(_f.read())
-            outcomes['drop_object'] = drop_obj
-            outcomes['target_object'] = target_obj
-            outcomes['condition'] = tp
-            records.append(outcomes)
+            all_outcomes = {k: v['all'] for k, v in outcomes.items()}    
+            all_outcomes['drop_object'] = drop_obj
+            all_outcomes['target_object'] = target_obj
+            all_outcomes['condition'] = tp
+            records.append(all_outcomes)
+            split_outcomes = {k: v['splits'] for k, v in outcomes.items()}
+            std_outcomes = {}
+            corr_outcomes = {}
+            for k, v in split_outcomes.items():
+                w0, w1 = list(zip(*v))
+                w = np.array(w0 + w1)
+                wstd = w.std()
+                std_outcomes[k] = wstd
+                corr_rec = (np.mean(w0), np.mean(w1))
+                corr_outcomes[k] = corr_rec
+            
+            std_outcomes['drop_object'] = drop_obj
+            std_outcomes['target_object'] = target_obj
+            std_outcomes['condition'] = tp
+            std_records.append(std_outcomes)
+            corr_records.append(corr_outcomes)
+            
     features = pd.DataFrame(records)
     features.to_csv(featpath, index=False)
+
+    std_features = pd.DataFrame(std_records)
+    std_features.to_csv(featstdpath, index=False)
+
+    ks = list(corr_records[0].keys())
+    corrs = {k: stats.pearsonr([c[k][0] for c in corr_records], [c[k][1] for c in corr_records])[0] for k in ks}
+    corrframe = pd.DataFrame([corrs])
+    corrframe.to_csv(corrpath, index=False) 
+
     K = list(filter(lambda x: x not in ['drop_object', 'target_object', 'condition'],
                features.columns))
     C = np.array([[stats.pearsonr(features[k1],
