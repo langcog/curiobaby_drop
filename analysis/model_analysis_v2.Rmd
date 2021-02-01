@@ -210,7 +210,6 @@ for(feat in feat_names) {
 all_trials_mse_r <- all_trials_mse_r %>% mutate(beta = as.numeric(beta),
                                                 mse = as.numeric(mse))
 
-save(all_trials_mse, file=here("models/all_trials_mse.RData"))
 ```
 
 ## Fit models to all trials (MSE - r objective)
@@ -235,7 +234,6 @@ for(feat in feat_names) {
 
 all_trials_mse_r <- all_trials_mse_r %>% mutate(beta = as.numeric(beta),
                                                 mse = as.numeric(mse))
-
 ```
 
 ## Fit separately to contain and support trials (MSE)
@@ -456,7 +454,23 @@ ad_df$model_sd = get_model_error_bars("support_probability", mdat_std)
 ch_df = get_model_target_choice_props(get_feature_df(mdat, "support_probability"), child_trial_agg, ch_feat[1,]$beta)
 ch_df$model_sd = get_model_error_bars("support_probability", mdat_std)
 
-save(ad_df, ch_df, file=here("models/support_probability_fit_df.RData"))
+
+supp_prob_beta1 <- 
+  bind_rows(get_model_target_choice_props(get_feature_df(mdat, "support_probability"), adult_trial_agg, beta=1) %>% mutate(AgeGroup="adults"),
+            get_model_target_choice_props(get_feature_df(mdat, "support_probability"), child_trial_agg, beta=1) %>% mutate(AgeGroup="children") %>% select(-n))
+
+
+
+supp_resp_sharp_beta1 <- 
+  bind_rows(get_model_target_choice_props(get_feature_df(mdat, "support_response_sharpness_C=0.01"), adult_trial_agg, beta=1) %>% mutate(AgeGroup="adults"),
+            get_model_target_choice_props(get_feature_df(mdat, "support_response_sharpness_C=0.01"), child_trial_agg, beta=1) %>% mutate(AgeGroup="children") %>% select(-n))
+
+supp_resp_sharp_beta_opt <- 
+  bind_rows(get_model_target_choice_props(get_feature_df(mdat, "support_response_sharpness_C=0.01"), adult_trial_agg, beta=1.94) %>% mutate(AgeGroup="adults"),
+            get_model_target_choice_props(get_feature_df(mdat, "support_response_sharpness_C=0.01"), child_trial_agg, beta=0.810) %>% mutate(AgeGroup="children") %>% select(-n))
+
+save(ad_df, ch_df, supp_prob_beta1, supp_resp_sharp_beta1, supp_resp_sharp_beta_opt,
+     file=here("models/support_probability_fit_df.RData"))
 
 supp_std_prob_cor <- get_feature_cor("support_std", "support_probability", mdat) # .72
 
@@ -472,7 +486,7 @@ ggarrange(ad, ch, nrow=1, common.legend = T)
 ### How much of the total explainable variance (e.g. relative to measurement noise) is explained by the best model for the adult data?
 
 ```{r}
-md <- get_model_target_choice_props(get_feature_df(mdat, feat_name), hum_data, this_dat$beta)
+#md <- get_model_target_choice_props(get_feature_df(mdat, feat_name), hum_data, this_dat$beta)
 
 ```
 
