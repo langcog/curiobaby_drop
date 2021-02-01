@@ -295,17 +295,17 @@ The child was asked to verbally select target object and then to indicate whethe
 ## Results
 
 We examined children's choice of target objects to determine if children were choosing randomly, or had consistent preferences for some objects. 
-Table 1 shows the proportion of children ("child" column) choosing the designed target relation for each of the 20 trials, alongside the adult choice proportions from Experiment 1 [maybe just drop Table 1?]. 
+Table 1 shows the proportion of children ("child" column) choosing the designed target relation for each of the 20 trials, alongside the adult choice proportions from Experiment 1. 
 Based on the binomial distribution, any of the trials on which more than 41 of the 66 participants agree (i.e., >0.64 or <0.36) significantly differ (*p*<.05) from chance. <!-- stricter crit for mult comparisons? Bonf=.0025 -->
 Children significantly preferred the designed relation on eight of the 10 containment trials, while only significantly preferring two of the 10 support relation choices.
 On the remaining two containment trials and the other eight support trials, children's preferences also did not significantly differ from chance against the designed relation.
 
 Were children more consistent in their choices on support or containment trials?
 As for adults, averaging each child's binary responses for each trial type revealed a stronger preference for containment relations ($M=$ `r round(ch_rel_means[1,]$M,2)`) than support relations ($M=$ `r round(ch_rel_means[2,]$M,2)`; paired `r t_apa(ch_supp_cont, format="rmarkdown", print=F)`).
-Overall, children did not show a significant preference for choosing the support relation [should we add a regression with trial_type * age (3 - 18=adult)?].
+Overall, children did not show a significant preference for choosing the support relation. <!-- [should we add a regression with trial_type * age (3 - 18=adult)?] -->
 Figure 4 shows the proportion of participants' choice of the designed target relation broken down by relation type and age group, showing a preference for the designed relations that increased with age, and that was stronger for containment.
 
-```{r adults-vs-children-relational-choices, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.5, fig.height=3.25, set.cap.width=T, num.cols.cap=1, fig.cap = "Comparison of children's vs. adults' choices for each type of trial, with bootstrapped 95\\% confidence intervals."}
+```{r adults-vs-children-relational-choices, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.5, fig.height=3.25, set.cap.width=T, num.cols.cap=1, fig.cap = "Children's vs. adults' choices for each type of trial, with bootstrapped 95\\% confidence intervals."}
 pos = position_dodge(width = .9)
 
 combo_dat %>% 
