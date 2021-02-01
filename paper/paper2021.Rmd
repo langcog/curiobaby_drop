@@ -75,20 +75,17 @@ Moreover, extant theories have rarely provided quantitatively precise enough pre
 
 The goal of the current paper is to help close this gap by proposing a novel paradigm to advance our theoretical understanding of curiosity, specifically within the domain of physical object interactions [@kubricht2017intuitive].
 First, we present an empirical investigation of the pattern of actions taken by children and adults in a novel physical exploration task. 
-We then present a set of heuristic models of curiosity based on a variety of metrics of simulated interactions (e.g., measuring likelihood of a dropped object coming to rest on a target object), and test the degree to which these features predict children and adults' behaviors in the same task.
+We then present a set of heuristic models of curiosity based on a variety of metrics of simulated interactions (e.g., likelihood of a dropped object coming to rest on a target object), and test the degree to which these features predict children and adults' behaviors in the same task.
 <!-- Finally, we evaluate the quantitative correspondence between the exploratory actions taken by an artificial agent that instantiates our computational theory and those taken by human children on the same set of tasks.  -->
 
 We take inspiration from a large body of prior work in developmental psychology investigating the development of knowledge about physical objects, their properties, and how they interact [@hespos2012physics; @smith2018developing; @Baillargeon2007]. 
-Children both spend a remarkably amount of time across exploring how different objects and surfaces interact during naturalistic play [@fenson1976] and spend longer time exploring objects that appear to violate physical laws (e.g., an object that appears to pass through a wall; @Stahl2015; @Baillargeon2007).  
- In other words, children seem to actively learn about physical interactions by intervening on the world and observing the consequences of their actions [@needham2000improvements; @Gopnik2009; @gureckis2012self]. 
+Children both spend a remarkably amount of time across exploring how different objects and surfaces interact during naturalistic play [@fenson1976] and spend longer time exploring objects that appear to violate physical laws (e.g., an object that appears to pass through a wall; @Stahl2015; @Baillargeon2007).
+In other words, children seem to actively learn about physical interactions by intervening on the world and observing the consequences of their actions [@needham2000improvements; @Gopnik2009; @gureckis2012self]. 
 However, relatively little work has examined what types of physical interactions children are most interested in testing, or linked children's actions to formal theories of physical interactions or exploratory behavior.
-Instead, most work that has investigated exploratory behavior in children has done so by examining how they play with relatively complex objects -- for example, documenting the number of functions discovered while playing with a novel toy [e.g., @Cook2011; @Bonawitz2012; @Gweon2014].  
-We developed a novel physical exploration task in which children, adults, or AI agents choose which series of physical experiments to perform and observe the results of each in real time.
+Instead, most work that has investigated exploratory behavior in children has done so by examining how they play with relatively complex objects -- for example, documenting the number of functions discovered while playing with a novel toy [e.g., @Cook2011; @Bonawitz2012; @Gweon2014].
 
-
-<!-- High-level statement of our approach -->
-In sum, this paper presents a paradigm and model for testing theories of curiosity about physical interactions. 
-<!-- and defining its role in guiding the development of knowledge about the physical world.  -->
+We developed a novel physical exploration task in which children, adults, or AI agents can choose which series of physical experiments to perform, <!-- and observe the results of each in real time.-->
+and then demonstrate how this paradigm can be used to test theories of curiosity about physical interactions. 
 First, we measured adults' and children's (3-7 years of age) preferences in a novel physical exploration task; participants were asked to choose one of two objects (e.g., a sphere, a dumbbell, see Figure 1) to drop onto a target object (e.g., a pyramid) with the goal of the creating the most interesting physical interaction (see Figure 2). 
 We then explore the predictive power of a variety of heuristic models of curiosity that operate on simulations of this same task with these same objects in a 3D environment. 
 We propose that using task-performing computational models and detailed measurement of human action selection on the same tasks has the promise to lead to more robust and precise theories of our curiosity about the physical world.
@@ -106,29 +103,6 @@ We propose that using task-performing computational models and detailed measurem
 <!-- Highlight main contributions of the paper -->
 <!-- One rich domain that young children are in the midst of learning about is the properties and affordances of physical objects.  -->
 <!-- A study of 9- to 16-month-olds found that infants' violation of expectations about a novel toy's hidden properties (e.g., making a sound) drives them to explore similar toys for longer [@Baldwin1993]. -->
-
-
-
-<!-- OLD INTRO: delete all?
-
-The goal of the current paper is to help close this gap by proposing a framework for advancing our theoretical understanding of curiosity. 
-First, we present an empirical investigation of the pattern of actions taken by children and adults in a novel physical exploration task. 
-We then present a set of heuristic models of curiosity based on a variety of metrics of simulated interactions (e.g., measuring likelihood of a dropped object coming to rest on a target object), and test whether these features predict people's preferences in the same task.
-Finally, we evaluate the quantitative correspondence between the exploratory actions taken by an artificial agent that instantiates our computational theory and those taken by human children on the same set of tasks. 
-
-Our empirical study is motivated by a large body of prior work in developmental psychology investigating the development of knowledge about physical objects, their properties, and how they interact (CITE Spelke, @Baillargeon2007), thus making exploration of physical objects a natural choice of domain to explore the implications of our theory. 
-However, the measures used in this literature have typically focused on either children's ability to discriminate types of events, or their ability to carry out particular tasks (e.g., shape sorting), but have not examined which types of interactions children are most interested in testing.
-For instance, a typical measure of physical curiosity has been longer looking times to surprising events than to expected events (e.g., objects appearing to pass through a wall; @Stahl2015; @Baillargeon2007). 
-Other work that has investigated exploratory behavior in children have used more granular measures, such as counting the number of functions discovered while playing with novel and complex toy [e.g., @Cook2011; @Bonawitz2012; @Gweon2014]. 
-Moreover, these studies have yet to directly constrain theories that predict which functions children will discover, and in what sequence. 
-What both of the standard looking-time and toy-exploration measures fail to capture when characterizing children's curiosity are the ways in which children actively learn by intervening on the world and observing the consequences of their actions [@Gopnik2009; @gureckis2012self]. 
-To address these limitations, we developed a novel physical exploration task in which children, adults, or AI agents choose which series of physical experiments to perform and observe the results of each in real time. 
-
-
-In sum, this paper presents a paradigm for testing and building theories of curiosity, and defining its role in guiding the development of knowledge about the physical world. 
-We present a study that measures adults' (Experiment 1) and children's (Experiment 2) preferences in a novel physical exploration task, a set of 20 heuristic models of curiosity that operate on simulations of this same task in a 3D environment, and comparisons between the preferences of children, adults, and these heuristic models on the same set of trials.
-Overall, our approach of coordinating the development of task-performing computational models and detailed measurement of human action selection on the same tasks has the promise to lead to more robust and precise theories of how curiosity guides cognitive development.
--->
 
 
 <!-- move this paragraph to GD if we want to discuss goals?
@@ -153,8 +127,7 @@ Thus, we set out to examine the development of these preferences, first in a lar
 ## Method
 
 ### Participants
-Participants were 200 adults recruited online via Amazon Mechanical Turk who were paid $1 for their participation.
-
+Participants were 200 adults recruited online via Amazon Mechanical Turk who were paid $1 for participating.
 
 ### Materials
 
