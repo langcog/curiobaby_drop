@@ -25,8 +25,10 @@ load_data <- function(fname) {
   names(mdat) = cnames
   for(c in 1:(ncol(mdat)-3)) {
     mdat[,c] = as.numeric(mdat[,c])
-    if(min(mdat[,c]) < 0) mdat[,c] = mdat[,c] + min(mdat[,c])
-    #print(paste("shifting",c,"so minimum is 0"))
+    if(min(mdat[,c]) < 0) {
+      mdat[,c] = mdat[,c] + min(mdat[,c])
+      print(paste("shifting",c,"so minimum is 0"))
+    }
   }
   mdat$trial = rep(1:20, each=2)
   # right now, each trial is 2 rows, 
@@ -42,9 +44,20 @@ load_data <- function(fname) {
 }
 
 # just 100 drops per trial
-mdat100 <- load_data("model_stats")
+#mdat100 <- load_data("model_stats")
 
 mdat <- load_data("model_stats250")
+
+# model split-half correlations and stds
+mdat_cor <- read_csv(here("models/model_stats250_corr.csv")) 
+# avg_len NA, but all others ~.997 - .999
+#View(mdat_cor)
+
+mdat_std <- load_data("model_stats250_std")
+mdat_std$drop = mdat$drop
+mdat_std$target = mdat$target
+mdat_std$relation = mdat$relation
+mdat_std$trial = mdat$trial
 
 sort(colMeans(mdat[,1:43]))
 # mean of obj_final_position_invstd_objects=drop is negative..
@@ -147,7 +160,7 @@ get_model_target_choice_props <- function(feat_df, hum_df, beta) {
   hum_df <- hum_df %>% arrange(relation, drop) # same order as model df
   hum_df$Model_targ_prop = 0
   for(i in 1:nrow(hum_df)) {
-    mod_cols = which(!is.na(feat_df[i,1:ncol(feat_df)]))[3:4] # CHECK THIS
+    mod_cols = which(!is.na(feat_df[i,1:ncol(feat_df)]))[3:4] 
     mod_choice = softmax(feat_df[i,mod_cols], beta=beta)
     hum_df[i,]$Model_targ_prop = as.numeric(mod_choice[hum_df[i,]$target] / sum(mod_choice))
   }
@@ -270,7 +283,6 @@ save(mdat, all_trials_mse, all_trials_mse_r,
 ```
 
 
-Could also fit separately to contain and support trials with MSE - r objective...
 
 
 ```{r load-model-data, echo=F}
@@ -424,11 +436,27 @@ When fit with MSE, the best-fitting feature for both children and adults is supp
 Note that although the MSE is quite low, the correlation between model and human responding for each trial is negative.
 
 ```{r}
+get_model_error_bars <- function(feat_name, mdat_std) {
+  # have std per drop, so we avg per trial (?) 
+  # (could get SEM for N=250 drops ?)
+  mdat_std <- mdat_std %>% arrange(relation, drop)
+  sd_trial <- rowMeans(matrix(mdat_std[,feat_name], nrow=20, byrow=T))
+  return(sd_trial)
+}
+
 ch_feat <- all_trials_mse %>% filter(Age=="children") %>%
   arrange(mse) 
 
 ad_feat <- all_trials_mse %>% filter(Age=="adults") %>%
   arrange(mse) 
+
+ad_df = get_model_target_choice_props(get_feature_df(mdat, "support_probability"), adult_trial_agg, ad_feat[2,]$beta)
+ad_df$model_sd = get_model_error_bars("support_probability", mdat_std)
+
+ch_df = get_model_target_choice_props(get_feature_df(mdat, "support_probability"), child_trial_agg, ch_feat[1,]$beta)
+ch_df$model_sd = get_model_error_bars("support_probability", mdat_std)
+
+save(ad_df, ch_df, file=here("models/support_probability_fit_df.RData"))
 
 supp_std_prob_cor <- get_feature_cor("support_std", "support_probability", mdat) # .72
 
@@ -436,9 +464,18 @@ supp_resp_sharp_prob_cor <- get_feature_cor("support_response_sharpness_C=0.01",
 
 ad <- plot_model_preds("support_probability", all_trials_mse, adult_trial_agg, age="adults", mdat)
 ch <- plot_model_preds("support_probability", all_trials_mse, child_trial_agg, age="children", mdat)
+# ToDo: add error bars to each trial for model (from mdat_std) and from humans...
 
 ggarrange(ad, ch, nrow=1, common.legend = T)
 ```
+
+### How much of the total explainable variance (e.g. relative to measurement noise) is explained by the best model for the adult data?
+
+```{r}
+md <- get_model_target_choice_props(get_feature_df(mdat, feat_name), hum_data, this_dat$beta)
+
+```
+
 
 The next-best feature for adults was support_std, which has r=`r round(supp_std_prob_cor$r, 2)` with the support_probability feature.
 The next-best feature for children was support_response_sharpness_C=0.01 (or C=.001, .0001, or 1e-05), which has r=`r round(supp_resp_sharp_prob_cor$r, 2)` with the support_probability feature.

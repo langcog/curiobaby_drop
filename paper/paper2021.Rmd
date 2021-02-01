@@ -372,7 +372,7 @@ combo_dat %>% group_by(drop, target, relation, ID) %>%
     geom_errorbarh(aes(xmin=ci_lower_adult, xmax=ci_upper_adult), alpha=.6) + 
     theme_bw() + ylim(0,1) + xlim(0,1) + 
     xlab("Adults' Choice Proportions") + ylab("Children's Choice Proportions") + 
-    geom_abline(xintercept=0, slope=1, linetype="dashed") +
+    geom_abline(intercept=0, slope=1, linetype="dashed") +
     geom_smooth(method = "lm") +
     theme(legend.position = "bottom")
   #geom_text(aes(label=target)) # 
@@ -423,7 +423,14 @@ The overall split-half reliability on the containment trials is *r* = `r round(m
 ## Comparison to Physical Simulations
 
 ```{r load-model-data}
-load(here("models/model_data.RData")) # mdat, mdat_eng, fits
+load(here("models/model_data.RData")) # mdat, all_trials_mse, all_trials_mse_r, etc.
+load(here("models/support_probability_fit_df.RData")) # ad_df, ch_df - model (w SD) vs. human (need 95%CIs)
+
+mdat <- ad_df %>% mutate(AgeGroup="adult") %>% 
+  bind_rows(ch_df %>% mutate(AgeGroup="child") %>% select(-n)) %>% 
+  mutate(mod_ci_lower = Model_targ_prop - 1.96*model_sd,
+         mod_ci_upper = Model_targ_prop + 1.96*model_sd) # 95% should fall within +/-1.96 SDs of mean
+# now just need 95% CIs for human data
 ```
 Using a physics engine and 3D models of the objects that were shown to participants, we constructed a simulation of each trial of the experiment and attempted to predict children's and adults' choices using a variety of heuristic models of the simulated physical interactions.
 For each trial's two possible drop object choices, we ran 250 simulated drops, and for each drop calculated a variety of features measuring the state of the model after the drop was completed.
@@ -437,8 +444,29 @@ We measure each of these features in 250 simulations of each possible drop in th
 Finally, we compare how well each of these simple heuristic models account for children's and adults' drop preferences on each trial.
 
 
-```{r}
-# plot the best feature for children, adults, 
+```{r human-vs-model-relational-choices, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.25, fig.height=5.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Comparison of model's vs. participants' choices for each type of trial, with bootstrapped 95\\% confidence intervals."}
+pos = position_dodge(width = .9)
+
+
+hum_ag <- combo_dat %>% group_by(drop, target, relation, ID) %>%
+  group_by(drop, target, relation, AgeGroup) %>%
+  tidyboot_mean(chose_target, na.rm=T) %>%
+  select(-n, -empirical_stat)
+
+hum_mod <- hum_ag %>% left_join(mdat)
+
+hum_mod %>%
+  ggplot(aes(x=mean, y=Model_targ_prop, group=relation, color=relation)) + 
+    geom_point(alpha=.6) + 
+    geom_errorbar(aes(ymin=mod_ci_lower, ymax=mod_ci_upper), alpha=.6) +
+    geom_errorbarh(aes(xmin=ci_lower, xmax=ci_upper), alpha=.6) + 
+    facet_wrap(~ AgeGroup, nrow=2) +
+    theme_bw() + ylim(0,1) + xlim(0,1) + 
+    xlab("Human Choice Proportions") + ylab("Model Choice Proportions") + 
+    geom_abline(intercept=0, slope=1, linetype="dashed") +
+    geom_smooth(method = "lm") +
+    theme(legend.position = "top")
+
 ```
 
 
@@ -455,7 +483,7 @@ Or are they less aware (or simply less interested in) support?
 Or do children find some other goal relatively more enticing?
 
 <!-- moved from old Intro: rewrite to discuss Haber et al. more -->
-Thexe results will serve as a test set for evaluating computational theories of curiosity, which in turn are inspired by classic descriptive theories positing that curiosity-driven behavior was the consequence of attentional capture by novel stimuli [e.g., @Berlyne1954; @Fantz1964], as well as theories providing qualitative explanations for curiosity-driven behavior as the result of learners' preferences for stimuli that are "moderately discrepant" in relation to their current knowledge state, and thereby provide opportunities to learn [@Kinney1976]. 
+These results will serve as a test set for evaluating computational theories of curiosity, which in turn are inspired by classic descriptive theories positing that curiosity-driven behavior was the consequence of attentional capture by novel stimuli [e.g., @Berlyne1954; @Fantz1964], as well as theories providing qualitative explanations for curiosity-driven behavior as the result of learners' preferences for stimuli that are "moderately discrepant" in relation to their current knowledge state, and thereby provide opportunities to learn [@Kinney1976]. 
 Recent studies have provided empirical support for this basic idea: 7- to 8-month-old infants are sensitive to stimulus complexity and prefer to look at moderately complex stimuli rather than simple or highly-complex stimuli [@Kidd2012; @Kidd2014].
 According to these theories, curiosity-driven behavior reflects a gap between the learner's knowledge and the state of the world [@Loewenstein1994], and thus they predict that as a learner gains additional knowledge, their preferences will shift toward more complex stimuli [@Dember1957].
 Although these theories have provided important qualitative insights, one of their major limitations is that they do not provide precise ways to characterize a learner's current knowledge state, how physical states of the world are represented in their mind, nor how discrepancies between a learner's knowledge and such states are compared.  
