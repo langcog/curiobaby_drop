@@ -426,25 +426,37 @@ The overall split-half reliability on the containment trials is *r* = `r round(m
 load(here("models/model_data.RData")) # mdat, all_trials_mse, all_trials_mse_r, etc.
 load(here("models/support_probability_fit_df.RData")) # ad_df, ch_df - model (w SD) vs. human (need 95%CIs)
 
+best_fits <- subset(all_trials_mse, feature=="support_probability")
+
 mdat <- ad_df %>% mutate(AgeGroup="adult") %>% 
   bind_rows(ch_df %>% mutate(AgeGroup="child") %>% select(-n)) %>% 
   mutate(mod_ci_lower = Model_targ_prop - 1.96*model_sd,
          mod_ci_upper = Model_targ_prop + 1.96*model_sd) # 95% should fall within +/-1.96 SDs of mean
 # now just need 95% CIs for human data
 ```
-Using a physics engine and 3D models of the objects that were shown to participants, we constructed a simulation of each trial of the experiment and attempted to predict children's and adults' choices using a variety of heuristic models of the simulated physical interactions.
+
+Using a physics engine [@gan2020threedworld] and 3D models of the objects that were shown to participants, we constructed a simulation of for each drop interaction in the experiment and attempted to predict children's and adults' choices using a variety of heuristic models based on the simulated physical interactions.
 For each trial's two possible drop object choices, we ran 250 simulated drops, and for each drop calculated a variety of features measuring the state of the model after the drop was completed.
-We selected features that we thought may provide good metrics for what people would found interesting. 
-For example, we collected for each drop the mean length of time before both objects come to rest (*avg_len*), as well as the standard deviation (SD) of that time (*len_std*).
-Some features were calculated separately for drop and target objects, such as: the SD of the object's final position (*obj_final_position_std_objects*) as well as the inverse of that (*obj_final_position_invstd_objects*), the mean final distance from the drop location (*avg_final_radius_objects*), the maximum final distance from the drop location (*avg_max_radius_objects*), the ... (*max_radius_std_objects*), ... (*normed_velocity_std_after_first_collision_objects*)
+We selected features that we thought may provide good metrics for what people could find interesting. 
+For example, we collected for each drop the mean length of time before both objects come to rest, as well as the standard deviation (SD) of that time.
+Some features were calculated separately for drop and target objects, such as the SD of each object's final position, the mean and maximum final distance of each object from the drop location, and the normed velocity of each object after first collision.
+We also tested a variety of features based on the likelihood of the dropped object coming to rest atop the target object--$Pr(support)$--and the robustness of this likelihood to small perturbations in drop position.
+Note that the model's definition of support does not distinguish support from containment.
 <!-- support_probability, support_std, support_response_linearity_r, support_response_linearity_pv  -->
 <!--len_inverse_sharpe_ratio, support_response_sharpness_C=1 -->
-[ToDo: describe *skillsiness*]
-We measure each of these features in 250 simulations of each possible drop in the experiment, and then use the resulting metrics to generate relative preferences for each of the drop choices on each trial. 
-Finally, we compare how well each of these simple heuristic models account for children's and adults' drop preferences on each trial.
 
 
-```{r human-vs-model-relational-choices, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.25, fig.height=5.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Comparison of model's vs. participants' choices for each type of trial, with bootstrapped 95\\% confidence intervals."}
+We measure each of these features in 250 simulations of each possible drop in the experiment, and then use the resulting values to generate relative preferences for each of the drop choices on each trial. 
+A model's preference on any given trial was assumed to be proportional to the relative magnitude of the feature values for the possible physical interactions on that trial, scaled by a softmax parameter $\beta$.
+For each model (feature), we optimized $\beta$ separately to find best-fitting values for children's and adults' drop preferences, with the objective of minimizing mean squared error (MSE) between model and human choice proportions across all 20 trials.
+
+### Results 
+The best-fitting feature was $Pr(support)$ for both children ($\beta =$ `r round(best_fits$beta[2],2)`, MSE = `r round(best_fits$mse[2], 2)`) and adults ($\beta =$ `r round(best_fits$beta[1],2)`, MSE = `r round(best_fits$mse[1], 2)`).
+<!-- other support-related features also fared well -->
+Figure 6 shows this model's fitted preferences plotted against those of children and adults.
+Although the model captures people's overall mean preference for the target relations, the trial-level correlation with human behavior is not very high (overall $r=$ `r round(cor(mdat$chose_target, mdat$Model_targ_prop),2)`).
+
+```{r human-vs-model-relational-choices, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.25, fig.height=4.75, set.cap.width=T, num.cols.cap=1, fig.cap = "Comparison of $Pr(support)$ model's vs. participants' choices for each type of trial, with 95\\% CIs."}
 pos = position_dodge(width = .9)
 
 
@@ -455,7 +467,7 @@ hum_ag <- combo_dat %>% group_by(drop, target, relation, ID) %>%
 
 hum_mod <- hum_ag %>% left_join(mdat)
 
-hum_mod %>%
+hum_mod %>% mutate(AgeGroup = ifelse(AgeGroup=="adult", "adults", "children")) %>%
   ggplot(aes(x=mean, y=Model_targ_prop, group=relation, color=relation)) + 
     geom_point(alpha=.6) + 
     geom_errorbar(aes(ymin=mod_ci_lower, ymax=mod_ci_upper), alpha=.6) +
@@ -465,7 +477,7 @@ hum_mod %>%
     xlab("Human Choice Proportions") + ylab("Model Choice Proportions") + 
     geom_abline(intercept=0, slope=1, linetype="dashed") +
     geom_smooth(method = "lm") +
-    theme(legend.position = "top")
+    theme(legend.position = "none")
 
 ```
 
@@ -473,7 +485,7 @@ hum_mod %>%
 
 # Discussion 
 This study aimed 1) to measure the consistency of children's and adults' preferences for particular object interactions, and 2) to determine whether people's interest was predicted by particular features of the imagined physical interactions between objects.
-After finding surprising consistency in an in-person pilot study of adults, an online study designed to make possible the same support and containment relations between dropped and target objects replicated this finding of consistency: adults are interested in dropping objects into containers, and to a lesser degree on top of supporting objects.
+In an online study that gave adults the opportunity to make drop choices that could result in either a likely support or likely containment relation on each trial, we found that adults consistently chose targets likely to contain the dropped object, and to a lesser degree chose target objects that were likely to support the dropped object.
 Experiment 2 found the same pattern in children, but with greater noise -- even to the extent that younger children were at-chance at choosing the support relation on most trials.
 
 Thus, we find an early-emerging interest in containment [@Casasola2003] that persists into adulthood, along with a weaker interest in support relations.
