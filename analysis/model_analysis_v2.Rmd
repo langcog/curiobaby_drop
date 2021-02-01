@@ -9,13 +9,14 @@ output: html_document
 knitr::opts_chunk$set(echo = F)
 require(tidyverse)
 require(here)
+require(kableExtra)
 
 FIT_MODELS = F
 ```
 
 ## Preprocessing
 
-```{r, load-data, echo=F, FIT_MODELS=F}
+```{r, load-data, echo=F, eval=FIT_MODELS}
 
 load_data <- function(fname) {
   raw <- read.table(here(paste0("models/",fname,".csv")), sep=',')
@@ -25,7 +26,7 @@ load_data <- function(fname) {
   for(c in 1:(ncol(mdat)-3)) {
     mdat[,c] = as.numeric(mdat[,c])
     if(min(mdat[,c]) < 0) mdat[,c] = mdat[,c] + min(mdat[,c])
-    print(paste("shifting",c,"so minimum is 0"))
+    #print(paste("shifting",c,"so minimum is 0"))
   }
   mdat$trial = rep(1:20, each=2)
   # right now, each trial is 2 rows, 
@@ -113,7 +114,7 @@ mdat <- mdat %>% left_join(mdat_eng)
 
 # Load human data
 
-Define helper functions
+And define helper functions
 
 ```{r, echo=F}
 # selects given feature and returns wide df that can be compared with behavioral data
@@ -165,10 +166,6 @@ evalFit <- function(feat_df, hum_df, beta, cor_objective=F, relation=NA) {
   return(mse) # return negative cor since DEoptim minimizes
 }
 
-feat_names = setdiff(names(mdat), c("drop","target","relation","trial"))
-# for each feature, want to fit beta to maximize correlation between human and model choices
-#feat_df <- get_feature_df(mdat, feat_names[1])
-
 child_trial_agg <- child_long %>% group_by(relation, drop, target) %>% # alt, 
   summarize(chose_target=mean(chose_target, na.rm=T), n=n())
 ```
@@ -203,7 +200,7 @@ all_trials_mse_r <- all_trials_mse_r %>% mutate(beta = as.numeric(beta),
 save(all_trials_mse, file=here("models/all_trials_mse.RData"))
 ```
 
-## Fit models to all trials (MSE + r objective)
+## Fit models to all trials (MSE - r objective)
 
 
 ```{r fit-models-to-all-trials-mse-and-r, echo=F, eval=FIT_MODELS}
@@ -276,10 +273,87 @@ save(mdat, all_trials_mse, all_trials_mse_r,
 Could also fit separately to contain and support trials with MSE - r objective...
 
 
-```{r}
+```{r load-model-data, echo=F}
 load(here("models/model_data.RData"))
+
+feat_names = setdiff(names(mdat), c("drop","target","relation","trial"))
+# for each feature, want to fit beta to maximize correlation between human and model choices
+#feat_df <- get_feature_df(mdat, feat_names[1])
 ```
 
+
+## Feature correlations
+
+Some of these features are perfectly correlated and even have identical values: e.g. support_probability and support_combo.
+All of the support_response_sharpness features with C<=.01 (C=.1 and above behave differently).
+All of the support_response_sharpness_accuracy features with C<=.01 (C=.1 and above behave differently).
+We remove some of these from the below tables.
+
+```{r, echo=F, include=F}
+get_feature_cor <- function(feat1, feat2, mdat) {
+  supp_prob <- get_feature_df(mdat, feat1) %>%
+    pivot_longer(3:12, names_to="target", values_drop_na=T)
+  supp_combo <- get_feature_df(mdat, feat2) %>%
+    pivot_longer(3:12, names_to="target", values_drop_na=T)
+  return(list(r=cor(supp_combo$value, supp_prob$value), SSE=sum((supp_combo$value - supp_prob$value)^2)))
+}
+
+get_feature_cor("support_probability", "support_combo", mdat)
+# same (1)
+
+# support_response_sharpness_C=0.01 or C=.001 almost as good for children
+get_feature_cor("support_probability", "support_response_sharpness_C=0.01", mdat)
+# .91
+
+get_feature_cor("support_response_sharpness_C=0.001", "support_response_sharpness_C=0.01", mdat) # 1 
+get_feature_cor("support_response_sharpness_C=0.001", "support_response_sharpness_C=0.0001", mdat) # 1
+get_feature_cor("support_response_sharpness_C=0.001", "support_response_sharpness_C=1e-05", mdat) # 1
+
+get_feature_cor("support_response_sharpness_C=0.1", "support_response_sharpness_C=0.01", mdat) # .95
+get_feature_cor("support_response_sharpness_C=0.1", "support_response_sharpness_C=1", mdat) # .94
+
+get_feature_cor("support_response_sharpness_accuracy_C=0.001", "support_response_sharpness_accuracy_C=0.01", mdat) # 1
+get_feature_cor("support_response_sharpness_accuracy_C=0.0001", "support_response_sharpness_accuracy_C=0.01", mdat)
+
+# remove some of the identical features
+all_trials_mse <- all_trials_mse %>% filter(feature!="support_combo",
+                                            feature!="support_sharpness_mean",
+                                            feature!="support_response_sharpness_C=0.0001", # keep .01
+                                            feature!="support_response_sharpness_C=0.001",
+                                            feature!="support_response_sharpness_C=1e-05",
+                                            feature!="support_response_sharpness_accuracy_C=0.0001",
+                                            feature!="support_response_sharpness_accuracy_C=0.001",
+                                            feature!="support_response_sharpness_accuracy_C=1e-05")
+all_trials_mse_r <- all_trials_mse_r %>% filter(feature!="support_combo",
+                                            feature!="support_sharpness_mean",
+                                            feature!="support_response_sharpness_C=0.0001", # keep .01
+                                            feature!="support_response_sharpness_C=0.001",
+                                            feature!="support_response_sharpness_C=1e-05",
+                                            feature!="support_response_sharpness_accuracy_C=0.0001",
+                                            feature!="support_response_sharpness_accuracy_C=0.001",
+                                            feature!="support_response_sharpness_accuracy_C=1e-05")
+supp_trials_mse <- supp_trials_mse %>% filter(feature!="support_combo",
+                                            feature!="support_sharpness_mean",
+                                            feature!="support_response_sharpness_C=0.0001", # keep .01
+                                            feature!="support_response_sharpness_C=0.001",
+                                            feature!="support_response_sharpness_C=1e-05",
+                                            feature!="support_response_sharpness_accuracy_C=0.0001",
+                                            feature!="support_response_sharpness_accuracy_C=0.001",
+                                            feature!="support_response_sharpness_accuracy_C=1e-05")
+cont_trials_mse <- cont_trials_mse %>% filter(feature!="support_combo",
+                                            feature!="support_sharpness_mean",
+                                            feature!="support_response_sharpness_C=0.0001", # keep .01
+                                            feature!="support_response_sharpness_C=0.001",
+                                            feature!="support_response_sharpness_C=1e-05",
+                                            feature!="support_response_sharpness_accuracy_C=0.0001",
+                                            feature!="support_response_sharpness_accuracy_C=0.001",
+                                            feature!="support_response_sharpness_accuracy_C=1e-05")
+```
+
+
+
+We have `r length(feat_names)` features from 250 simulated drops per combination to optimize softmax betas for.
+The tables below show fits and betas for the best-fitting 10 features (sorted by adult fit).
 
 ## Fits to all trials
 
@@ -287,7 +361,7 @@ load(here("models/model_data.RData"))
 fit_tab <- all_trials_mse %>% pivot_wider( names_from = Age, values_from = c(beta, mse)) %>%
   arrange(mse_adults)
 
-knitr::kable(fit_tab, digits = 3)
+knitr::kable(fit_tab[1:10,], digits = 3)
 ```
 
 
@@ -300,7 +374,7 @@ all_trials_mse_r <- all_trials_mse_r %>% mutate(beta = as.numeric(beta),
 fit_tab <- all_trials_mse_r %>% pivot_wider( names_from = Age, values_from = c(beta, mse)) %>%
   arrange(mse_adults)
 
-knitr::kable(fit_tab, digits = 3)
+knitr::kable(fit_tab[1:10,], digits = 3)
 ```
 
 
@@ -310,7 +384,7 @@ knitr::kable(fit_tab, digits = 3)
 fit_tab <- supp_trials_mse %>% pivot_wider(names_from = Age, values_from = c(beta, mse)) %>%
   arrange(mse_adults)
 
-knitr::kable(fit_tab, digits = 3)
+knitr::kable(fit_tab[1:10,], digits = 3)
 ```
 
 ## Fits to containment trials (MSE)
@@ -319,71 +393,132 @@ knitr::kable(fit_tab, digits = 3)
 fit_tab <- cont_trials_mse %>% pivot_wider(names_from = Age, values_from = c(beta, mse)) %>%
   arrange(mse_adults)
 
-knitr::kable(fit_tab, digits = 3)
+knitr::kable(fit_tab[1:10,], digits = 3)
 ```
 
 
 What do the predicted choice proportions from the best features for each age group look like?
 Let's look at the best feature for each each group from each fit method.
 
-```{r, echo=F, message=F}
+```{r plot-model-vs-human, echo=F, message=F}
 require(ggpubr)
 
 plot_model_preds <- function(feat_name, fits, hum_data, age="adults", mdat) {
   this_dat = subset(fits, Age==age & feature==feat_name)
-  md <- get_model_target_choice_props(get_feature_df(mdat, feat_name), hum_data, beta)
+  md <- get_model_target_choice_props(get_feature_df(mdat, feat_name), hum_data, this_dat$beta)
   md %>% ggplot(aes(x=chose_target, y=Model_targ_prop, color=relation)) +
     geom_abline(slope=1, intercept=0, linetype="dashed") +
     geom_point(alpha=.5) + geom_smooth(method='lm', formula=y ~ x) + 
     xlab("Human Choice Probability") + 
     ylab("Model Choice Probability") +
-    ggtitle(paste0(feat_name,": ",age)) + theme_minimal() + 
+    ggtitle(paste0(age,": ",feat_name)) + theme_minimal() + 
     xlim(0,1) + ylim(0,1) +
     annotate("text", x=.5, y=0.05, 
              label = paste0("beta = ",round(this_dat$beta,2),", MSE = ",round(this_dat$mse, 3))) # 
 }
 ```
 
+## Best feature from fitting all trials (MSE)
 
+When fit with MSE, the best-fitting feature for both children and adults is support probability, shown below with betas optimized separately for adults' and children's data.
+Note that although the MSE is quite low, the correlation between model and human responding for each trial is negative.
 
-## Plots of other best-fitting features for all trials (MSE fits)
+```{r}
+ch_feat <- all_trials_mse %>% filter(Age=="children") %>%
+  arrange(mse) 
 
-```{r, echo=F, message=F}
-ad_supp <- plot_model_preds("support_probability", all_trials_mse, adult_trial_agg, age="adults", mdat)
-ch_supp <- plot_model_preds("support_probability", all_trials_mse, child_trial_agg, age="children", mdat)
+ad_feat <- all_trials_mse %>% filter(Age=="adults") %>%
+  arrange(mse) 
 
-ggarrange(ad_supp, ch_supp, nrow=1, common.legend = T)
-```
+supp_std_prob_cor <- get_feature_cor("support_std", "support_probability", mdat) # .72
 
+supp_resp_sharp_prob_cor <- get_feature_cor("support_response_sharpness_C=0.01", "support_probability", mdat)
 
-```{r,  echo=F, message=F}
-ad <- plot_model_preds("support_combo", all_trials_mse, adult_trial_agg, age="adults", mdat)
-ch <- plot_model_preds("support_combo", all_trials_mse, child_trial_agg, age="children", mdat)
+ad <- plot_model_preds("support_probability", all_trials_mse, adult_trial_agg, age="adults", mdat)
+ch <- plot_model_preds("support_probability", all_trials_mse, child_trial_agg, age="children", mdat)
 
 ggarrange(ad, ch, nrow=1, common.legend = T)
 ```
+
+The next-best feature for adults was support_std, which has r=`r round(supp_std_prob_cor$r, 2)` with the support_probability feature.
+The next-best feature for children was support_response_sharpness_C=0.01 (or C=.001, .0001, or 1e-05), which has r=`r round(supp_resp_sharp_prob_cor$r, 2)` with the support_probability feature.
+These second-best features are shown below.
 
 ```{r, echo=F, message=F}
 ad <- plot_model_preds("support_std", all_trials_mse, adult_trial_agg, age="adults", mdat)
-ch <- plot_model_preds("support_std", all_trials_mse, child_trial_agg, age="children", mdat)
-
-ggarrange(ad, ch, nrow=1, common.legend = T)
-```
-
-```{r,  echo=F, message=F}
-ad <- plot_model_preds("support_response_sharpness_C=0.01", all_trials_mse, adult_trial_agg, age="adults", mdat)
 ch <- plot_model_preds("support_response_sharpness_C=0.01", all_trials_mse, child_trial_agg, age="children", mdat)
 
 ggarrange(ad, ch, nrow=1, common.legend = T)
 ```
 
-```{r,  echo=F, message=F}
-ad <- plot_model_preds("len_inverse_sharpe_ratio", all_trials_mse, adult_trial_agg, age="adults", mdat)
-ch <- plot_model_preds("len_inverse_sharpe_ratio", all_trials_mse, child_trial_agg, age="children", mdat)
+# Best feature from fitting all trials (MSE - r)
+
+When fit with a combined MSE and r objective, the best-fitting feature for both children and adults is support_response_sharpness_C=0.01, shown below with betas optimized separately for adults' and children's data.
+
+```{r}
+ch_feat <- all_trials_mse_r %>% filter(Age=="children") %>%
+  arrange(mse) # support_response_sharpness_C=0.01, then support_response_sharpness_C=0.1 
+
+ad_feat <- all_trials_mse_r %>% filter(Age=="adults") %>%
+  arrange(mse) # support_response_sharpness_C=0.01, then normed_velocity_std_after_first_collision_objects=target
+
+supp_res_sharp_pt01_pt1 <- get_feature_cor("support_response_sharpness_C=0.01", "support_response_sharpness_C=0.1", mdat) # .95
+
+supp_resp_sharp_norm_vel_targ <- get_feature_cor("support_response_sharpness_C=0.01", "normed_velocity_std_after_first_collision_objects=target", mdat)
+
+ad <- plot_model_preds("support_response_sharpness_C=0.01", all_trials_mse_r, adult_trial_agg, age="adults", mdat)
+ch <- plot_model_preds("support_response_sharpness_C=0.01", all_trials_mse_r, child_trial_agg, age="children", mdat)
 
 ggarrange(ad, ch, nrow=1, common.legend = T)
 ```
 
+The next-best feature for adults was normed_velocity_std_after_first_collision_objects=target, which has r=`r round(supp_resp_sharp_norm_vel_targ$r, 2)` with the support_response_sharpness_C=0.01 feature.
+The next-best feature for children was support_response_sharpness_C=0.1, which has r=`r round(supp_res_sharp_pt01_pt1$r, 2)` with the support_response_sharpness_C=0.01 feature.
+These second-best features are shown below.
+
+```{r, echo=F, message=F}
+ad <- plot_model_preds("normed_velocity_std_after_first_collision_objects=target", all_trials_mse_r, adult_trial_agg, age="adults", mdat)
+ch <- plot_model_preds("support_response_sharpness_C=0.1", all_trials_mse_r, child_trial_agg, age="children", mdat)
+
+ggarrange(ad, ch, nrow=1, common.legend = T)
+```
+
+
+## Best features from fitting containment trials (MSE)
+
+The best-fitting feature from fitting only containment trials was support_probability, for both children and adults:
+
+```{r}
+ch_feat <- cont_trials_mse %>% filter(Age=="children") %>%
+  arrange(mse) %>% slice(1) # support_probability then support_response_sharpness_C=10.0
+
+ad_feat <- cont_trials_mse %>% filter(Age=="adults") %>%
+  arrange(mse) %>% slice(1) # support_probability then support_std (beta=10 !)
+
+knitr::kable(bind_rows(ch_feat, ad_feat), digits=3)
+```
+
+
+## Best features from fitting support trials (MSE)
+
+The best-fitting feature for support trials for children was normed_velocity_std_after_first_collision_objects, and for adults was support_response_linearity_r (although support_probability was not far behind for adults):
+
+```{r}
+ch_feat <- supp_trials_mse %>% filter(Age=="children") %>%
+  arrange(mse) %>% slice(1) #
+
+ad_feat <- supp_trials_mse %>% filter(Age=="adults") %>%
+  arrange(mse) %>% slice(1) # support_probability then support_std (beta=10 !)
+
+bind_rows(ch_feat, ad_feat) %>% kable(digits=3)
+```
+
+
+
+
+### Other promising features: avg_final_radius_objects=target
+
+avg_final_radius_objects=target shows positive correlations with children's and adults' preferences, but for many of the trials (both contain and support) the model chooses the target with small probability.
 
 ```{r,  echo=F, message=F}
 ad <- plot_model_preds("avg_final_radius_objects=target", all_trials_mse, adult_trial_agg, age="adults", mdat)
@@ -392,16 +527,13 @@ ch <- plot_model_preds("avg_final_radius_objects=target", all_trials_mse, child_
 ggarrange(ad, ch, nrow=1, common.legend = T)
 ```
 
-```{r,  echo=F, message=F}
-ad <- plot_model_preds("support_response_linearity_r", all_trials_mse, adult_trial_agg, age="adults", mdat)
-ch <- plot_model_preds("support_response_linearity_r", all_trials_mse, child_trial_agg, age="children", mdat)
+### Other promising features: support_response_sharpness_C=0.01
 
-ggarrange(ad, ch, nrow=1, common.legend = T)
-```
+support_response_sharpness_C=0.01 has a fairly good MSE in particular for children, and also shows a positive correlation with children's preferences on containment trials.
 
 ```{r,  echo=F, message=F}
-ad <- plot_model_preds("support_sharpness_mean", all_trials_mse, adult_trial_agg, age="adults", mdat)
-ch <- plot_model_preds("support_sharpness_mean", all_trials_mse, child_trial_agg, age="children", mdat)
+ad <- plot_model_preds("support_response_sharpness_C=0.01", all_trials_mse, adult_trial_agg, age="adults", mdat)
+ch <- plot_model_preds("support_response_sharpness_C=0.01", all_trials_mse, child_trial_agg, age="children", mdat)
 
 ggarrange(ad, ch, nrow=1, common.legend = T)
 ```
