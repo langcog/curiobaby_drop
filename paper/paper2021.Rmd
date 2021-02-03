@@ -53,6 +53,7 @@ require(tidyboot)
 library(apa) # for generating APA-style text to report statistical tests
 library(ggpubr)
 require(gridExtra)
+require(kableExtra)
 ```
 
 ```{r, load-data}
@@ -237,10 +238,12 @@ sh_subj_adult = split_half_subj_cor(subset(combo_dat, AgeGroup=="adult"))
 
 sh_subj_child = split_half_subj_cor(subset(combo_dat, AgeGroup=="child"))
 
-sh_subj_contain = split_half_subj_cor(subset(combo_dat, relation=="contain"))
-
-sh_subj_support = split_half_subj_cor(subset(combo_dat, relation=="support"))
-
+#sh_subj_contain = split_half_subj_cor(subset(combo_dat, relation=="contain"))
+sh_ch_contain = split_half_subj_cor(subset(combo_dat, relation=="contain" & AgeGroup=="child"))
+sh_ad_contain = split_half_subj_cor(subset(combo_dat, relation=="contain" & AgeGroup=="adult"))
+#sh_subj_support = split_half_subj_cor(subset(combo_dat, relation=="support"))
+sh_ch_support = split_half_subj_cor(subset(combo_dat, relation=="support" & AgeGroup=="child"))
+sh_ad_support = split_half_subj_cor(subset(combo_dat, relation=="support" & AgeGroup=="adult"))
 # split items in half, check cor between halves...GK: I don't think we care about this
 
 ```
@@ -254,7 +257,8 @@ Based on the binomial distribution, any of the trials on which more than 90 of t
 As can be seen in Table 1, adults participants (*adult* column) significantly preferred the target relation for all 10 of the containment trials, and significantly preferred five targets on the 10 support trials; the other five support trials did not significantly differ from chance, suggesting that many participants found the prospect of dropping on the distractor object at least equally enticing.
 
 Finally, we examined the split-half reliability of adults' choices by repeatedly splitting the samples in half and testing the correlation between the halves.
-Based on 100 random samples, the split-half reliability for adults is *r* = `r round(mean(sh_subj_adult), 2)` (sd=`r round(sd(sh_subj_adult), 2)`).
+Based on 100 random samples, the split-half reliability for adults was *r* = `r round(mean(sh_subj_adult), 2)` (sd=`r round(sd(sh_subj_adult), 2)`).
+The split-half reliability of adults' choices on containment trials was *r* = `r round(mean(sh_ad_contain), 2)` (sd=`r round(sd(sh_ad_contain), 2)`), and on support trials was *r* = `r round(mean(sh_ad_support), 2)` (sd=`r round(sd(sh_ad_support), 2)`).
 
 ```{r adults-table, results="asis", include=F}
 adtab <- xtable::xtable(adult_trial_agg, digits=2, 
@@ -322,6 +326,7 @@ Based on the binomial distribution, any of the trials on which more than 41 of t
 Children significantly preferred the designed relation on eight of the 10 containment trials, while only significantly preferring two of the 10 support relation choices.
 On the remaining two containment trials and the other eight support trials, children's preferences also did not significantly differ from chance against the designed relation.
 The split-half reliability for children's choices is *r* = `r round(mean(sh_subj_child), 2)` (sd=`r round(sd(sh_subj_child), 2)`).
+The split-half reliability of children's choices on containment trials was *r* = `r round(mean(sh_ch_contain), 2)` (sd=`r round(sd(sh_ch_contain), 2)`), and on support trials was *r* = `r round(mean(sh_ch_support), 2)` (sd=`r round(sd(sh_ch_support), 2)`).
 
 ```{r adults-vs-children-relational-choices, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.5, fig.height=3.25, set.cap.width=T, num.cols.cap=1, fig.cap = "Children's vs. adults' choices for each type of trial, with bootstrapped 95\\% confidence intervals."}
 pos = position_dodge(width = .9)
@@ -350,8 +355,6 @@ If they corresponded perfectly, they would fall along the dotted $y=x$ line, but
 At a glance, this seems to support the hypothesis that "children are noisy adults."
 We will re-examine this hypothesis with model-based predictions for each trial.
 
-The overall split-half reliability of children and adults on containment trials is *r* = `r round(mean(sh_subj_contain), 2)` (sd=`r round(sd(sh_subj_contain), 2)`), and on support trials is *r* = `r round(mean(sh_subj_support), 2)` (sd=`r round(sd(sh_subj_support), 2)`).
-<!-- [should we separately report these for adults and children?] -->
 ```{r adults-vs-children, fig.env = "figure", fig.pos = "h", fig.align="center", fig.width=3.3, fig.height=3.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Comparison of children's vs. adults' preferences on each trial (dot), with bootstrapped 95\\% confidence intervals."}
 # add vert and horiz error bars 
 combo_dat %>% group_by(drop, target, relation, ID) %>%
@@ -405,6 +408,7 @@ supp_resp_sharp_beta1_cors <- supp_resp_sharp_beta1 %>% group_by(AgeGroup) %>%
             mse = mean((chose_target - Model_targ_prop)^2)) # .059 .016
 ```
 
+
 Using a physics engine [@gan2020threedworld] and 3D models of the objects that were shown to participants, we constructed a simulation of for each drop interaction in the experiment and attempted to predict children's and adults' choices using a variety of heuristic models based on the simulated physical interactions.
 For each trial's two possible drop object choices, we ran 250 simulated drops, and for each drop calculated a variety of features measuring the state of the model after the drop was completed.
 We selected features that we thought may provide good metrics for what people could find interesting, for instance, the mean length of time before both objects come to rest, as well as the standard deviation (SD) of that time.
@@ -419,14 +423,82 @@ A model's preference on any given trial was assumed to be proportional to the re
 For each model (feature), we optimized $\beta$ separately to find best-fitting values for children's and adults' drop preferences, with the objective of minimizing mean squared error (MSE) between model and human choice proportions across all 20 trials.
 
 ### Results 
-The best-fitting feature was $Pr(support)$ for both children ($\beta =$ `r round(best_fits$beta[2],2)`, MSE = `r round(best_fits$mse[2], 3)`) and adults ($\beta =$ `r round(best_fits$beta[1],2)`, MSE = `r round(best_fits$mse[1], 3)`).\footnote{For $\beta=1$, adult MSE = `r round(supp_prob_beta1_cors$mse[1],3)`, child MSE = `r round(supp_prob_beta1_cors$mse[2],3)` for $Pr(support)$.}
-<!-- other support-related features also fared well -->
+
+
+```{r human-vs-model-table, results="asis"}
+# now we just have a table of selected features that were moderately correlated with people's choices
+load(here("models/model_preds_beta1.RData"))
+
+described_features = c("support_response_sharpness_C=1",
+                       "normed_velocity_std_after_first_collision_objects=target",
+                       "normed_velocity_std_after_first_collision_objects=drop",
+                       "avg_max_radius_objects=target",
+                       "avg_max_radius_objects=drop",
+                       "obj_final_position_invstd_objects=target",
+                       "obj_final_position_invstd_objects=drop",
+                       "avg_final_radius_objects=target",
+                       "avg_final_radius_objects=drop",
+                       "avg_len",
+                       "len_std",
+                       "support_probability")
+
+supp_trials <- supp_trials %>% rename(`Support` = r) %>%
+  select(-mse)
+
+cont_trials <- cont_trials %>% rename(`Contain` = r) %>%
+  select(-mse)
+
+# combine all_trials, supp_trials, and cont_trials
+mod_tab <- all_trials %>% select(-mse) %>%
+  rename(`All` = r) %>% 
+  left_join(supp_trials) %>%
+  left_join(cont_trials) %>%
+  filter(is.element(feature, described_features)) %>%
+  arrange(desc(`All`), feature)  %>%
+  mutate(Age = ifelse(Age=="children", "Child:", "Adult:")) %>%
+  pivot_wider(names_from=Age, values_from=c(`All`, `Support`, `Contain`), 
+              names_glue = "{Age} {.value}") %>%
+  arrange(desc(`Adult: All`)) %>%
+  mutate(feature = case_when(feature == 'support_response_sharpness_C=1' ~ 'Supp. Sharpness',
+                             feature == 'support_probability' ~ 'Pr(support)',
+                             feature == 'normed_velocity_std_after_first_collision_objects=target' ~ 'Target Velocity',
+                             feature == 'normed_velocity_std_after_first_collision_objects=drop' ~ 'Drop Obj. Velocity',
+                             feature == 'avg_len' ~ 'Avg. Distance',
+                             feature == 'len_std' ~ 'Distance SD',
+                             feature == 'obj_final_position_invstd_objects=target' ~ 'Target Pos. 1/SD',
+                             feature == 'obj_final_position_invstd_objects=drop' ~ 'Drop Obj Pos. 1/SD',
+                             feature == 'avg_final_radius_objects=target' ~ 'Avg. Target Radius',
+                             feature == 'avg_final_radius_objects=drop' ~ 'Avg. Drop Obj Radius',
+                             feature == 'avg_max_radius_objects=drop' ~ 'Max Drop Obj Radius',
+                             feature == 'avg_max_radius_objects=target' ~ 'Max Target Radius',
+                             TRUE ~ feature))
+         
+
+ 
+#modtab <- xtable::xtable(mod_tab, digits=2, caption = "Correlations of model and human responses.")
+#modtab %>% kable(digits=2)
+#print(modtab, type="latex", comment = F, include.rownames = F, table.placement = "H")
+
+mod_tab <- as.matrix(mod_tab)
+# bold max value per column
+for(c in 2:ncol(mod_tab)) {
+  mod_tab[,c] = round(as.numeric(mod_tab[,c]), 2)
+  max_row = which(as.numeric(mod_tab[,c])==max(as.numeric(mod_tab[,c])))
+  mod_tab[max_row,c] = cell_spec(mod_tab[max_row,c], "latex", bold = T)
+}
+
+kable(mod_tab, "latex", booktabs = T, escape=F, digits = 2, caption="Correlations ($r$) of model and human responses.") %>%
+  column_spec(column = 2:ncol(mod_tab), width=c("1cm","1cm","1.3cm","1.3cm","1.3cm","1.3cm")) %>%
+  kable_styling(latex_options = "scale_down") 
+```
+
+<!-- The best-fitting feature was $Pr(support)$ for both children ($\beta =$ `r round(best_fits$beta[2],2)`, MSE = `r round(best_fits$mse[2], 3)`) and adults ($\beta =$ `r round(best_fits$beta[1],2)`, MSE = `r round(best_fits$mse[1], 3)`).\footnote{For $\beta=1$, adult MSE = `r round(supp_prob_beta1_cors$mse[1],3)`, child MSE = `r round(supp_prob_beta1_cors$mse[2],3)` for $Pr(support)$.}
 Figure 6 shows this model's fitted preferences plotted against those of children and adults.
 Although the model captured people's overall mean preference for the target relations, the trial-level correlation with human behavior was negative (adults $r=$ `r round(supp_prob_beta_opt_cors$r[1],2)`, children $r=$ `r round(supp_prob_beta_opt_cors$r[2],2)`, with similar values for $\beta = 1$).
 The support response sharpness model fit slightly worse (children $\beta = 0.81$, MSE = 0.016) and adults ($\beta = 1.94$, MSE = 0.054), but its responses were positively correlated with people's (adults $r =$ `r round(supp_resp_sharp_beta_opt_cors$r[1], 2)`, children $r =$ `r round(supp_resp_sharp_beta_opt_cors$r[2],2)`).\footnote{For $\beta=1$, adult MSE = `r round(supp_resp_sharp_beta1_cors$mse[1],3)`, child MSE = `r round(supp_resp_sharp_beta1_cors$mse[2],3)` for support response sharpness, with very similar correlations.}
+-->
 
-
-```{r human-vs-model-relational-choices, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.25, fig.height=4.75, set.cap.width=T, num.cols.cap=1, fig.cap = "Comparison of $Pr(support)$ model's vs. participants' choices for each type of trial, with 95\\% CIs."}
+```{r human-vs-model-relational-choices, eval=F, include=F, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.25, fig.height=4.75, set.cap.width=T, num.cols.cap=1, fig.cap = "Comparison of $Pr(support)$ model's vs. participants' choices for each type of trial, with 95\\% CIs."}
 pos = position_dodge(width = .9)
 
 
