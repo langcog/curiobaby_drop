@@ -1,7 +1,7 @@
 ---
 # Mike has a better title git stashed but G can't remember it..
 # old: What if you drop that? Developmental changes in curiosity about physical interactions
-title: "Using physical simulations to predict children's and adults' preference for physical interactions"
+title: "Using physical simulations to predict children's and adults' preferences in physical interactions"
 bibliography: library.bib
 csl: apa6.csl
 document-params: "10pt, letterpaper"
@@ -18,13 +18,14 @@ abstract: >
      to study in a laboratory context. A promising approach to developing and testing theories of 
      curiosity is to instantiate them in artificial agents that are able to act and explore in a 
      simulated environment, and then compare the behavior of these agents to humans exploring the 
-     same stimuli. Here we propose a new experimental paradigm for examining children's--and 
-     AI agents'--curiosity about objects' physical interactions by letting them choose which object to 
-     target when dropping a given object. We compared adults' (N=155) and children's choices (N=66; 
-     3-7 year-olds) and found that adults show a strong preference for choices affording a containment
+     same stimuli. Here we propose a new experimental paradigm for examining children's -- and 
+     AI agents' -- curiosity about objects' physical interactions.
+     We let them choose which object to 
+     drop another object onto in order to create the most interesting effect. We compared adults' (N=155) and children's choices (N=66; 
+     3-7 year-olds) and found that adults show a strong preference for drops that could potentially result in a containment
      relation, a preference that is also shown by children. Adults alone also make choices consistent 
-     with achieving support relations. We contextualize our results using heuristic models based on 
-     physics simulations of the same scenarios judged by participants.
+     with achieving support relations. We contextualize our results using heuristic computational models based on 
+     3D physical simulations of the same scenarios judged by participants.
     
 keywords: >
     curiosity; novel objects; object interactions; intuitive physics
@@ -70,8 +71,8 @@ age <- child_long %>% distinct(ID, Age) %>% group_by(Age) %>%
 
 Curiosity is a hallmark aspect of human intelligence. 
 From infants exploring the objects in their environment to scientists exploring the frontiers of our solar system, humans are highly motivated to seek out new knowledge and experiences. 
-However, although such exploratory behavior has long been recognized as a critical component of human learning [@james1983talks] and cognitive development [@Gopnik2009; @Piaget1952], formal theories that explain human curiosity and how it drives exploratory behavior have remained elusive [@Kidd2015]. 
-Moreover, extant theories have rarely provided quantitatively precise enough predictions to be directly compared to empirical measurements of curiosity-driven behavior in humans.
+Although such exploratory behavior has long been recognized as a critical component of human learning [@james1983talks] and cognitive development [@Gopnik2009; @Piaget1952], formal theories that explain human curiosity and how it drives exploratory behavior have remained elusive [@Kidd2015]. 
+Moreover, extant theories have rarely provided precise enough predictions to be directly compared to empirical measurements of curiosity-driven behavior in humans, in part because curiosity tends to result in complex, open-ended behaviors that are difficult to quantify.
 
 
 The goal of the current paper is to help close this gap by proposing a novel paradigm to advance our theoretical understanding of curiosity, specifically within the domain of physical object interactions [@kubricht2017intuitive].
