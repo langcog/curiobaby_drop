@@ -85,7 +85,7 @@ In other words, children seem to actively learn about physical interactions by i
 However, relatively little work has examined what types of physical interactions children are most interested in testing, or linked children's actions to formal theories of exploration or of physics learning.
 Instead, most work that has investigated exploratory behavior in children has done so by examining how they play with relatively complex objects -- for example, documenting the number of functions discovered while playing with a novel toy [e.g., @Cook2011; @Bonawitz2012; @Gweon2014].
 
-We developed a novel physical exploration task in which children, adults, or AI agents can choose which series of physical experiments to perform, <!-- and observe the results of each in real time.-->
+We thus developed a novel physical exploration task in which children, adults, or AI agents can choose which series of physical experiments to perform, <!-- and observe the results of each in real time.-->
 and then demonstrate how this paradigm can be used to test theories of curiosity about physical interactions. 
 First, we measured people's choices in a novel physical exploration task, in which participants were told that they would drop a given object (e.g., a sphere, a torus; see Figure 1) onto one of two target objects (e.g., a dumbbell, a pentagonal prism; see Figure 2), with the goal of the creating the most interesting physical interaction.
 We recorded adults' and children's (3-7 years of age) choices for a set of trials in which some of the drop objects could plausibly end up *supported* by one of the target objects, and for a set of trials in which some of the drop objects could end up *contained* by one of the targets -- although the other potential targets likely also offered affordances of interest.
@@ -112,7 +112,7 @@ Our design is motivated by the results of a pilot study conducted in-person in J
 In the pilot study (N=15), the pairs of target or drop objects were chosen essentially at random, but were the same for all participants.
 We were surprised to find consistency in adults' preferences for many of the trials: especially when given a drop object and asked to choose one of two target objects, adults were quite often (75-90%) targeting that object that would either *contain* or *support* the dropped object (i.e., the pipe could contain the cone; the pentagonal prism could support the octahedron).
 This consistency in their choices is remarkable given that there are many other possible goals that people might choose in order to make something "interesting" happen: they might attempt to make the dropped object roll or bounce far from the target, or rebound in an unexpected direction, but in fact most people settled on attempting support or containment relations.
-Thus, we set out to examine the development of these preferences, first in a large adult sample, and then in young children. <!-- , since some have characterized children as simply being noisy adults. -->
+Thus, we set out to examine the development of these preferences, first in a large adult sample in order to have high reliability for later model comparisons, and then in young children.
 
 ## Method
 \vspace{-4pt}
@@ -162,30 +162,11 @@ The catch trials were meant to encourage attention to the objects, and participa
 <!-- Finally, there were two free response explanation trials mixed among the drop trials, querying participants, "Why did you make that choice?"
 These free responses were examined to determine if participants had particular goals in mind when making a choice, and how prevalent those goals were among participants. -->
 
-
-## Results
-We analyzed data from the `r Nad` adults who completed the experiment and got at least 3 of the 4 catch trials correct (45 participants were excluded for not meeting this criterion).
-<!-- The main questions of interest are 1) are adults consistent in their preference of drop-target combinations? 2) are they more consistent with trials that afford support or containment relations? and 3) are there other apparent factors that drive their preferences?
-Our analysis addresses each question in turn. -->
-Table 1 shows the proportion of participants that chose the designed target relation for each of the 20 trials. <!-- [should also show alternative target object?]. -->
-Based on the binomial distribution, any of the trials on which more than 90 of the 155 participants agree (i.e., >0.59 or <0.41) significantly differ from chance. <!-- [adjust criterion for multiple comparisons?] -->
-As can be seen in Table 1, adults participants (*adult* column) significantly preferred the target relation for all 10 of the containment trials, and significantly preferred five targets on the 10 support trials; the other five support trials did not significantly differ from chance.
-
-
-```{r adult-agg}
+```{r}
 adult_trial_agg <- adult_long %>% group_by(relation, drop, target) %>% # alt, 
   summarize(chose_target=mean(chose_target, na.rm=T)) %>% # , n=n()
   arrange(relation, desc(chose_target))
-```
 
-```{r adults-table, results="asis", include=F}
-adtab <- xtable::xtable(adult_trial_agg, digits=2, 
-                       caption = "Adult target preferences per trial.")
-
-print(adtab, type="latex", comment = F, include.rownames = F, table.placement = "H")
-```
-
-```{r}
 ad_subj_agg <- adult_long %>% group_by(ResponseId, relation) %>% # alt, 
   summarize(chose_target=mean(chose_target, na.rm=T)) 
 
@@ -194,7 +175,6 @@ ad_rel_means <- ad_subj_agg %>% group_by(relation) %>% summarize(M=mean(chose_ta
 ad_supp_cont <- t.test(x=subset(ad_subj_agg, relation=="contain")$chose_target, 
                        y=subset(ad_subj_agg, relation=="support")$chose_target, paired=T)
 ```
-
 
 ```{r child-data-agg}
 child_trial_agg <- child_long %>% group_by(relation, drop, target) %>% # alt, 
@@ -231,11 +211,6 @@ ch_supp_cont <- t.test(x=subset(ad_subj_agg, relation=="contain")$chose_target,
                        y=subset(ad_subj_agg, relation=="support")$chose_target, paired=T)
 ```
 
-Were adults more consistent in their choices on support or containment trials?
-Averaging each subject's binary responses (1=target relation, 0=alternative) for each trial type revealed a stronger preference for containment relations ($M=$ `r round(ad_rel_means[1,]$M,2)`) than support relations ($M=$ `r round(ad_rel_means[2,]$M,2)`; paired `r t_apa(ad_supp_cont, format="rmarkdown", print=F)`).
-<!--For the five support trials for which adults showed no significant preference, we will return to discuss alternative hypotheses after looking at children's preferences in Experiment 2.-->
-
-
 ```{r reliability}
 # split subjects in half, check cor between halves
 split_half_subj_cor <- function(dat, nsim=100) {
@@ -270,8 +245,25 @@ sh_subj_support = split_half_subj_cor(subset(combo_dat, relation=="support"))
 
 ```
 
+## Results
+We analyzed data from the `r Nad` adults who completed the experiment and got at least 3 of the 4 catch trials correct (45 participants were excluded for not meeting this criterion).
+<!-- The main questions of interest are 1) are adults consistent in their preference of drop-target combinations? 2) are they more consistent with trials that afford support or containment relations? and 3) are there other apparent factors that drive their preferences? Our analysis addresses each question in turn. -->
+Averaging each subject's binary responses (1=target relation, 0=alternative) for each trial type revealed a stronger preference for containment relations ($M=$ `r round(ad_rel_means[1,]$M,2)`) than support relations ($M=$ `r round(ad_rel_means[2,]$M,2)`; paired `r t_apa(ad_supp_cont, format="rmarkdown", print=F)`).
+Table 1 shows the proportion of participants that chose the designed target relation for each of the 20 trials. <!-- [should also show alternative target object?]. -->
+Based on the binomial distribution, any of the trials on which more than 90 of the 155 participants agree (i.e., >0.59 or <0.41) significantly differ from chance. 
+As can be seen in Table 1, adults participants (*adult* column) significantly preferred the target relation for all 10 of the containment trials, and significantly preferred five targets on the 10 support trials; the other five support trials did not significantly differ from chance, suggesting that many participants found the prospect of dropping on the distractor object at least equally enticing.
+
 Finally, we examined the split-half reliability of adults' choices by repeatedly splitting the samples in half and testing the correlation between the halves.
 Based on 100 random samples, the split-half reliability for adults is *r* = `r round(mean(sh_subj_adult), 2)` (sd=`r round(sd(sh_subj_adult), 2)`).
+
+```{r adults-table, results="asis", include=F}
+adtab <- xtable::xtable(adult_trial_agg, digits=2, 
+                       caption = "Adult target preferences per trial.")
+
+print(adtab, type="latex", comment = F, include.rownames = F, table.placement = "H")
+```
+
+
 
 ```{r child-table, results="asis"}
 # how to do 2-col table? , fig.env = "figure*" 
@@ -287,7 +279,7 @@ print(chtab, type="latex", comment = F, include.rownames = F, table.placement = 
 # Experiment 2: Children
 \vspace{-4pt}
 Experiment 1 demonstrated that adults show consistent preferences for dropping objects on target objects that afford containment relations, and to a lesser extent support relations. 
-Experiment 2 investigates whether these strong preferences are present even in young children, recognizing that children may find different types of physical interactions (e.g., rolling, bouncing, unpredictability) of greater interest.
+Experiment 2 investigates whether these strong preferences are present even in young children, recognizing that children may find different types of physical interactions (e.g., rolling, bouncing, unpredictability) of greater interest than adults, or may simply show more idiosyncratic choice patterns.
 
 ## Method
 \vspace{-4pt}
@@ -295,9 +287,9 @@ We adapted the same materials and procedure used in Experiment 1 for use in an o
 
 ### Participants
 \vspace{-4pt}
-Participants were 73 children recruited online via outreach through a local nursery school and targeted Facebook ads.
+Participants were 73 children recruited online via outreach through a local nursery school and targeted Facebook ads over the course of 6 months.
 Participant exclusions were made based on cases where i) the participant did not complete more than half of the study play session or ii) the parent did not consent for video recording of study. 
-After exclusions, results from `r Nch` were analyzed, including `r age[1,]$N` 3-year-olds, `r age[2,]$N` 4-year-olds, `r age[3,]$N` 5-year-olds, `r age[4,]$N` 6-year-olds, and `r age[5,]$N` 7-year-olds. <!-- Sama: notes on exclusions? -->
+After exclusions, results from `r Nch` were analyzed, including `r age[1,]$N` 3-year-olds, `r age[2,]$N` 4-year-olds, `r age[3,]$N` 5-year-olds, `r age[4,]$N` 6-year-olds, and `r age[5,]$N` 7-year-olds.
 
 ### Materials
 \vspace{-4pt}
@@ -320,16 +312,16 @@ The sides on which target objects and colors appeared were counterbalanced acros
 
 ## Results
 \vspace{-4pt}
+Were children more consistent in their choices on support or containment trials?
+As for adults, averaging each child's binary responses for each trial type revealed a stronger preference for containment relations ($M=$ `r round(ch_rel_means[1,]$M,2)`) than support relations ($M=$ `r round(ch_rel_means[2,]$M,2)`; paired `r t_apa(ch_supp_cont, format="rmarkdown", print=F)`).
+Overall, children did not show a significant preference for choosing the support relation. <!-- [add a regression with trial_type * age (3 - 18=adult)?] -->
+Figure 4 shows the proportion of participants' choice of the designed target relation broken down by relation type and age group, showing a preference for the designed relations that increased with age, and that was stronger for containment.
 We examined children's choice of target objects to determine if children were choosing randomly, or had consistent preferences for some objects. 
 Table 1 shows the proportion of children ("child" column) choosing the designed target relation for each of the 20 trials, alongside the adult choice proportions from Experiment 1. 
 Based on the binomial distribution, any of the trials on which more than 41 of the 66 participants agree (i.e., >0.64 or <0.36) significantly differ (*p*<.05) from chance. <!-- stricter crit for mult comparisons? Bonf=.0025 -->
 Children significantly preferred the designed relation on eight of the 10 containment trials, while only significantly preferring two of the 10 support relation choices.
 On the remaining two containment trials and the other eight support trials, children's preferences also did not significantly differ from chance against the designed relation.
-
-Were children more consistent in their choices on support or containment trials?
-As for adults, averaging each child's binary responses for each trial type revealed a stronger preference for containment relations ($M=$ `r round(ch_rel_means[1,]$M,2)`) than support relations ($M=$ `r round(ch_rel_means[2,]$M,2)`; paired `r t_apa(ch_supp_cont, format="rmarkdown", print=F)`).
-Overall, children did not show a significant preference for choosing the support relation. <!-- [should we add a regression with trial_type * age (3 - 18=adult)?] -->
-Figure 4 shows the proportion of participants' choice of the designed target relation broken down by relation type and age group, showing a preference for the designed relations that increased with age, and that was stronger for containment.
+The split-half reliability for children's choices is *r* = `r round(mean(sh_subj_child), 2)` (sd=`r round(sd(sh_subj_child), 2)`).
 
 ```{r adults-vs-children-relational-choices, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.5, fig.height=3.25, set.cap.width=T, num.cols.cap=1, fig.cap = "Children's vs. adults' choices for each type of trial, with bootstrapped 95\\% confidence intervals."}
 pos = position_dodge(width = .9)
@@ -358,6 +350,8 @@ If they corresponded perfectly, they would fall along the dotted $y=x$ line, but
 At a glance, this seems to support the hypothesis that "children are noisy adults."
 We will re-examine this hypothesis with model-based predictions for each trial.
 
+The overall split-half reliability of children and adults on containment trials is *r* = `r round(mean(sh_subj_contain), 2)` (sd=`r round(sd(sh_subj_contain), 2)`), and on support trials is *r* = `r round(mean(sh_subj_support), 2)` (sd=`r round(sd(sh_subj_support), 2)`).
+<!-- [should we separately report these for adults and children?] -->
 ```{r adults-vs-children, fig.env = "figure", fig.pos = "h", fig.align="center", fig.width=3.3, fig.height=3.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Comparison of children's vs. adults' preferences on each trial (dot), with bootstrapped 95\\% confidence intervals."}
 # add vert and horiz error bars 
 combo_dat %>% group_by(drop, target, relation, ID) %>%
@@ -377,11 +371,6 @@ combo_dat %>% group_by(drop, target, relation, ID) %>%
   #geom_text(aes(label=target)) # 
 
 ```
-
-The split-half reliability for children's choices is *r* = `r round(mean(sh_subj_child), 2)` (sd=`r round(sd(sh_subj_child), 2)`).
-The overall split-half reliability of children and adults on containment trials is *r* = `r round(mean(sh_subj_contain), 2)` (sd=`r round(sd(sh_subj_contain), 2)`), and on support trials is *r* = `r round(mean(sh_subj_support), 2)` (sd=`r round(sd(sh_subj_support), 2)`).
-<!-- [should we separately report these for adults and children?] -->
-
 
 ## Comparison to Physical Simulations
 
@@ -497,11 +486,11 @@ Or are they less aware (or simply less interested in) support?
 Or do children find some other goal relatively more enticing?
 -->
 
-
+<!--
 # Acknowledgements
-
 This work was funded by HAI seed grant #. 
-We thank X and Y for helpful comments.
+We thank X and Y for helpful comments. 
+-->
 
 # References 
 
