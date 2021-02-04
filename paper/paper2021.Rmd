@@ -1,7 +1,7 @@
 ---
 # Mike has a better title git stashed but G can't remember it..
 # old: What if you drop that? Developmental changes in curiosity about physical interactions
-title: "Using physical simulations to predict children's and adults' preference for physical interactions"
+title: "Using physics simulations to predict children's and adults' preference for physical interactions"
 bibliography: library.bib
 csl: apa6.csl
 document-params: "10pt, letterpaper"
@@ -352,8 +352,8 @@ combo_dat %>%
 Finally, we compare the trial-level preferences of children and adults.
 Figure 5 shows adults' (Experiment 1) vs. children's (Experiment 2) choice proportions for the target relations, colored by relation type (visualizing the same data presented in Table 2). 
 If they corresponded perfectly, they would fall along the dotted $y=x$ line, but children's preferences mostly fall short of that line, lying closer to $y=0.5$. 
-At a glance, this seems to support the hypothesis that "children are noisy adults."
-We will re-examine this hypothesis with model-based predictions for each trial.
+<!-- At a glance, this seems to support the hypothesis that "children are noisy adults."
+We will re-examine this hypothesis with model-based predictions for each trial. -->
 
 ```{r adults-vs-children, fig.env = "figure", fig.pos = "h", fig.align="center", fig.width=3.3, fig.height=3.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Comparison of children's vs. adults' preferences on each trial (dot), with bootstrapped 95\\% confidence intervals."}
 # add vert and horiz error bars 
@@ -375,8 +375,8 @@ combo_dat %>% group_by(drop, target, relation, ID) %>%
 
 ```
 
-## Comparison to Physical Simulations
-
+## Comparison to Physics Simulations
+\vspace{-4pt}
 ```{r load-model-data}
 load(here("models/model_data.RData")) # mdat, all_trials_mse, all_trials_mse_r, etc.
 load(here("models/support_probability_fit_df.RData")) 
@@ -408,22 +408,28 @@ supp_resp_sharp_beta1_cors <- supp_resp_sharp_beta1 %>% group_by(AgeGroup) %>%
             mse = mean((chose_target - Model_targ_prop)^2)) # .059 .016
 ```
 
-
 Using a physics engine [@gan2020threedworld] and 3D models of the objects that were shown to participants, we constructed a simulation of for each drop interaction in the experiment and attempted to predict children's and adults' choices using a variety of heuristic models based on the simulated physical interactions.
 For each trial's two possible drop object choices, we ran 250 simulated drops, and for each drop calculated a variety of features measuring the state of the model after the drop was completed.
-We selected features that we thought may provide good metrics for what people could find interesting, for instance, the mean length of time before both objects come to rest, as well as the standard deviation (SD) of that time.
-Some features were calculated separately for drop and target objects, such as the SD of each object's final position, the mean and maximum final distance of each object from the drop location, and the normed velocity of each object after first collision.
-We also tested a variety of features based on the likelihood of the dropped object coming to rest atop the target object--$Pr(support)$--and the robustness of this likelihood to small perturbations in drop position.
-Note that the model's definition of support does not distinguish support from containment.
-<!-- support_probability, support_std, support_response_linearity_r, support_response_linearity_pv  -->
-<!--len_inverse_sharpe_ratio, support_response_sharpness_C=1 -->
+We selected features that we thought may provide good metrics for what people could find interesting, for instance, the mean amount of time before both objects come to rest (*M(Move Time)*), as well as the standard deviation of that time (*SD(Move Time)*).
+Some features were calculated separately for drop and target objects, such as the inverse SD of each object's final position (*1/SD(Drop Obj Pos)* and *1/SD(Target Pos)*), the mean and maximum final distance of each object from the drop location (e.g., *M(Target Dist)* and *Max(Target Dist)*), and the SD of the normed velocity of each object after first collision (e.g., *Vel(Target)*).
+We also tested a variety of features based on the likelihood of the dropped object coming to rest atop the target object--$Pr(support)$--and the robustness of this likelihood to small perturbations in drop position (*Supp. Sharpness*).
+Note that the model's definition of support does not explicitly distinguish support from containment.
+
+<!--Supp. Sharpness = support_response_sharpness_C=1 -->
 
 We measured each of these features in 250 simulations of each possible drop in the experiment, and then used the resulting values to generate relative preferences for the drop choices on each trial. 
 A model's preference on any given trial was assumed to be proportional to the relative magnitude of the feature values for the possible physical interactions on that trial, scaled by a softmax parameter $\beta$.
-For each model (feature), we optimized $\beta$ separately to find best-fitting values for children's and adults' drop preferences, with the objective of minimizing mean squared error (MSE) between model and human choice proportions across all 20 trials.
+For each model (feature), we optimized $\beta$ separately to find best-fitting values for children's and adults' choice proportions, with the objective of minimizing mean squared error (MSE) between model and human choice proportions across all 20 trials.
 
 ### Results 
 
+Examination of the fitted model preferences revealed that none of them achieved a good fit to human preferences.
+For example, while the best-fitting feature, *Pr(support)*, captured both adults' and children's overall mean preference for the designed target relations, but explained no trial-level variation and was in fact negatively correlated with people's choices, overall.
+Thus, instead of reporting predictions from fitted $\beta$s for each feature, we show in Table 2 the correlation between model preferences (with softmax $\beta = 1$) vs. adults' and children's choice proportions, both to all trials and separately for containment and support trials.
+The feature with the strongest correlation to adults is Vel(Target) ($r=.33$), but adults' support trials were more correlated with *1/SD(Target Pos)* ($r=.39$), while contain trials were most correlated with *Vel(Drop Obj)* ($r=.54$).
+The feature with the strongest correlation to children is *Supp. Sharpness* ($r=.18$), but like adults, children's support trial choices were better correlated with *1/SD(Target Pos)* ($r=.41$).
+Children's containment trial choices were most correlated with *Max(Target Dist)* ($r=.43$), but *Vel(Drop Object)*, the most related to adults' containment trials, was not far behind ($r=.41$).
+Many of the other features show weak or even moderate negative correlations with people's choices.
 
 ```{r human-vs-model-table, results="asis"}
 # now we just have a table of selected features that were moderately correlated with people's choices
@@ -461,16 +467,16 @@ mod_tab <- all_trials %>% select(-mse) %>%
   arrange(desc(`Adult: All`)) %>%
   mutate(feature = case_when(feature == 'support_response_sharpness_C=1' ~ 'Supp. Sharpness',
                              feature == 'support_probability' ~ 'Pr(support)',
-                             feature == 'normed_velocity_std_after_first_collision_objects=target' ~ 'Target Velocity',
-                             feature == 'normed_velocity_std_after_first_collision_objects=drop' ~ 'Drop Obj. Velocity',
-                             feature == 'avg_len' ~ 'Avg. Distance',
-                             feature == 'len_std' ~ 'Distance SD',
-                             feature == 'obj_final_position_invstd_objects=target' ~ 'Target Pos. 1/SD',
-                             feature == 'obj_final_position_invstd_objects=drop' ~ 'Drop Obj Pos. 1/SD',
-                             feature == 'avg_final_radius_objects=target' ~ 'Avg. Target Radius',
-                             feature == 'avg_final_radius_objects=drop' ~ 'Avg. Drop Obj Radius',
-                             feature == 'avg_max_radius_objects=drop' ~ 'Max Drop Obj Radius',
-                             feature == 'avg_max_radius_objects=target' ~ 'Max Target Radius',
+                             feature == 'normed_velocity_std_after_first_collision_objects=target' ~ 'Vel(Target)',
+                             feature == 'normed_velocity_std_after_first_collision_objects=drop' ~ 'Vel(Drop Obj)',
+                             feature == 'avg_len' ~ 'M(Move Time)',
+                             feature == 'len_std' ~ 'SD(Move Time)',
+                             feature == 'obj_final_position_invstd_objects=target' ~ '1/SD(Target Pos)',
+                             feature == 'obj_final_position_invstd_objects=drop' ~ '1/SD(Drop Obj Pos)',
+                             feature == 'avg_final_radius_objects=target' ~ 'M(Target Dist)',
+                             feature == 'avg_final_radius_objects=drop' ~ 'M(Drop Obj Dist)',
+                             feature == 'avg_max_radius_objects=drop' ~ 'Max(Drop Obj Dist)',
+                             feature == 'avg_max_radius_objects=target' ~ 'Max(Target Dist)',
                              TRUE ~ feature))
          
 
@@ -538,10 +544,11 @@ One of the next best-fitting models was the sensitivity of *Pr(support)* to pert
 On balance, although much of the variation in this dataset is unexplained, it is encouraging that people's interest in physical interactions can be in part accounted for by simple heuristic models based on simulations of the same physical task we asked participants to merely imagine. 
 
 We suggest that these results can fruitfully serve as a test set for evaluating more complex computational  theories of curiosity such as the proposal that learners prefer to explore stimuli that are "moderately discrepant" in relation to their current knowledge state, thereby providing an opportunity to learn [@Kinney1976], and that curiosity will change as the gap between the learner's knowledge develops and the state of the world closes [@Loewenstein1994].
-These theories are starting to be implemented in deep neural networks, which have recently been shown to be capable of learning forward and inverse physical dynamics (i.e., "intuitive physics") from images when given the ability to "poke" the objects in the scene [@Agrawal2016]. 
-@Haber2018learning created a deep reinforcement learning model to drive intrinsically-motivated artificial agents, using two interacting neural networks: a *world-model* and a *self-model*.
+These theories are starting to be implemented in deep neural networks, which have recently been found capable of learning forward and inverse physical dynamics (i.e., "intuitive physics") from images when given the ability to "poke" the objects in the scene [@Agrawal2016], and have more recently been used to test which "curious" policies for generating actions result in robust and effective learning of intuitive physics in deep reinforcement learning agents [@Haber2018learning].
+<!-- @Haber2018learning created a deep reinforcement learning model to drive intrinsically-motivated artificial agents, using two interacting neural networks: a *world-model* and a *self-model*.
 These networks are trained simultaneously to solve different problems: the world-model attempts to predict the consequences of the agent's actions (either the forward or inverse dynamics), while the self-model attempts to learn to predict the errors of the world-model. 
 The agent can use the predictions of the self-model to implement a variety of curiosity policies for choosing actions, for example to pick actions that it believes will challenge its world-model. 
+-->
 In future work, we aim to examine the development of curiosity in such curious artificial agents, and compare these agents' behavior to people's in the same tasks.
 Curiosity has inspired curiosity in researchers for decades, but only recently have the tools come along that make these theories testable.
 
