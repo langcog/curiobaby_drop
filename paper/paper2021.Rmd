@@ -560,6 +560,7 @@ These networks are trained simultaneously to solve different problems: the world
 The agent can use the predictions of the self-model to implement a variety of curiosity policies for choosing actions, for example to pick actions that it believes will challenge its world-model. 
 -->
 In future work, we aim to examine the development of curiosity in such curious artificial agents, and compare whether these agents behave similarly to people and "drop it like it's hot" [@Snoop].
+
 The multifaceted nature of curiosity has fascinated researchers for decades, but only recently have we developed the means to factorize and test these theories. 
 We propose that the development of parallel tasks for children, humans, and embodied agents is a promising way forward towards modeling curiosity in the real-world.
 
