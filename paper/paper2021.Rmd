@@ -354,8 +354,8 @@ Finally, we compared the trial-level preferences of children and adults.
 Figure 5 shows adults' (Experiment 1) vs. children's (Experiment 2) choice proportions for the target relations, colored by relation type. 
 (visualizing the same data presented in Table 2).
 If they corresponded perfectly, they would fall along the dotted $y=x$ line, but children's preferences mostly fall short of that line, lying closer to the chance line ($y=0.5$).
-At a glance, these results seem to support the hypothesis that "children are noisy adults" in this tasks and suggests some consistency in the trial-level effects across development.
-<!-- We will re-examine this hypothesis with model-based predictions for each trial. --> -->
+At a glance, these results seem to support the hypothesis that "children are noisy adults" in this task and suggests some consistency in the trial-level effects across development. 
+This consistency also confers additional motivation for attempting to understand what drives human interest in particular physical interactions in this task through computational models.
 
 ```{r adults-vs-children, fig.env = "figure", fig.pos = "h", fig.align="center", fig.width=3.3, fig.height=3.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Comparison of children's vs. adults' preferences on each trial (dot), with bootstrapped 95\\% confidence intervals."}
 # add vert and horiz error bars 
@@ -535,7 +535,7 @@ hum_mod %>% mutate(AgeGroup = ifelse(AgeGroup=="adult", "adults", "children")) %
 
 
 # Discussion 
-This study aimed 1) to measure the consistency of children's and adults' preferences for particular object interactions, and 2) to determine whether people's interest was predicted by particular features of the imagined physical interactions between objects.
+This study aimed to 1) measure the consistency of children's and adults' preferences for particular object interactions, and 2) determine whether people's interest was predicted by particular features of the imagined physical interactions between objects.
 In an online study that gave adults the opportunity to make drop choices that could result in either a likely support or likely containment relation on each trial, we found that adults consistently chose targets likely to contain the dropped object, and to a lesser degree chose target objects that were likely to support the dropped object.
 Experiment 2 found the same pattern in children, but with greater noise -- even to the extent that younger children were at-chance at choosing the support relation on most trials.
 In sum, our behavioral study found that infant's early-emerging interest in containment [@Casasola2003] may extend through childhood and persist into adulthood, along with a weaker interest in support relations.
@@ -546,14 +546,14 @@ Instead, we found a few features that were partially correlated with people's ch
 For containment trials, the normed velocity of the drop object after first collision was most correlated with adults' choices ($r=.54$) and moderately with children's ($r=.41$), but children's choices were also correlated with the maximum and mean distance traveled by the target ($r=.43$ and $r=.42$).
 On balance, although much systematic variation in this dataset is unaccounted for, it is somewhat encouraging that people's interest in physical interactions can be in part accounted for by simple heuristic models based on simulations of the same physical task we asked participants to merely imagine.
 
-At the same time, the fact that these results are not fully explainable by simple heuristic models suggest that this paradigm of "dropping it like it's hot" may fruitfully serve as a test bed for evaluating more complex computational theories of curiosity. 
+At the same time, the fact that these results are not fully explainable by simple heuristic models suggest that this paradigm may fruitfully serve as a test bed for evaluating more complex computational theories of curiosity. 
 For example, in one proposal learners prefer to explore stimuli that are "moderately discrepant" in relation to their current knowledge state, thereby providing an opportunity to learn [@Kinney1976], and curiosity changes as the gap between the learner's knowledge develops and the state of the world closes [@Loewenstein1994].
 These theories are beginning to be implemented in deep neural networks, which are now capable of learning forward and inverse physical dynamics (i.e., "intuitive physics") from images when given the ability to "poke" the objects in the scene [@Agrawal2016], and have more recently been used to test which "curious" policies for generating actions result in robust and effective learning of intuitive physics in deep reinforcement learning agents [@Haber2018learning].
 <!-- @Haber2018learning created a deep reinforcement learning model to drive intrinsically-motivated artificial agents, using two interacting neural networks: a *world-model* and a *self-model*.
 These networks are trained simultaneously to solve different problems: the world-model attempts to predict the consequences of the agent's actions (either the forward or inverse dynamics), while the self-model attempts to learn to predict the errors of the world-model. 
 The agent can use the predictions of the self-model to implement a variety of curiosity policies for choosing actions, for example to pick actions that it believes will challenge its world-model. 
 -->
-In future work, we aim to examine the development of curiosity in such curious artificial agents, and compare these agents' behavior to people's in the same tasks.
+In future work, we aim to examine the development of curiosity in such curious artificial agents, and compare whether these agents behave similarly to people and "drop it like it's hot" [@Snoop].
 The multifaceted nature of curiosity has fascinated researchers for decades, but only recently have we developed the means to factorize and test these theories. 
 We propose that the development of parallel tasks for children, humans, and embodied agents is a promising way forward towards modeling curiosity in the real-world.
 
