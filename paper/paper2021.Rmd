@@ -117,12 +117,10 @@ This consistency in their choices is remarkable given that there are many other 
 Thus, we set out to examine the development of these preferences, first in a large adult sample in order to have high reliability for later model comparisons, and then in young children.
 
 ## Method
-<!-- \vspace{-4pt} -->
 ### Participants
 200 adults were recruited via Amazon Mechanical Turk and were paid $1 for participating.
 
 ### Materials
-<!-- \vspace{-4pt} -->
 Stimuli were images of 3D objects produced using Blender 3D-modeling software. 
 The nine objects, depicted in Figure 1, were bowl, cone, dumbbell, octahedron, pentagon (pentagonal prism), pipe, pyramid, torus, triangular prism, and ball (sphere; not pictured).
 
@@ -133,7 +131,6 @@ grid::grid.raster(img)
 ```
 
 ### Design
-<!-- \vspace{-4pt} -->
 The experiment consisted of 20 drop trials, completed by each participant in one of four pseudorandom orders.
 Participants were randomly assigned to each order.
 Each drop trial displayed an object X that is to be dropped on one of two other objects (Y or Z), as described in the following procedure.
@@ -159,7 +156,7 @@ The catch trials were meant to encourage attention to the objects, and participa
 <!-- Finally, there were two free response explanation trials mixed among the drop trials, querying participants, "Why did you make that choice?"
 These free responses were examined to determine if participants had particular goals in mind when making a choice, and how prevalent those goals were among participants. -->
 
-```{r fig2-task, fig.env = "figure", fig.pos = "t", fig.align='center', fig.width=3.4, fig.height=3.3, set.cap.width=T, num.cols.cap=1, fig.cap = "Example of a trial given to adults in Experiment 1."}
+```{r fig2-task, fig.env = "figure", fig.pos = "t", fig.align='center', fig.width=3.5, fig.height=3.4, set.cap.width=T, num.cols.cap=1, fig.cap = "Example of a trial given to adults in Experiment 1."}
 img <- png::readPNG("figs/2AFC_DropTaskFig.png")
 grid::grid.raster(img)
 ```
@@ -250,10 +247,29 @@ sh_ad_support = split_half_subj_cor(subset(combo_dat, relation=="support" & AgeG
 
 ```
 
+```{r noise-ceiling, echo=F}
+
+calc_noise_ceiling <- function(split_half_cors) {
+  rD = (2 * split_half_cors) / (1 + split_half_cors)
+  return(sqrt(mean(rD)))
+}
+
+noise_ceiling_adult = calc_noise_ceiling(sh_subj_adult) # .99
+noise_ceiling_child = calc_noise_ceiling(sh_subj_child) # .87
+
+#calc_noise_ceiling(sh_ch_contain) # .66
+#calc_noise_ceiling(sh_ad_contain) # .96
+
+#calc_noise_ceiling(sh_ch_support) # .88
+#calc_noise_ceiling(sh_ad_support) # .97
+
+```
+
+
 ## Results
 We analyzed data from the `r Nad` adults who completed the experiment and answered at least 3 of the 4 catch trials correctly (45 participants were excluded for not meeting this criterion).
 <!-- The main questions of interest are 1) are adults consistent in their preference of drop-target combinations? 2) are they more consistent with trials that afford support or containment relations? and 3) are there other apparent factors that drive their preferences? Our analysis addresses each question in turn. -->
-Averaging each subject's binary responses (1=target relation, 0=alternative) for each trial type revealed a stronger preference for containment relations ($M=$ `r round(ad_rel_means[1,]$M,2)`) than support relations ($M=$ `r round(ad_rel_means[2,]$M,2)`; paired `r t_apa(ad_supp_cont, format="rmarkdown", print=F)`).
+Averaging each subject's binary responses (1=target relation, 0=alternative) for each trial type revealed a stronger preference for containment relations ($M=$ `r round(ad_rel_means[1,]$M,2)`) than support relations ($M=$ `r round(ad_rel_means[2,]$M,2)`; paired `r apa::t_apa(ad_supp_cont, format="rmarkdown", print=F)`).
 Table 1 shows the proportion of participants that chose the designed target relation for each of the 20 trials. <!-- [should also show alternative target object?]. -->
 Based on the binomial distribution, any of the trials on which more than 90 of the 155 participants agree (i.e., >0.59 or <0.41) significantly differ from chance. 
 As can be seen in Table 1, adults participants (*adult* column) significantly preferred the target relation for all 10 of the containment trials, and significantly preferred five targets on the 10 support trials; the other five support trials did not significantly differ from chance, suggesting that many participants found the prospect of dropping on the distractor object at least equally enticing. 
@@ -283,24 +299,21 @@ print(chtab, type="latex", comment = F, include.rownames = F, table.placement = 
 
 
 # Experiment 2: Children
-<!-- \vspace{-4pt} -->
+
 Experiment 1 demonstrated that adults show consistent preferences for dropping objects on target objects that afford containment relations, and to a lesser extent support relations. 
 Experiment 2 investigates whether these strong preferences are present even in young children, recognizing that children may find different types of physical interactions (e.g., rolling, bouncing, unpredictability) of greater interest than adults, or may simply show more idiosyncratic choice patterns.
 
 ## Method
-<!-- \vspace{-4pt} -->
 We adapted the same materials and procedure used in Experiment 1 for use in an online experiment with children, in order to directly compare the results for children and adults.
 
 ### Participants
-<!-- \vspace{-4pt} -->
 Participants were 73 children recruited online via outreach through a local nursery school and targeted Facebook ads over the course of 6 months.
 Participant exclusions were made based on cases where i) the participant did not complete more than half of the study play session or ii) the parent did not consent for video recording of study. 
 After exclusions, results from `r Nch` were analyzed, including `r age[1,]$N` 3-year-olds, `r age[2,]$N` 4-year-olds, `r age[3,]$N` 5-year-olds, `r age[4,]$N` 6-year-olds, and `r age[5,]$N` 7-year-olds.
 
 ### Materials
-<!-- \vspace{-4pt} -->
 The materials were the same as those used in Experiment 1, except that the trials were adapted for presentation via Zoom in a slide presentation as shown in Figure 3. 
-<!-- Introductory slides were added for informed consenting process and screen configuration, where the researcher's video was placed directly below drop object X and in between target objects Y and Z (see Figure 3). -->
+
 
 ```{r fig1-sets, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=2.55, fig.height=2.35, set.cap.width=T, num.cols.cap=1, fig.cap = "Zoom screen configuration for children in Experiment 2. Parents were asked to place the experimenter's video feed in the bottom center so the experimenter could point up to the drop object and left and right at each target choice."}
 img <- png::readPNG("figs/online-child-practice-trial.png")
@@ -308,7 +321,6 @@ grid::grid.raster(img)
 ```
 
 ### Procedure
-<!-- \vspace{-4pt} -->
 <!-- Based on piloting, we estimated the activity would require 10 minutes to complete. -->
 After the parent provided informed consent, children were assigned to one of two pseudorandom trial orders in counterbalanced order.
 <!-- A video recording was taken of the online session. -->
@@ -317,15 +329,14 @@ Children were asked to verbally select target object Y or Z, and then asked to c
 The sides on which target objects and colors appeared were counterbalanced across trials. 
 
 ## Results
-<!-- \vspace{-4pt} -->
 <!-- Were children more consistent in their choices on support or containment trials? -->
-Similar to adults, averaging each child's binary responses for each trial type revealed a stronger preference for containment relations ($M=$ `r round(ch_rel_means[1,]$M,2)`) than support relations ($M=$ `r round(ch_rel_means[2,]$M,2)`; paired `r t_apa(ch_supp_cont, format="rmarkdown", print=F)`). 
+Similar to adults, averaging each child's binary responses for each trial type revealed a stronger preference for containment relations ($M=$ `r round(ch_rel_means[1,]$M,2)`) than support relations ($M=$ `r round(ch_rel_means[2,]$M,2)`; paired `r apa::t_apa(ch_supp_cont, format="rmarkdown", print=F)`). 
 Unlike adults, however, children did not show a significant preference for choosing the support relation. <!-- [add a regression with trial_type * age (3 - 18=adult)?] -->
 Figure 4 shows the proportion of participants' choice of the designed target relation broken down by relation type and age group. Preferences increased with age and were overall stronger for containment.
 
-<!-- We next examined children's choice of target objects to determine if children were choosing randomly, or had consistent preferences for some objects.  -->
-We next examined trial-level effects in children. Table 1 shows the proportion of children ("child" column) choosing the designed target relation for each of the 20 trials, alongside the adult choice proportions from Experiment 1. 
-Based on the binomial distribution, any of the trials on which more than 41 of the 66 participants agree (i.e., >0.64 or <0.36) significantly differ (*p*<.05) from chance. <!-- stricter crit for mult comparisons? Bonf=.0025 -->
+We next examined trial-level effects in children. 
+Table 1 shows the proportion of children ("child" column) choosing the designed target relation for each of the 20 trials, alongside the adult choice proportions from Experiment 1. 
+Based on the binomial distribution, any of the trials on which more than 41 of the 66 participants agree (i.e., >0.64 or <0.36) significantly differ (*p*<.05) from chance. 
 Children significantly preferred the designed relation on eight of the 10 containment trials, while only significantly preferring two of the 10 support relation choices.
 On the remaining two containment trials and the other eight support trials, children's preferences also did not significantly differ from chance against the designed relation.
 These item effects were relatively reliable, though noisier than that of adults: the split-half reliability for children's choices was *r* = `r round(mean(sh_subj_child), 2)` (sd=`r round(sd(sh_subj_child), 2)`).
@@ -351,7 +362,6 @@ combo_dat %>%
 
 
 ### Comparison of Children's vs. Adults' Preferences
-<!-- \vspace{-4pt} -->
 <!-- Finally, we compared the trial-level preferences of children and adults. -->
 Figure 5 shows adults' (Experiment 1) vs. children's (Experiment 2) choice proportions for the target relations, colored by relation type (visualizing the same data presented in Table 2, but with 95% CIs).
 If adults' and children's judgments corresponded perfectly, they would fall along the dotted $y=x$ line, but children's preferences mostly fall short of that line, lying closer to the chance line ($y=0.5$).
@@ -379,7 +389,6 @@ combo_dat %>% group_by(drop, target, relation, ID) %>%
 ```
 
 # Comparison to Physics Simulations
-<!-- \vspace{-4pt} -->
 ```{r load-model-data}
 load(here("models/model_data.RData")) # mdat, all_trials_mse, all_trials_mse_r, etc.
 load(here("models/support_probability_fit_df.RData")) 
@@ -417,7 +426,7 @@ We next attempted to predict adults' and children's judgments using a 3D model o
 
 For each trial's two possible drop object choices, we ran 250 simulated drops, and for each drop we calculated a variety of features measuring the state of the model after the drop was completed.
 We selected features that we thought may provide good metrics for what people could find interesting, for instance, the mean amount of time before both objects come to rest (*M(Move Time)*), as well as the standard deviation of that time (*SD(Move Time)*).
-Some features were calculated separately for drop and target objects, such as how variable each object's final positions tend to be (e.g., the inverse SD of each object's final position (*1/SD(Drop Obj Pos)* and *1/SD(Target Pos)*), the mean and maximum final distance of each object from the drop location (e.g., *M(Target Dist)* and *Max(Target Dist)*), and how variable the speed of each objects tend to be after collision (e.g., *Vel(Target)*).
+Some features were calculated separately for drop and target objects, such as how variable each object's final positions tend to be (e.g., the inverse SD of each object's final position (*1/SD(Drop Obj Pos)* and *1/SD(Target Pos)*), the mean and maximum final distance of each object from the drop location (e.g., *M(Target Dist)* and *Max(Target Dist)*), and how variable the velocity of each object tends to be after the first collision (e.g., *SD(Target Vel)*).
 <!-- SD of the normed velocity of each object after first collision (e.g.,  -->
 We also tested a variety of features based on the likelihood of the dropped object coming to rest atop the target object--$Pr(support)$--and the robustness of this likelihood to small perturbations in drop position (*Supp. Sharpness*).
 Note that the model's definition of support does not explicitly distinguish support from containment.
@@ -431,13 +440,16 @@ For each model (feature), we also optimized $\beta$ separately to find best-fitt
 
 ## Results 
 
-Overall, a few of these features were modestly correlated with people's choices. Table 2 shows the correlation between model preferences (with softmax $\beta = 1$) vs. adults' and children's choice proportions, both to all trials and separately for containment and support trials.
-When all trials were considered together, the feature with the strongest correlation to adults' choices was the velocity of the target object (*Vel(Target)*, $r=.33$), while the feature with the strongest correlation to children's choices was *Support Sharpness* (see Methods, $r=.18$)
+Overall, a few of these features were modestly correlated with people's choices. 
+Table 2 shows the correlation between model preferences (with softmax $\beta = 1$) vs. adults' and children's choice proportions, both to all trials and separately for containment and support trials.
+When all trials were considered together, the feature with the strongest correlation to adults' choices was the velocity of the target object (*SD(Target Vel)*, $r=.33$), while the feature with the strongest correlation to children's choices was *Support Sharpness* (see Methods, $r=.18$)
 <!-- For support trials, both adults' ($r=.39$) and children's ($r=.41$) choices were best correlated with a feature indexing the variability in the target object's final position (*1/SD(Target Pos)*).  -->
-<!-- For containment trials, adults' choices were most correlated with the velocity of the dropped object (*Vel(Drop Obj)*, $r=.54$) which also showed a modest correlation with children's choices ($r=.41$); however, children's choices were most correlated with the maximum distance of the target object (*Max(Target Dist)*, $r=.43$).  -->
+<!-- For containment trials, adults' choices were most correlated with the velocity of the dropped object (*SD(Drop Obj Vel)*, $r=.54$) which also showed a modest correlation with children's choices ($r=.41$); however, children's choices were most correlated with the maximum distance of the target object (*Max(Target Dist)*, $r=.43$).  -->
 Many of the other features showed weak or even moderate negative correlations with people's choices.
 
-Examination of the models with $\beta$ optimized, in contrast, revealed that none  achieved a good fit to human preferences. While the best-fitting feature, *Pr(support)*, captured both adults' and children's overall mean preference for the designed target relations, it explained essentially no trial-level variation and was in fact negatively correlated with choices. This was not due to noisy behavioral data: while the noise ceiling on choice preferences for all trials was $r$=.97 for adults and $r$=.76 for children, the best fitting feature only achieved XX. 
+Examination of the models with $\beta$ optimized, in contrast, revealed that none achieved a good fit to human preferences. 
+While the best-fitting feature, *Pr(support)*, captured both adults' and children's overall mean preference for the designed target relations, it explained essentially no trial-level variation and was in fact negatively correlated with choices. 
+This was not due to noisy behavioral data: while the noise ceiling on choice preferences for all trials was $r=$ `r round(noise_ceiling_adult, 2)` for adults and $r=$ `r round(noise_ceiling_child, 2)` for children, the best-fitting feature accounted for very little of that. 
 
 ```{r human-vs-model-table, results="asis"}
 # now we just have a table of selected features that were moderately correlated with people's choices
@@ -475,8 +487,8 @@ mod_tab <- all_trials %>% select(-mse) %>%
   arrange(desc(`Adult: All`)) %>%
   mutate(feature = case_when(feature == 'support_response_sharpness_C=1' ~ 'Supp. Sharpness',
                              feature == 'support_probability' ~ 'Pr(support)',
-                             feature == 'normed_velocity_std_after_first_collision_objects=target' ~ 'Vel(Target)',
-                             feature == 'normed_velocity_std_after_first_collision_objects=drop' ~ 'Vel(Drop Obj)',
+                             feature == 'normed_velocity_std_after_first_collision_objects=target' ~ 'SD(Target Vel)',
+                             feature == 'normed_velocity_std_after_first_collision_objects=drop' ~ 'SD(Drop Obj Vel)',
                              feature == 'avg_len' ~ 'M(Move Time)',
                              feature == 'len_std' ~ 'SD(Move Time)',
                              feature == 'obj_final_position_invstd_objects=target' ~ '1/SD(Target Pos)',
