@@ -351,10 +351,9 @@ combo_dat %>%
 ## Comparison of Children's vs. Adults' Preferences
 \vspace{-4pt}
 Finally, we compared the trial-level preferences of children and adults.
-Figure 5 shows adults' (Experiment 1) vs. children's (Experiment 2) choice proportions for the target relations, colored by relation type. 
-(visualizing the same data presented in Table 2).
+Figure 5 shows adults' (Experiment 1) vs. children's (Experiment 2) choice proportions for the target relations, colored by relation type (visualizing the same data presented in Table 2, but with 95% CIs).
 If they corresponded perfectly, they would fall along the dotted $y=x$ line, but children's preferences mostly fall short of that line, lying closer to the chance line ($y=0.5$).
-At a glance, these results seem to support the hypothesis that "children are noisy adults" in this task and suggests some consistency in the trial-level effects across development. 
+At a glance, these results seem to support the hypothesis that "children are noisy adults" in this task as well as suggesting some consistency in the trial-level effects across development. 
 This consistency also confers additional motivation for attempting to understand what drives human interest in particular physical interactions in this task through computational models.
 
 ```{r adults-vs-children, fig.env = "figure", fig.pos = "h", fig.align="center", fig.width=3.3, fig.height=3.5, set.cap.width=T, num.cols.cap=1, fig.cap = "Comparison of children's vs. adults' preferences on each trial (dot), with bootstrapped 95\\% confidence intervals."}
@@ -427,7 +426,7 @@ For each model (feature), we optimized $\beta$ separately to find best-fitting v
 ### Results 
 
 Examination of the fitted model preferences revealed that none of them achieved a good fit to human preferences.
-For example, while the best-fitting feature, *Pr(support)*, captured both adults' and children's overall mean preference for the designed target relations, but explained no trial-level variation and was in fact negatively correlated with people's choices, overall.
+For example, while the best-fitting feature, *Pr(support)*, captured both adults' and children's overall mean preference for the designed target relations, it explained no trial-level variation and was in fact negatively correlated with people's choices.
 Thus, instead of reporting predictions from fitted $\beta$s for each feature, we show in Table 2 the correlation between model preferences (with softmax $\beta = 1$) vs. adults' and children's choice proportions, both to all trials and separately for containment and support trials.
 The feature with the strongest correlation to adults is *Vel(Target)* ($r=.33$), but adults' support trials were more correlated with *1/SD(Target Pos)* ($r=.39$), while containment trials were most correlated with *Vel(Drop Obj)* ($r=.54$).
 The feature with the strongest correlation to children is *Supp. Sharpness* ($r=.18$), but like adults, children's support trial choices were better correlated with *1/SD(Target Pos)* ($r=.41$).
@@ -480,7 +479,8 @@ mod_tab <- all_trials %>% select(-mse) %>%
                              feature == 'avg_final_radius_objects=drop' ~ 'M(Drop Obj Dist)',
                              feature == 'avg_max_radius_objects=drop' ~ 'Max(Drop Obj Dist)',
                              feature == 'avg_max_radius_objects=target' ~ 'Max(Target Dist)',
-                             TRUE ~ feature))
+                             TRUE ~ feature)) %>%
+  rename(Feature = feature)
          
 
  
