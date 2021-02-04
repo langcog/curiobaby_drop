@@ -421,17 +421,16 @@ Note that the model's definition of support does not explicitly distinguish supp
 
 We measured each of these features in 250 simulations of each possible drop in the experiment, and then used the resulting values to generate relative preferences for the drop choices on each trial. 
 A model's preference on any given trial was assumed to be proportional to the relative magnitude of the feature values for the possible physical interactions on that trial, scaled by a softmax parameter $\beta$.
-For each model (feature), we optimized $\beta$ separately to find best-fitting values for children's and adults' choice proportions, with the objective of minimizing mean squared error (MSE) between model and human choice proportions across all 20 trials.
+For each model (feature), we also optimized $\beta$ separately to find best-fitting values for children's and adults' choice proportions, with the objective of minimizing mean squared error (MSE) between model and human choice proportions across all 20 trials.
 
 ### Results 
-
-Examination of the fitted model preferences revealed that none of them achieved a good fit to human preferences.
-For example, while the best-fitting feature, *Pr(support)*, captured both adults' and children's overall mean preference for the designed target relations, it explained no trial-level variation and was in fact negatively correlated with people's choices.
-Thus, instead of reporting predictions from fitted $\beta$s for each feature, we show in Table 2 the correlation between model preferences (with softmax $\beta = 1$) vs. adults' and children's choice proportions, both to all trials and separately for containment and support trials.
-The feature with the strongest correlation to adults is *Vel(Target)* ($r=.33$), but adults' support trials were more correlated with *1/SD(Target Pos)* ($r=.39$), while containment trials were most correlated with *Vel(Drop Obj)* ($r=.54$).
-The feature with the strongest correlation to children is *Supp. Sharpness* ($r=.18$), but like adults, children's support trial choices were better correlated with *1/SD(Target Pos)* ($r=.41$).
-Children's containment trial choices were most correlated with *Max(Target Dist)* ($r=.43$), but *Vel(Drop Object)*, the most related to adults' containment trials, was not far behind ($r=.41$).
+Overall, we found a few of these features were modestly correlated with people's choices. Table 2 shows the correlation between model preferences (with softmax $\beta = 1$) vs. adults' and children's choice proportions, both to all trials and separately for containment and support trials.
+When all trials were considered together, the feature with the strongest correlation to adults' choices was the velocity of the target object (*Vel(Target)*, $r=.33$), while the feature with the strongest correlation to children's choices was *Support Sharpness* (see Methods, $r=.18$)
+For support trials, both adults' ($r=.39$) and children's ($r=.41$) choices were best correlated with a feature indexing the variability in the target object's final position (*1/SD(Target Pos)*). 
+For containment trials, adults' choices were most correlated with the velocity of the dropped object (*Vel(Drop Obj)*, $r=.54$) which also showed a modest correlation with children's choices ($r=.41$); however, children's choices were most correlated with the maximum distance of the target object (*Max(Target Dist)*, $r=.43$). 
 Many of the other features show weak or even moderate negative correlations with people's choices.
+
+Examination of the fitted model preferences, in contrast, revealed that none of them achieved a good fit to human preferences. While the best-fitting feature, *Pr(support)*, captured both adults' and children's overall mean preference for the designed target relations, it explained no trial-level variation and was in fact negatively correlated with people's choices. This was not due to noisy behavioral data: while the noise ceiling on choice preferences for all trials was $r$=.97 for adults and $r$=.76 for children, the best fitting feature only achieved XX. 
 
 ```{r human-vs-model-table, results="asis"}
 # now we just have a table of selected features that were moderately correlated with people's choices
