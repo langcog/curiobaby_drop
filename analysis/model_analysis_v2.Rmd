@@ -176,7 +176,7 @@ evalFit <- function(feat_df, hum_df, beta, cor_objective=F, relation=NA) {
   r = with(hum_df, cor(chose_target, Model_targ_prop))
   mse = with(hum_df, sum((chose_target - Model_targ_prop)^2)) / nrow(hum_df) 
   if(cor_objective) mse = mse - r # also try to minimize -correlation
-  return(mse) # return negative cor since DEoptim minimizes
+  return(list(mse=mse, r=r)) # return negative cor since DEoptim minimizes
 }
 
 child_trial_agg <- child_long %>% group_by(relation, drop, target) %>% # alt, 
@@ -279,6 +279,66 @@ cont_trials_mse <- cont_trials_mse %>% mutate(beta = as.numeric(beta),
 save(mdat, all_trials_mse, all_trials_mse_r, 
      supp_trials_mse, cont_trials_mse, file=here("models/model_data.RData"))
 ```
+
+
+## Get all feature correlations with Beta=1
+
+```{r fit-models-to-supp-cont-trials-mse, echo=F, eval=FIT_MODELS}
+supp_trials <- tibble()
+cont_trials <- tibble()
+all_trials <- tibble()
+
+feat_names = c("support_response_sharpness_C=1",
+                       "normed_velocity_std_after_first_collision_objects=target",
+                       "normed_velocity_std_after_first_collision_objects=drop",
+                       "avg_max_radius_objects=target",
+                       "avg_max_radius_objects=drop",
+                       "obj_final_position_invstd_objects=target",
+                       "obj_final_position_invstd_objects=drop",
+                       "avg_final_radius_objects=target",
+                       "avg_final_radius_objects=drop",
+                       "avg_len",
+                       "len_std",
+                       "support_probability")
+
+for(feat in feat_names) {
+  feat_df <- get_feature_df(mdat, feat)
+  # get r and mse values for beta=1
+  adult_all <- evalFit(feat_df, adult_trial_agg, 1)
+  adult_supp <- evalFit(feat_df, adult_trial_agg, 1, relation="support")
+  adult_cont <- evalFit(feat_df, adult_trial_agg, 1, relation="contain")
+  
+  child_all <- evalFit(feat_df, child_trial_agg, 1)
+  child_supp <- evalFit(feat_df, child_trial_agg, 1, relation="support")
+  child_cont <- evalFit(feat_df, child_trial_agg, 1, relation="contain")
+  
+  supp_trials <- bind_rows(supp_trials, c(Age = "adults", feature=feat,  
+                          mse = adult_supp$mse, r = adult_supp$r))
+  supp_trials <- bind_rows(supp_trials, c(Age = "children", feature=feat, 
+                          mse = child_supp$mse, r = child_supp$r))
+
+  cont_trials <- bind_rows(cont_trials, c(Age = "adults", feature=feat, 
+                          mse = adult_cont$mse, r = adult_cont$r))
+  cont_trials <- bind_rows(cont_trials, c(Age = "children", feature=feat, 
+                          mse = child_cont$mse, r = child_cont$r))
+
+  all_trials <- bind_rows(all_trials, c(Age = "adults", feature=feat,
+                          mse = adult_all$mse, r = adult_all$r))
+  all_trials <- bind_rows(all_trials, c(Age = "children", feature=feat,
+                          mse = child_all$mse, r = child_all$r))
+}
+
+supp_trials <- supp_trials %>% mutate(r = as.numeric(r), mse = as.numeric(mse)) %>%
+  arrange(desc(r))
+cont_trials <- cont_trials %>% mutate(r = as.numeric(r), mse = as.numeric(mse)) %>%
+  arrange(desc(r))
+all_trials <- all_trials %>% mutate(r = as.numeric(r), mse = as.numeric(mse)) %>%
+  arrange(desc(r))
+
+save(mdat, all_trials, supp_trials, cont_trials, file=here("models/model_preds_beta1.RData"))
+```
+
+
 
 
 
