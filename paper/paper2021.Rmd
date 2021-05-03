@@ -76,14 +76,14 @@ Although such exploratory behavior has long been recognized as a critical compon
 Moreover, extant theories have rarely provided precise enough predictions to be directly compared to empirical measurements of curiosity-driven behavior in humans, in part because curiosity tends to result in complex, open-ended behaviors that are difficult to quantify.
 
 
-The goal of the current paper is to help close this gap by proposing a novel paradigm to advance our theoretical understanding of curiosity, specifically within the domain of physical object interactions [@kubricht2017intuitive].
+The goal of the current paper is to help close this gap by proposing a novel paradigm to advance our theoretical understanding of curiosity, specifically within the domain of physical object interactions [@kubricht2017intuitive; @bramley2018].
 First, we present an empirical investigation of the pattern of choices taken by children and adults in a novel task. 
 We then present a set of heuristic models of this behavior based on a variety of metrics of simulated physical interactions (e.g., likelihood of a dropped object coming to rest on a target object), and test the degree to which these features predict children and adults' behaviors in the same task.
 <!-- Finally, we sketch how future work can test the correspondence between the exploratory actions taken by an artificial agent that instantiates our computational theory and those taken by human children on the same set of tasks. -->
 
 We take inspiration from a large body of prior work in developmental psychology investigating the development of knowledge about physical objects, their properties, and how they interact [@hespos2012physics; @smith2018developing; @Baillargeon2007]. 
-Children both spend a remarkably amount of time across exploring how different objects and surfaces interact during naturalistic play [@fenson1976] and spend longer time exploring objects that appear to violate physical laws [e.g., an object that appears to pass through a wall; @Stahl2015; @Baillargeon2007].
-In other words, children seem to actively learn about physical interactions by intervening on the world and observing the consequences of their actions [@needham2000improvements; @Gopnik2009; @gureckis2012self]. 
+Children both spend a remarkable amount of time across exploring how different objects and surfaces interact during naturalistic play [@fenson1976] and spend longer time exploring objects that appear to violate physical laws [e.g., an object that appears to pass through a wall; @Stahl2015; @Baillargeon2007].
+In other words, children seem to actively learn about physical interactions by intervening on the world and observing the consequences of their actions [@needham2000improvements; @Gopnik2009; @gureckis2012self; @allen2020]. 
 However, relatively little work has examined what types of physical interactions children are most interested in testing, or linked children's actions to formal theories of exploration or of physics learning.
 Instead, most work that has investigated exploratory behavior in children has done so by examining how they play with relatively complex objects -- for example, documenting the number of functions discovered while playing with a novel toy [e.g., @Cook2011; @Bonawitz2012; @Gweon2014].
 
@@ -91,7 +91,8 @@ We thus developed a novel physical exploration task in which children, adults, o
 and then demonstrate how this paradigm can be used to test theories of curiosity about physical interactions. 
 First, we measured people's choices in a novel task, in which participants were told that they would drop a given object (e.g., a sphere, a torus; see Figure 1) onto one of two target objects (e.g., a dumbbell, a pentagonal prism; see Figure 2), with the goal of the creating the most interesting physical interaction.
 We recorded adults' and children's (3--7 years of age) choices for a set of trials in which some of the drop objects could plausibly end up *supported* by one of the target objects, and for a set of trials in which some of the drop objects could end up *contained* by one of the targets -- although the other potential targets likely also offered affordances of interest.
-After examining the consistency of people's preferences, we tested the predictive power of a variety of heuristic features derived from simulations of this task using a 3D environment. 
+After examining the consistency of people's preferences, we tested the predictive power of a variety of heuristic features derived from simulations of this task using a 3D environment.
+<!-- cite @gerstenberg2020 about here? -->
 <!-- Our results suggest that using detailed measurement of human action selection and computational models based on simulations of the same tasks promises to lead to more robust and precise theories of human curiosity about the physical world, and how it develops. -->
 
 <!-- What we've learned from prior theoretical work, and how it falls short -->
@@ -112,7 +113,7 @@ After examining the consistency of people's preferences, we tested the predictiv
 To investigate the systematicity of people's preferences for physical interactions between objects, we began by studying adults, whom we might expect to be less idiosyncratic and thus more consistent in their choices than children.
 Our design is motivated by the results of a pilot study conducted in-person in January, 2020, in which we asked adults to select which of a pair of 3D-printed toy blocks (see Figure 1) they would like to drop on a given target object from the set, or vice-versa: on which of a given pair of target objects would they like to drop a given object.
 In the pilot study (N=15), the pairs of target or drop objects were chosen essentially at random, but were the same for all participants.
-We were surprised to find consistency in adults' preferences for many of the trials: especially when given a drop object and asked to choose one of two target objects, adults were quite often (75-90%) targeting that object that would either *contain* or *support* the dropped object (i.e., the pipe could contain the cone; the pentagonal prism could support the octahedron).
+We were surprised to find consistency in adults' preferences for many of the trials: especially when given a drop object and asked to choose one of two target objects, adults were quite often (75-90%) targeting the object that would either *contain* or *support* the dropped object (i.e., the pipe could contain the cone; the pentagonal prism could support the octahedron).
 This consistency in their choices is remarkable given that there are many other possible goals that people might choose in order to make something "interesting" happen: they might attempt to make the dropped object roll or bounce far from the target, or rebound in an unexpected direction, but in fact most people settled on attempting support or containment relations.
 Thus, we set out to examine the development of these preferences, first in a large adult sample in order to have high reliability for later model comparisons, and then in young children.
 
