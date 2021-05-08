@@ -69,12 +69,10 @@ age <- child_long %>% distinct(ID, Age) %>% group_by(Age) %>%
 ```
 
 # Introduction 
-
 Curiosity is a hallmark aspect of human intelligence. 
 From infants exploring the objects in their environment to scientists exploring the frontiers of our solar system, humans are highly motivated to seek out new knowledge and experiences. 
 Although such exploratory behavior has long been recognized as a critical component of human learning [@james1983talks] and cognitive development [@Gopnik2009; @Piaget1952], formal theories that explain human curiosity and how it drives exploratory behavior have remained elusive [@Kidd2015]. 
 Moreover, extant theories have rarely provided precise enough predictions to be directly compared to empirical measurements of curiosity-driven behavior in humans, in part because curiosity tends to result in complex, open-ended behaviors that are difficult to quantify.
-
 
 The goal of the current paper is to help close this gap by proposing a novel paradigm to advance our theoretical understanding of curiosity, specifically within the domain of physical object interactions [@kubricht2017intuitive; @bramley2018].
 First, we present an empirical investigation of the pattern of choices taken by children and adults in a novel task. 
@@ -88,10 +86,13 @@ However, relatively little work has examined what types of physical interactions
 Instead, most work that has investigated exploratory behavior in children has done so by examining how they play with relatively complex objects -- for example, documenting the number of functions discovered while playing with a novel toy [e.g., @Cook2011; @Bonawitz2012; @Gweon2014].
 
 We thus developed a novel physical exploration task in which children, adults, or AI agents can choose which series of physical experiments to perform, <!-- and observe the results of each in real time.-->
-and then demonstrate how this paradigm can be used to test theories of curiosity about physical interactions. 
+and then demonstrate how this paradigm can be used to test theories of curiosity about physical interactions.
 First, we measured people's choices in a novel task, in which participants were told that they would drop a given object (e.g., a sphere, a torus; see Figure 1) onto one of two target objects (e.g., a dumbbell, a pentagonal prism; see Figure 2), with the goal of the creating the most interesting physical interaction.
 We recorded adults' and children's (3--7 years of age) choices for a set of trials in which some of the drop objects could plausibly end up *supported* by one of the target objects, and for a set of trials in which some of the drop objects could end up *contained* by one of the targets -- although the other potential targets likely also offered affordances of interest.
-After examining the consistency of people's preferences, we tested the predictive power of a variety of heuristic features derived from simulations of this task using a 3D environment.
+After examining children's and adult's preferences, we tested the predictive power of a variety of heuristic features derived from simulations of this task using a 3D environment.
+To preview our results, we found a surprising amount of consistency in how both children and adults chose to explore the relationships between different objects -- but that this consistency was not easily explained by any of simple heuristic features that we tested. 
+We propose that these kinds of physical exploration task are a promising tested for adjudicating between different embodied models of curiosity.
+
 <!-- cite @gerstenberg2020 about here? -->
 <!-- Our results suggest that using detailed measurement of human action selection and computational models based on simulations of the same tasks promises to lead to more robust and precise theories of human curiosity about the physical world, and how it develops. -->
 
@@ -109,7 +110,6 @@ After examining the consistency of people's preferences, we tested the predictiv
 
 
 # Experiment 1: Adults
-
 To investigate the systematicity of people's preferences for physical interactions between objects, we began by studying adults, whom we might expect to be less idiosyncratic and thus more consistent in their choices than children.
 Our design is motivated by the results of a pilot study conducted in-person in January, 2020, in which we asked adults to select which of a pair of 3D-printed toy blocks (see Figure 1) they would like to drop on a given target object from the set, or vice-versa: on which of a given pair of target objects would they like to drop a given object.
 In the pilot study (N=15), the pairs of target or drop objects were chosen essentially at random, but were the same for all participants.
@@ -572,13 +572,12 @@ These theories are beginning to be implemented in deep neural networks, which ar
 These networks are trained simultaneously to solve different problems: the world-model attempts to predict the consequences of the agent's actions (either the forward or inverse dynamics), while the self-model attempts to learn to predict the errors of the world-model. 
 The agent can use the predictions of the self-model to implement a variety of curiosity policies for choosing actions, for example to pick actions that it believes will challenge its world-model. 
 -->
-In future work, we aim to examine the development of curiosity in such curious artificial agents, and compare whether these agents behave similarly to people and "drop it like it's hot" [@Snoop].
+In future work, we aim to examine the development of curiosity in such curious artificial agents, and compare whether these agents behave similarly to people when asked to "drop it like it's hot" [@Snoop].
 
 The multifaceted nature of curiosity has fascinated researchers for decades, but only recently have we developed the means to factorize and test these theories. 
 We propose that the development of parallel tasks for children, humans, and embodied agents is a promising way forward towards modeling curiosity in the real-world.
 
-<!--
-According to these theories, curiosity-driven behavior reflects a gap between the learner's knowledge and the state of the world [@Loewenstein1994], and thus they predict that as a learner gains additional knowledge, their preferences will shift toward more complex stimuli [@Dember1957].
+<!--According to these theories, curiosity-driven behavior reflects a gap between the learner's knowledge and the state of the world [@Loewenstein1994], and thus they predict that as a learner gains additional knowledge, their preferences will shift toward more complex stimuli [@Dember1957]
 Although these theories have provided important qualitative insights, one of their major limitations is that they do not provide precise ways to characterize a learner's current knowledge state, how physical states of the world are represented in their mind, nor how discrepancies between a learner's knowledge and such states are compared.  
 Our approach leverages theory and insights from reinforcement learning (RL), including the value of mechanisms that equip RL agents with "intrinsic motivation" — a drive to explore the state space even when rewards are sparse or absent, and favor actions with uncertain outcomes, because they may result in the discovery of new policies with high expected values [@Schmidhuber2010].
 Our modeling approach is resonant with recent work that has instantiated such intrinsic-motivation mechanisms in robots to help them learn robust ways to predict physical events in the world world [@Oudeyer2007; @Oudeyer2013], although this work typically involves pretraining models on a separate physical prediction task before implementing curiosity-driven learning, and has not yet been directly compared to human behavior in the same prediction tasks.
