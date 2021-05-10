@@ -10,11 +10,11 @@ author-information: >
     \author{
     {\large \bf George Kachergis}$^{1,\star}$, {\large \bf Samaher Radwan}$^1$, {\large \bf Bria Long}$^1$,  
     {\large \bf Judith Fan}$^2$, \\
-    $^{\star}$\texttt{kachergis@stanford.edu} \\
-    {\large \bf Daniel Bear}$^{1,3}$, {\large \bf Daniel Yamins}$^{1,3}$, {\large \bf Michael C.~Frank}$^1$ \\ 
+    {\large \bf Daniel Bear}$^{1,3}$, {\large \bf Daniel Yamins}$^{1,3}$, \and {\large \bf Michael C.~Frank}$^1$ \\ 
     $^1$Department of Psychology, Stanford University \\
     $^2$Department of Psychology, University of California at San Diego \\
-    $^3$Department of Computer Science, Stanford University}
+    $^3$Department of Computer Science, Stanford University \\
+    $^{\star}$\texttt{kachergis@stanford.edu}}
 
 abstract: >
      Curiosity is a fundamental driver of human behavior, and yet because of its open-ended nature 
@@ -367,7 +367,9 @@ combo_dat %>%
   summarize(chose_target=mean(chose_target, na.rm=T)) %>%
   group_by(relation, AgeGroup) %>%
   tidyboot_mean(chose_target) %>%
-  ggplot(aes(x=relation, y=mean, fill=AgeGroup)) + geom_bar(stat="identity", position=pos) + 
+  ggplot(aes(x=relation, y=mean, fill=AgeGroup)) + 
+  geom_bar(stat="identity", position=pos) + 
+  scale_fill_brewer(palette="Dark2") + 
   geom_linerange(aes(ymin = ci_lower, ymax = ci_upper), position = pos) + 
   geom_hline(aes(yintercept=.5), linetype="dashed") + theme_classic() + ylim(0,1) +
   ylab("Proportion Choosing Target Relation") +
@@ -559,6 +561,7 @@ hum_mod <- hum_ag %>% left_join(mdat)
 
 hum_mod %>% mutate(AgeGroup = ifelse(AgeGroup=="adult", "adults", "children")) %>%
   ggplot(aes(x=mean, y=Model_targ_prop, group=relation, color=relation)) + 
+    #scale_color_manual(values=c("#E69F00", "#56B4E9")) +
     geom_point(alpha=.6) + 
     geom_errorbar(aes(ymin=mod_ci_lower, ymax=mod_ci_upper), alpha=.6) +
     geom_errorbarh(aes(xmin=ci_lower, xmax=ci_upper), alpha=.6) + 
@@ -567,7 +570,7 @@ hum_mod %>% mutate(AgeGroup = ifelse(AgeGroup=="adult", "adults", "children")) %
     xlab("Human Choice Proportions") + ylab("Model Choice Proportions") + 
     geom_abline(intercept=0, slope=1, linetype="dashed") +
     geom_smooth(method = "lm") +
-    theme(legend.position = "none")
+    theme(legend.position = "none") 
 
 ```
 
@@ -607,14 +610,15 @@ Or are they less aware (or simply less interested in) support?
 Or do children find some other goal relatively more enticing? -->
 
 <!--According to these theories, curiosity-driven behavior reflects a gap between the learner's knowledge and the state of the world [@Loewenstein1994], and thus they predict that as a learner gains additional knowledge, their preferences will shift toward more complex stimuli [@Dember1957]
-Although these theories have provided important qualitative insights, one of their major limitations is that they do not provide precise ways to characterize a learner's current knowledge state, how physical states of the world are represented in their mind, nor how discrepancies between a learner's knowledge and such states are compared.  
+Although these theories have provided important qualitative insights, one of their major limitations is that they do not provide precise ways to characterize a learner's current knowledge state, how physical states of the world are represented in their mind, nor how discrepancies between a learner's knowledge and such states are evaluated.
 Our approach leverages theory and insights from reinforcement learning (RL), including the value of mechanisms that equip RL agents with "intrinsic motivation" — a drive to explore the state space even when rewards are sparse or absent, and favor actions with uncertain outcomes, because they may result in the discovery of new policies with high expected values [@Schmidhuber2010].
 Our modeling approach is resonant with recent work that has instantiated such intrinsic-motivation mechanisms in robots to help them learn robust ways to predict physical events in the world world [@Oudeyer2007; @Oudeyer2013], although this work typically involves pretraining models on a separate physical prediction task before implementing curiosity-driven learning, and has not yet been directly compared to human behavior in the same prediction tasks.
 -->
 
+\vspace{1em} \fbox{\parbox[b][][c]{7.3cm}{\centering All data and code for these analyses are available at\ \url{https://osf.io/37qvb}}} \vspace{1em}
 
 # Acknowledgements
-This work was funded by a Stanford University Human-centered Artificial Intelligence seed grant. 
+This work was funded by a Stanford University Human-centered Artificial Intelligence grant. 
 
 
 # References 
