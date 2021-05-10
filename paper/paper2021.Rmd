@@ -19,12 +19,13 @@ abstract: >
      curiosity is to instantiate them in artificial agents that are able to act and explore in a 
      simulated environment, and then compare the behavior of these agents to humans exploring the 
      same stimuli. Here we propose a new experimental paradigm for examining children's -- and 
-     AI agents' -- curiosity about objects' physical interactions.
-     We let them choose which object to 
-     drop another object onto in order to create the most interesting effect. We compared adults' (N=155) and children's choices (N=66; 
-     3-7 year-olds) and found that adults show a strong preference for drops that could potentially result in a containment
-     relation, a preference that is also shown by children. Adults alone also make choices consistent 
-     with achieving support relations. We contextualize our results using heuristic computational models based on 
+     AI agents' -- curiosity about objects' physical interactions. We let them choose which object 
+     to drop another object onto in order to create the most interesting effect. 
+     We compared adults' (N=155) and children's choices (N=66; 3-7 year-olds) and found that both 
+     children and adults show a strong preference for choosing target objects that could potentially 
+     contain the dropped object.
+     Adults alone also make choices consistent with achieving support relations. 
+     We contextualize our results using heuristic computational models based on 
      3D physical simulations of the same scenarios judged by participants.
     
 keywords: >
@@ -33,7 +34,7 @@ keywords: >
 output: cogsci2016::cogsci_paper
 #    includes:
 #      in_header: preamble.tex
-#final-submission: \cogscifinalcopy
+final-submission: \cogscifinalcopy
 ---
 
 ```{r global_options, include=FALSE}
@@ -83,15 +84,15 @@ We take inspiration from a large body of prior work in developmental psychology 
 Children both spend a remarkable amount of time across exploring how different objects and surfaces interact during naturalistic play [@fenson1976] and spend longer time exploring objects that appear to violate physical laws [e.g., an object that appears to pass through a wall; @Stahl2015; @Baillargeon2007].
 In other words, children seem to actively learn about physical interactions by intervening on the world and observing the consequences of their actions [@needham2000improvements; @Gopnik2009; @gureckis2012self; @allen2020]. 
 However, relatively little work has examined what types of physical interactions children are most interested in testing, or linked children's actions to formal theories of exploration or of physics learning.
-Instead, most work that has investigated exploratory behavior in children has done so by examining how they play with relatively complex objects -- for example, documenting the number of functions discovered while playing with a novel toy [e.g., @Cook2011; @Bonawitz2012; @Gweon2014].
+Instead, most work that has investigated exploratory behavior in children has done so by examining how they play with relatively complex objects -- for example, documenting the number of functions discovered while playing with a novel toy [e.g., @Cook2011; @Bonawitz2012; @Gweon2014; @hoicka2016]. <!-- though see @sim2017-->
 
 We thus developed a novel physical exploration task in which children, adults, or AI agents can choose which series of physical experiments to perform, <!-- and observe the results of each in real time.-->
 and then demonstrate how this paradigm can be used to test theories of curiosity about physical interactions.
 First, we measured people's choices in a novel task, in which participants were told that they would drop a given object (e.g., a sphere, a torus; see Figure 1) onto one of two target objects (e.g., a dumbbell, a pentagonal prism; see Figure 2), with the goal of the creating the most interesting physical interaction.
 We recorded adults' and children's (3--7 years of age) choices for a set of trials in which some of the drop objects could plausibly end up *supported* by one of the target objects, and for a set of trials in which some of the drop objects could end up *contained* by one of the targets -- although the other potential targets likely also offered affordances of interest.
-After examining children's and adult's preferences, we tested the predictive power of a variety of heuristic features derived from simulations of this task using a 3D environment.
-To preview our results, we found a surprising amount of consistency in how both children and adults chose to explore the relationships between different objects -- but that this consistency was not easily explained by any of simple heuristic features that we tested. 
-We propose that these kinds of physical exploration task are a promising tested for adjudicating between different embodied models of curiosity.
+After examining children's and adult's preferences, we tested the predictive power of a variety of heuristic features derived from the simulated physics of this task in a 3D environment.
+To preview our results, we found a surprising amount of consistency in how both children and adults chose to explore the relationships between different objects -- but that this consistency was not easily explained by any of the simple heuristic features that we tested. 
+We propose that this type of physical exploration task is a promising test for adjudicating between different embodied models of curiosity.
 
 <!-- cite @gerstenberg2020 about here? -->
 <!-- Our results suggest that using detailed measurement of human action selection and computational models based on simulations of the same tasks promises to lead to more robust and precise theories of human curiosity about the physical world, and how it develops. -->
@@ -126,10 +127,11 @@ Stimuli were images of 3D objects produced using Blender 3D-modeling software.
 The nine objects, depicted in Figure 1, were bowl, cone, dumbbell, octahedron, pentagon (pentagonal prism), pipe, pyramid, torus, triangular prism, and ball (sphere; not pictured).
 
 <!-- GK: possibly re-do this figure to have the proper orientations -->
-```{r fig3-child-sets, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.2, fig.height=2.9, set.cap.width=T, num.cols.cap=1, fig.cap = "Nine of the 10 3D objects used for dropping and as targets (not pictured: ball)."}
-img <- png::readPNG("figs/fig1-objects.png")
+```{r fig1-objects, fig.env = "figure", fig.pos = "h", fig.align='center', fig.width=3.5, fig.height=4.0, set.cap.width=T, num.cols.cap=1, fig.cap = "(Top) Nine of the 10 3D objects used for dropping and as targets (not pictured: ball). (Bottom) Example support and containment relations."}
+img <- png::readPNG("figs/fig1_objects_support_contain_examples.png")
 grid::grid.raster(img)
 ```
+
 
 ### Design
 The experiment consisted of 20 drop trials, completed by each participant in one of four pseudorandom orders.
@@ -589,11 +591,9 @@ Or are they less aware (or simply less interested in) support?
 Or do children find some other goal relatively more enticing?
 -->
 
-<!--
 # Acknowledgements
-This work was funded by HAI seed grant #. 
-We thank X and Y for helpful comments. 
--->
+This work was funded by a Stanford University Human-centered Artificial Intelligence seed grant. 
+
 
 # References 
 
