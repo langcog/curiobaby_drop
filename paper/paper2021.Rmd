@@ -380,7 +380,7 @@ combo_dat %>%
 
 ### Comparison of Children's vs. Adults' Preferences
 <!-- Finally, we compared the trial-level preferences of children and adults. -->
-Figure 5 shows adults' (Experiment 1) vs. children's (Experiment 2) choice proportions for the target relations, colored by relation type (visualizing the same data presented in Table 2, but with 95% CIs).
+Figure 5 shows adults' (Experiment 1) vs. children's (Experiment 2) choice proportions for the target relations, colored by relation type (visualizing the same data presented in Table 1, but with 95% CIs).
 If adults' and children's judgments corresponded perfectly, they would fall along the dotted $y=x$ line, but children's preferences mostly fall short of that line, lying closer to the chance line ($y=0.5$).
 At a glance, these results seem to support the hypothesis that "children are noisy adults" in this task as well as suggesting some consistency in the trial-level effects across development. 
 This consistency also confers additional motivation for attempting to understand what drives human interest in particular physical interactions in this task through computational models.
