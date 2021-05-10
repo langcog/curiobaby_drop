@@ -7,10 +7,14 @@ csl: apa6.csl
 document-params: "10pt, letterpaper"
 
 author-information: > 
-    \author{{\large \bf George Kachergis (kachergis@stanford.edu)} \and {\large \bf Sama Radwan} \and {\large \bf Bria Long} \\ Department of Psychology, Stanford University \\ Palo Alto, CA 94305 USA
-    \AND {\large \bf Judith Fan (jefan@ucsd.edu)} \\ Department of Psychology, University of San Diego \\ Madison, WI 53706 USA
-    \AND {\large \bf Daniel Bear} \and {\large \bf Daniel Yamins} \\ Departments of Psychology & Computer Science, Stanford University \\ Palo Alto, CA 94305 USA
-    \AND {\large \bf Michael C.~Frank} \\ Department of Psychology, Stanford University \\ Palo Alto, CA 94305 USA}
+    \author{
+    {\large \bf George Kachergis}$^1,\star$, {\large \bf Samaher Radwan}$^1$, {\large \bf Bria Long}$^1$,  
+    {\large \bf Judith Fan}$^2$, \\
+    $^{\star}$\texttt{kachergis@stanford.edu} \\
+    {\large \bf Daniel Bear}$^{1,3}$, {\large \bf Daniel Yamins}$^{1,3}$, {\large \bf Michael C.~Frank}$^1$ \\ 
+    $^1$Department of Psychology, Stanford University \\
+    $^2$Department of Psychology, University of California at San Diego \\
+    $^3$Department of Computer Science, Stanford University}
 
 abstract: >
      Curiosity is a fundamental driver of human behavior, and yet because of its open-ended nature 
@@ -56,6 +60,7 @@ library(apa) # for generating APA-style text to report statistical tests
 library(ggpubr)
 require(gridExtra)
 require(kableExtra)
+require(papaja)
 ```
 
 ```{r, load-data}
@@ -454,7 +459,8 @@ Examination of the models with $\beta$ optimized, in contrast, revealed that non
 While the best-fitting feature, *Pr(support)*, captured both adults' and children's overall mean preference for the designed target relations, it explained essentially no trial-level variation and was in fact negatively correlated with choices. 
 This was not due to noisy behavioral data: while the noise ceiling on choice preferences for all trials was $r=$ `r round(noise_ceiling_adult, 2)` for adults and $r=$ `r round(noise_ceiling_child, 2)` for children, the best-fitting feature accounted for very little of that. 
 
-```{r human-vs-model-table, results="asis"}
+```{r human-vs-model-table, results="asis"} 
+# to make double-wide, need to modify tex file to \begin{table*} / \end{table*}
 # now we just have a table of selected features that were moderately correlated with people's choices
 load(here("models/model_preds_beta1.RData"))
 
@@ -517,10 +523,15 @@ for(c in 2:ncol(mod_tab)) {
   mod_tab[max_row,c] = cell_spec(mod_tab[max_row,c], "latex", bold = T)
 }
 
-kable(mod_tab, "latex", booktabs = T, escape=F, digits = 2, caption="Correlations ($r$) of model and human responses.") %>%
-  column_spec(column = 2:ncol(mod_tab), width=c("1cm","1cm","1.3cm","1.3cm","1.3cm","1.3cm")) %>%
-  kable_styling(latex_options = "scale_down") 
+#kable(mod_tab, "latex", booktabs = T, escape=F, digits = 2, caption="Correlations ($r$) of model and human responses.") 
+  #column_spec(column = 2:ncol(mod_tab), width=c("1cm","1cm","1.3cm","1.3cm","1.3cm","1.3cm")) %>%
+  #kable_styling(latex_options = "scale_down") 
+apa_table(mod_tab, format="latex", digits=2, escape=F, span_text_columns=T,
+          align = c("l", rep("r", ncol(mod_tab)-1)), # font_size = "small", 
+          caption="Correlations ($r$) of model and human responses.")
 ```
+
+
 
 <!-- The best-fitting feature was $Pr(support)$ for both children ($\beta =$ `r round(best_fits$beta[2],2)`, MSE = `r round(best_fits$mse[2], 3)`) and adults ($\beta =$ `r round(best_fits$beta[1],2)`, MSE = `r round(best_fits$mse[1], 3)`).\footnote{For $\beta=1$, adult MSE = `r round(supp_prob_beta1_cors$mse[1],3)`, child MSE = `r round(supp_prob_beta1_cors$mse[2],3)` for $Pr(support)$.}
 Figure 6 shows this model's fitted preferences plotted against those of children and adults.
@@ -562,10 +573,12 @@ Experiment 2 found the same pattern in children, but with attenuated preferences
 One interpretation of these results is that infants' early-emerging interest in containment [@Casasola2003] may be related to older children's and adults' interest in stochastic interactions that have some possibility of producing containment relations. 
 
 Given the high reliability of choices on this task, particularly for adults ($r = .95$, children $r = .61$), we tested how well heuristic features of the physical interactions could predict these choices.
+In light of findings that people often single out one of several possible causes as "the" cause in judgements of physical causation [e.g., @gerstenberg2020], we might expect to find single features that are predictive of people's choices.
 We explored a wide range of features that we thought might be proportional to people's interest in particular object interactions (e.g., how far a dropped object might end up from the drop location), but not one of these features explained much of the trial-level variance in people's choices. 
-<!-- Instead, we found a few features that were partially correlated with people's choices: for example, the inverse standard deviation of the target's final position was the best predictor of both children's and adults' choices on support trials. -->
-<!-- For containment trials, the normed velocity of the drop object after first collision was most correlated with adults' choices and moderately with children's, but children's choices were also correlated with the maximum and mean distance traveled by the target. -->
+Instead, we found a few features that were partially correlated with people's choices: for example, the best predictor of both children's and adult's choices on support trials was the inverse standard deviation of the target's final position, but the strength of this correlation was only moderate ($r \approx 0.4$).
+For containment trials, the normed velocity of the drop object after first collision was most correlated with adults' choices and moderately with children's, but children's choices were also correlated with the maximum and mean distance traveled by the target.
 On balance, although much systematic variation in this dataset is unaccounted for, it is somewhat encouraging that people's interest in physical interactions can be in part accounted for by simple heuristic features based on simulations of the same physical task we asked participants to merely imagine.
+
 
 At the same time, the fact that these results are not fully explainable by simple heuristic models suggest that this paradigm may fruitfully serve as a test bed for evaluating more complex computational theories of curiosity. 
 For example, in one proposal learners prefer to explore stimuli that are "moderately discrepant" in relation to their current knowledge state, thereby providing an opportunity to learn [@Kinney1976], and curiosity changes as the gap between the learner's knowledge develops and the state of the world closes [@Loewenstein1994].
