@@ -88,7 +88,7 @@ We then present a set of heuristic models of this behavior based on a variety of
 We take inspiration from a large body of prior work in developmental psychology investigating the development of knowledge about physical objects, their properties, and how they interact [@hespos2012physics; @smith2018developing; @Baillargeon2007]. 
 Children both spend a remarkable amount of time across exploring how different objects and surfaces interact during naturalistic play [@fenson1976] and spend longer time exploring objects that appear to violate physical laws [e.g., an object that appears to pass through a wall; @Stahl2015; @Baillargeon2007].
 In other words, children seem to actively learn about physical interactions by intervening on the world and observing the consequences of their actions [@needham2000improvements; @Gopnik2009; @gureckis2012self; @allen2020]. 
-However, relatively little work has examined what types of physical interactions children are most interested in testing, or linked children's actions to formal theories of exploration or of physics learning.
+However, relatively little work has either examined what types of physical interactions children are most interested in testing, or linked children's actions to formal theories of exploration or of physics learning.
 Instead, most work that has investigated exploratory behavior in children has done so by examining how they play with relatively complex objects -- for example, documenting the number of functions discovered while playing with a novel toy [e.g., @Cook2011; @Bonawitz2012; @Gweon2014; @hoicka2016]. <!-- though see @sim2017-->
 
 We thus developed a novel physical exploration task in which children, adults, or AI agents can choose which series of physical experiments to perform, <!-- and observe the results of each in real time.-->
@@ -157,8 +157,8 @@ Participants were instructed that they would be helping choose which toys to inc
 Participants were then given a practice trial (see Figure 2), in which they were told that they should imagine dropping a given object (the torus) on each of two toys (the dumbbell or the pentagonal prism) in a bin. 
 They were then asked to choose which toy to drop the torus on, and prompted to choose the most interesting or surprising combination.
 After making their choice on the practice trial, participants were shown a 10-second video recording of 3D-printed plastic toys carrying out their chosen interaction (e.g., if they chose the dumbbell, they would see the torus dropped on the dumbbell).
-This was done to ensure that they understood the consequences of the choice they made.
-After the video of the torus drop, participants were given a sequence of 20 more drop trials asking them to choose which toy (X or Y) they would like to drop object Z on.
+This was done to ensure that they understood the consequences of the choice they made, although it was pointed out to them that the video they saw showed only one possible outcome.
+After the example video, participants were given a sequence of 20 more drop trials asking them to choose which toy (X or Y) they would like to drop object Z on.
 Four catch trials were interspersed among the 20 drop trials, which asked them to indicate which object they had just dropped on the previous trial (3-alternative forced choice).
 The catch trials were meant to encourage attention to the objects, and participants who were incorrect on two or more of the catch trials were excluded.
 <!-- Finally, there were two free response explanation trials mixed among the drop trials, querying participants, "Why did you make that choice?"
@@ -323,8 +323,8 @@ We adapted the same materials and procedure used in Experiment 1 for use in an o
 
 ### Participants
 Participants were 73 children recruited online via outreach through a local nursery school and targeted Facebook ads over the course of 6 months.
-Participant exclusions were made based on cases where i) the participant did not complete more than half of the study play session or ii) the parent did not consent for video recording of study. 
-After exclusions, results from `r Nch` were analyzed, including `r age[1,]$N` 3-year-olds, `r age[2,]$N` 4-year-olds, `r age[3,]$N` 5-year-olds, `r age[4,]$N` 6-year-olds, and `r age[5,]$N` 7-year-olds.
+Participant exclusions were made based on cases where i) the participant did not complete more than half of the trials or ii) the parent did not consent for video recording of the session. 
+After exclusions, results from `r Nch` children were analyzed, including `r age[1,]$N` 3-year-olds, `r age[2,]$N` 4-year-olds, `r age[3,]$N` 5-year-olds, `r age[4,]$N` 6-year-olds, and `r age[5,]$N` 7-year-olds.
 
 ### Materials
 The materials were the same as those used in Experiment 1, except that the trials were adapted for presentation via Zoom in a slide presentation as shown in Figure 3. 
@@ -461,7 +461,7 @@ Overall, a few of these features were modestly correlated with people's choices.
 Table 2 shows the correlation between model preferences (with softmax $\beta = 1$) vs. adults' and children's choice proportions, both to all trials and separately for containment and support trials.
 When all trials were considered together, the feature with the strongest correlation to adults' choices was the velocity of the target object (*SD(Target Vel)*, $r=.33$), while the feature with the strongest correlation to children's choices was *Support Sharpness* (see Methods, $r=.18$).
 For support trials, both adults' ($r=.39$) and children's ($r=.41$) choices were best correlated with a feature indexing the variability in the target object's final position (*1/SD(Target Pos)*).
-For containment trials, adults' choices were most correlated with the velocity of the dropped object (*SD(Drop Obj Vel)*, $r=.54$) which also showed a modest correlation with children's choices ($r=.41$); however, children's choices were most correlated with the maximum distance of the target object (*Max(Target Dist)*, $r=.43$).
+For containment trials, adults' choices were most correlated with the velocity of the dropped object (*SD(Drop Obj Vel)*, $r=.54$), which also showed a modest correlation with children's choices ($r=.41$); however, children's choices were most correlated with the maximum distance of the target object (*Max(Target Dist)*, $r=.43$).
 Many of the other features showed weak or even moderate negative correlations with people's choices.
 
 Examination of the models with $\beta$ optimized, in contrast, revealed that none achieved a good fit to human preferences. 
@@ -592,7 +592,7 @@ On balance, although much systematic variation in this dataset is unaccounted fo
 
 At the same time, the fact that these results are not fully explainable by simple heuristic models suggest that this paradigm may fruitfully serve as a test bed for evaluating more complex computational theories of curiosity. 
 For example, in one proposal learners prefer to explore stimuli that are "moderately discrepant" in relation to their current knowledge state, thereby providing an opportunity to learn [@Kinney1976], and curiosity changes as the gap between the learner's knowledge develops and the state of the world closes [@Loewenstein1994].
-These theories are beginning to be implemented in deep neural networks, which are now capable of learning forward and inverse physical dynamics (i.e., "intuitive physics") from images when given the ability to "poke" the objects in the scene [@Agrawal2016], and have more recently been used to test which "curious" policies for generating actions result in robust and effective learning of intuitive physics in deep reinforcement learning agents [@Haber2018learning].
+These theories are beginning to be implemented in deep neural networks, which are now capable of learning forward and inverse physical dynamics (i.e., "intuitive physics") from images when given the ability to "poke" the objects in the scene [@Agrawal2016], and have more recently been used to test which "curiosity" policies for generating actions result in robust and effective learning of intuitive physics in deep reinforcement learning agents [@Haber2018learning].
 
 Such embodied deep reinforcement learning agents are often composed of two models: a *world model* which attempts to predict the consequences of the agent's actions (i.e., the forward dynamics--physics--of the world), while the *self model* attempts to predict the errors of the world model.
 The predictions of the self model can be used to implement different curiosity policies for choosing actions [e.g., picking actions that are expected to challenge its world model; @Haber2018learning].
