@@ -28,22 +28,84 @@ library(ggpubr)
 require(gridExtra)
 require(papaja)
 require(kableExtra)
+require(qualtRics)
 ```
 
 ## Load Data
 
 ```{r pressure, echo=FALSE}
-
+# Preregistration: https://docs.google.com/document/d/10iQ80L4K9PSa8yINPcjURj7xl10hXxzFHqtsS3DnsII/edit
 load(file=here("paper/processed_data.RData")) 
 
-int_dat <- read_csv(here("analysis/data_exp3/curiodrop V2 data - Intestingness.csv")) 
-lik_dat <- read_csv(here("analysis/data_exp3/curiodrop V2 data - Likelihood.csv"))
+int_dat <- read_csv(here("analysis/data_exp3/curiodrop V2 data - Intestingness.csv")) %>% 
+  select(-`c1-14a`, -`c2-21a`, -`c3-22a`, -`c4-28a`, -`Q9`, -`Q8_1`)
+lik_dat <- read_csv(here("analysis/data_exp3/curiodrop V2 data - Likelihood.csv")) %>%
+  select(-`c1-14a`, -`c2-21a`, -`c3-22a`, -`c4-28a`, -`Q9`, -`Q8_1`)
 
+new_col_names = unlist(int_dat[1,])
+new_col_names[1:2] = c("Exclusion","SC0")
+new_col_names[length(new_col_names)] = "subjID"
+names(int_dat) = new_col_names
+names(lik_dat) = new_col_names
+
+int_dat = int_dat[2:nrow(int_dat),]
+lik_dat = lik_dat[2:nrow(lik_dat),]
 ```
 
 ## Clean data
 
 ```{r}
-install.packages("qualtRics")
+# ToDo: count exclusions
+int_dat <- int_dat %>% filter(is.na(Exclusion))
+
+lik_dat <- lik_dat %>% filter(is.na(Exclusion))
+```
+
+# Pivot
+
+```{r}
+int_long <- int_dat %>% relocate(subjID) %>% # SC0 = score of catch trials
+  pivot_longer(cols=4:ncol(int_dat), names_to="trial", values_to = "rating") %>%
+  separate(col=trial, sep='-', into=c("drop","choice")) %>% select(-Exclusion) %>%
+  rename(catch_trials_correct=`SC0`)
+
+lik_long <- lik_dat %>% relocate(subjID) %>%
+  pivot_longer(cols=4:ncol(int_dat), names_to="trial", values_to = "rating") %>%
+  separate(col=trial, sep='-', into=c("drop","choice")) %>% select(-Exclusion) %>%
+  filter(!is.na(rating))
+```
+
+## Data inspection
+
+```{r}
+table(int_long$subjID)
+table(lik_long$subjID)
+
+sum(is.na(int_long$rating))
+sum(is.na(lik_long$rating))
+```
+
+## Summarize Choice Data
+
+```{r}
+adult_agg <- adult_long %>% group_by(drop, target, relation) %>%
+  summarize(chose_target = mean(chose_target)) # do we want raw counts for chose target vs. foil?
+# for trial 1, 70% chose target (30% chose distractor)
+
+child_agg <- child_long %>% group_by(drop, target, relation) %>%
+  summarize(chose_target = mean(chose_target))
+```
+
+## Summarize Ratings Data
+
+```{r}
+lik_agg <- lik_long %>% mutate(rating = as.numeric(rating)) %>%
+  group_by(drop, choice) %>%
+  summarise(likelihood = mean(rating)) 
+
+int_agg <- lik_long %>% mutate(rating = as.numeric(rating)) %>%
+  group_by(drop, choice) %>%
+  summarise(interest = mean(rating)) 
+# also want ratings scaled 0-1?
 ```
 
