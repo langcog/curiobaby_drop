@@ -102,7 +102,7 @@ adult_agg$distractor = distractors
 # for trial 1, 70% chose target (30% chose distractor)
 
 child_agg <- child_long %>% group_by(drop, target, relation) %>%
-  summarize(chose_target = mean(chose_target)) 
+  summarize(chose_target = mean(chose_target, na.rm=T)) 
 
 child_agg$distractor = distractors
 ```
@@ -158,7 +158,7 @@ child_agg <- child_agg %>%
 ```
 
 
-## Compare adult choice proportions vs. likelihood proportions
+## Compare adult choices to ratings-derived proportions
 
 Regression:
 
@@ -193,3 +193,22 @@ p2 <- adult_agg %>% ggplot(aes(x=chose_target, y=prop_target_interest, color=rel
 ggpubr::ggarrange(p1, p2, nrow=1, common.legend = T)
 ```
 
+## Compare children's choices to ratings-derived proportions
+
+```{r}
+p1 <- child_agg %>% ggplot(aes(x=chose_target, y=prop_target_likelihood, color=relation)) + geom_point() +
+  xlab("Proportion of Adults Choosing Target") +
+  ylab("Luce choice of Target vs. Distractor Likelihood") +
+  xlim(0,1) + ylim(0,1) + theme_classic() +
+  geom_abline(slope=1, intercept=0, linetype="dashed") +
+  stat_cor(method = "pearson") 
+
+p2 <- child_agg %>% ggplot(aes(x=chose_target, y=prop_target_interest, color=relation)) + geom_point() +
+  xlab("Proportion of Adults Choosing Target") +
+  ylab("Luce choice of Target vs. Distractor Interestingness") +
+  xlim(0,1) + ylim(0,1) + theme_classic() +
+  geom_abline(slope=1, intercept=0, linetype="dashed") +
+  stat_cor(method = "pearson")
+
+ggpubr::ggarrange(p1, p2, nrow=1, common.legend = T)
+```
