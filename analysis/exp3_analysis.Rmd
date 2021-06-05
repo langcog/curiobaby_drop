@@ -181,14 +181,18 @@ p1 <- adult_agg %>% ggplot(aes(x=chose_target, y=prop_target_likelihood, color=r
   ylab("Luce choice of Target vs. Distractor Likelihood") +
   xlim(0,1) + ylim(0,1) + theme_classic() +
   geom_abline(slope=1, intercept=0, linetype="dashed") +
-  stat_cor(method = "pearson") 
+  #stat_cor(method = "pearson") 
+  stat_cor(inherit.aes = F, aes(x=chose_target, y=prop_target_likelihood, 
+               label = paste(..rr.label.., sep = "~`,`~")))
 
 p2 <- adult_agg %>% ggplot(aes(x=chose_target, y=prop_target_interest, color=relation)) + geom_point() +
   xlab("Proportion of Adults Choosing Target") +
   ylab("Luce choice of Target vs. Distractor Interestingness") +
   xlim(0,1) + ylim(0,1) + theme_classic() +
   geom_abline(slope=1, intercept=0, linetype="dashed") +
-  stat_cor(method = "pearson")
+  #stat_cor(method = "pearson")
+  stat_cor(inherit.aes = F, aes(x=chose_target, y=prop_target_interest, 
+               label = paste(..rr.label.., sep = "~`,`~")))
 
 ggpubr::ggarrange(p1, p2, nrow=1, common.legend = T)
 ```
@@ -201,14 +205,18 @@ p1 <- child_agg %>% ggplot(aes(x=chose_target, y=prop_target_likelihood, color=r
   ylab("Luce choice of Target vs. Distractor Likelihood") +
   xlim(0,1) + ylim(0,1) + theme_classic() +
   geom_abline(slope=1, intercept=0, linetype="dashed") +
-  stat_cor(method = "pearson") 
+  #stat_cor(method = "pearson") 
+  stat_cor(inherit.aes = F, aes(x=chose_target, y=prop_target_likelihood, 
+               label = paste(..rr.label.., sep = "~`,`~")))
 
 p2 <- child_agg %>% ggplot(aes(x=chose_target, y=prop_target_interest, color=relation)) + geom_point() +
   xlab("Proportion of Adults Choosing Target") +
   ylab("Luce choice of Target vs. Distractor Interestingness") +
   xlim(0,1) + ylim(0,1) + theme_classic() +
   geom_abline(slope=1, intercept=0, linetype="dashed") +
-  stat_cor(method = "pearson")
+  #stat_cor(method = "pearson")
+  stat_cor(inherit.aes = F, aes(x=chose_target, y=prop_target_interest, 
+               label = paste(..rr.label.., sep = "~`,`~")))
 
 ggpubr::ggarrange(p1, p2, nrow=1, common.legend = T)
 ```
