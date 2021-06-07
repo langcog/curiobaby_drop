@@ -31,6 +31,7 @@ require(kableExtra)
 #require(qualtRics)
 require(lmerTest)
 require(ggpubr)
+require(DT)
 ```
 
 ## Load Data
@@ -118,24 +119,29 @@ int_agg <- int_long %>% mutate(rating = as.numeric(rating)) %>%
   group_by(drop, choice) %>%
   summarise(interest = mean(rating) - 1) 
 # also want ratings scaled 0-1?
+
+results_table <- lik_agg %>% left_join(int_agg) %>%
+  arrange(desc(likelihood))
+
+datatable(results_table) %>% formatRound(columns=c("likelihood","interest"), digits=3)
 ```
 
 ## Merge ratings with adults' drop choices
 
 ```{r}
 adult_agg <- adult_agg %>% left_join(lik_agg, by=c("drop"="drop", "target"="choice")) %>%
-  rename(target_likelihood = likelihood) %>%
+  rename(targ_lik = likelihood) %>%
   left_join(lik_agg, by=c("drop"="drop", "distractor"="choice")) %>%
-  rename(distractor_likelihood = likelihood)
+  rename(dist_lik = likelihood)
 
 adult_agg <- adult_agg %>% left_join(int_agg, by=c("drop"="drop", "target"="choice")) %>%
-  rename(target_interest = interest) %>%
+  rename(targ_int = interest) %>%
   left_join(int_agg, by=c("drop"="drop", "distractor"="choice")) %>%
-  rename(distractor_interest = interest)
+  rename(dist_int = interest)
 
 adult_agg <- adult_agg %>% 
-  mutate(prop_target_likelihood = target_likelihood / (target_likelihood + distractor_likelihood),
-         prop_target_interest = target_interest / (target_interest + distractor_interest))
+  mutate(prop_targ_lik = targ_lik / (targ_lik + dist_lik),
+         prop_targ_int = targ_int / (targ_int + dist_int))
 ```
 
 
@@ -143,18 +149,30 @@ adult_agg <- adult_agg %>%
 
 ```{r}
 child_agg <- child_agg %>% left_join(lik_agg, by=c("drop"="drop", "target"="choice")) %>%
-  rename(target_likelihood = likelihood) %>%
+  rename(targ_lik = likelihood) %>%
   left_join(lik_agg, by=c("drop"="drop", "distractor"="choice")) %>%
-  rename(distractor_likelihood = likelihood)
+  rename(dist_lik = likelihood)
 
 child_agg <- child_agg %>% left_join(int_agg, by=c("drop"="drop", "target"="choice")) %>%
-  rename(target_interest = interest) %>%
+  rename(targ_int = interest) %>%
   left_join(int_agg, by=c("drop"="drop", "distractor"="choice")) %>%
-  rename(distractor_interest = interest)
+  rename(dist_int = interest)
 
 child_agg <- child_agg %>% 
-  mutate(prop_target_likelihood = target_likelihood / (target_likelihood + distractor_likelihood),
-         prop_target_interest = target_interest / (target_interest + distractor_interest))
+  mutate(prop_targ_lik = targ_lik / (targ_lik + dist_lik),
+         prop_targ_int = targ_int / (targ_int + dist_int))
+```
+
+## Adult Choices vs. Ratings Table 
+
+```{r}
+adult_agg %>% relocate(relation) %>% 
+  relocate(distractor, .after=target) %>% 
+  relocate(prop_targ_lik, .after=dist_lik) %>%
+  DT::datatable() %>% 
+  formatRound(columns=c("chose_target","targ_lik","dist_lik",
+                        "targ_int","dist_int","prop_targ_lik",
+                        "prop_targ_int"), digits=3)
 ```
 
 
@@ -163,35 +181,35 @@ child_agg <- child_agg %>%
 Regression:
 
 ```{r}
-m_lik <- lm(chose_target ~ relation * prop_target_likelihood, data=adult_agg)
-m_int <- lm(chose_target ~ relation * prop_target_interest, data=adult_agg)
+m_lik <- lm(chose_target ~ relation * prop_targ_lik, data=adult_agg)
+m_int <- lm(chose_target ~ relation * prop_targ_int, data=adult_agg)
 summary(m_lik) # Rsq = .63
 summary(m_int) # Rsq = .84
 anova(m_lik, m_int)
 
 
-m3 <- lm(chose_target ~ relation * prop_target_likelihood + relation * prop_target_interest, data=adult_agg)
+m3 <- lm(chose_target ~ relation * prop_targ_lik + relation * prop_targ_int, data=adult_agg)
 summary(m3)
 ```
 
 
-```{r}
-p1 <- adult_agg %>% ggplot(aes(x=chose_target, y=prop_target_likelihood, color=relation)) + geom_point() +
+```{r, fig.width=7.0, fig.height=3.8}
+p1 <- adult_agg %>% ggplot(aes(x=chose_target, y=prop_targ_lik, color=relation)) + geom_point() +
   xlab("Proportion of Adults Choosing Target") +
   ylab("Luce choice of Target vs. Distractor Likelihood") +
   xlim(0,1) + ylim(0,1) + theme_classic() +
   geom_abline(slope=1, intercept=0, linetype="dashed") +
   #stat_cor(method = "pearson") 
-  stat_cor(inherit.aes = F, aes(x=chose_target, y=prop_target_likelihood, 
+  stat_cor(inherit.aes = F, aes(x=chose_target, y=prop_targ_lik, 
                label = paste(..rr.label.., sep = "~`,`~")))
 
-p2 <- adult_agg %>% ggplot(aes(x=chose_target, y=prop_target_interest, color=relation)) + geom_point() +
+p2 <- adult_agg %>% ggplot(aes(x=chose_target, y=prop_targ_int, color=relation)) + geom_point() +
   xlab("Proportion of Adults Choosing Target") +
   ylab("Luce choice of Target vs. Distractor Interestingness") +
   xlim(0,1) + ylim(0,1) + theme_classic() +
   geom_abline(slope=1, intercept=0, linetype="dashed") +
   #stat_cor(method = "pearson")
-  stat_cor(inherit.aes = F, aes(x=chose_target, y=prop_target_interest, 
+  stat_cor(inherit.aes = F, aes(x=chose_target, y=prop_targ_int, 
                label = paste(..rr.label.., sep = "~`,`~")))
 
 ggpubr::ggarrange(p1, p2, nrow=1, common.legend = T)
@@ -199,23 +217,23 @@ ggpubr::ggarrange(p1, p2, nrow=1, common.legend = T)
 
 ## Compare children's choices to ratings-derived proportions
 
-```{r}
-p1 <- child_agg %>% ggplot(aes(x=chose_target, y=prop_target_likelihood, color=relation)) + geom_point() +
-  xlab("Proportion of Adults Choosing Target") +
+```{r, fig.width=7.0, fig.height=3.8}
+p1 <- child_agg %>% ggplot(aes(x=chose_target, y=prop_targ_lik, color=relation)) + geom_point() +
+  xlab("Proportion of Children Choosing Target") +
   ylab("Luce choice of Target vs. Distractor Likelihood") +
   xlim(0,1) + ylim(0,1) + theme_classic() +
   geom_abline(slope=1, intercept=0, linetype="dashed") +
   #stat_cor(method = "pearson") 
-  stat_cor(inherit.aes = F, aes(x=chose_target, y=prop_target_likelihood, 
+  stat_cor(inherit.aes = F, aes(x=chose_target, y=prop_targ_lik, 
                label = paste(..rr.label.., sep = "~`,`~")))
 
-p2 <- child_agg %>% ggplot(aes(x=chose_target, y=prop_target_interest, color=relation)) + geom_point() +
-  xlab("Proportion of Adults Choosing Target") +
+p2 <- child_agg %>% ggplot(aes(x=chose_target, y=prop_targ_int, color=relation)) + geom_point() +
+  xlab("Proportion of Children Choosing Target") +
   ylab("Luce choice of Target vs. Distractor Interestingness") +
   xlim(0,1) + ylim(0,1) + theme_classic() +
   geom_abline(slope=1, intercept=0, linetype="dashed") +
   #stat_cor(method = "pearson")
-  stat_cor(inherit.aes = F, aes(x=chose_target, y=prop_target_interest, 
+  stat_cor(inherit.aes = F, aes(x=chose_target, y=prop_targ_int, 
                label = paste(..rr.label.., sep = "~`,`~")))
 
 ggpubr::ggarrange(p1, p2, nrow=1, common.legend = T)
@@ -224,13 +242,11 @@ ggpubr::ggarrange(p1, p2, nrow=1, common.legend = T)
 
 ## Compare Likelihood Ratings to Physics Models
 
-```{r}
+```{r, fig.width=7.0, fig.height=3.8}
 load(here("models/model_data.RData")) # mdat, all_trials_mse, all_trials_mse_r, etc.
 # load(here("models/support_probability_fit_df.RData")) 
 
-
-#mdat %>% select(drop, target, relation, trial, support_probability) %>%
-#  pivot_wider(id_cols=trial, names_from=trial, values_from=support_probability)
+# compare to support probability
 supp_prob <- mdat %>% select(drop, target, relation, support_probability) 
 
 trials <- adult_agg %>% select(drop, target, distractor, relation) %>%
@@ -240,15 +256,37 @@ trials <- adult_agg %>% select(drop, target, distractor, relation) %>%
   rename(dist_supp_prob = support_probability) %>%
   mutate(prop_target_supp = (targ_supp_prob) / (targ_supp_prob + dist_supp_prob + 1e-5))
 
-adult_agg %>% left_join(trials %>% select(drop, target, distractor, relation, prop_target_supp)) %>%
-  ggplot(aes(x=prop_target_supp, y=prop_target_likelihood, color=relation)) + geom_point(alpha=.8) +
+p1 <- adult_agg %>% left_join(trials %>% select(drop, target, distractor, relation, prop_target_supp)) %>%
+  ggplot(aes(x=prop_target_supp, y=prop_targ_lik, color=relation)) + geom_point(alpha=.8) +
   xlab("Proportion Target Support in Model") +
   ylab("Luce choice of Target vs. Distractor Likelihood") +
   xlim(0,1) + ylim(0,1) + theme_classic() +
   geom_abline(slope=1, intercept=0, linetype="dashed") +
   #stat_cor(method = "pearson") 
-  stat_cor(inherit.aes = F, aes(x=prop_target_supp, y=prop_target_likelihood, 
+  stat_cor(inherit.aes = F, aes(x=prop_target_supp, y=prop_targ_lik, 
                label = paste(..rr.label.., sep = "~`,`~")))
+
+## compare to support sharpness
+supp_tmp <- mdat %>% select(drop, target, relation, support_std) 
+
+trials <- adult_agg %>% select(drop, target, distractor, relation) %>%
+  left_join(supp_tmp, by=c("drop","target","relation")) %>%
+  rename(targ_supp_std = support_std) %>%
+  left_join(supp_tmp, by=c("drop"="drop", "distractor"="target", "relation"="relation")) %>%
+  rename(dist_supp_std = support_std) %>%
+  mutate(prop_target_supp = (targ_supp_std) / (targ_supp_std + dist_supp_std + 1e-5))
+
+p2 <- adult_agg %>% left_join(trials %>% select(drop, target, distractor, relation, prop_target_supp)) %>%
+  ggplot(aes(x=prop_target_supp, y=prop_targ_lik, color=relation)) + geom_point(alpha=.8) +
+  xlab("Prop. Target Support SD in Model") +
+  ylab("Luce choice of Target vs. Distractor Likelihood") +
+  xlim(0,1) + ylim(0,1) + theme_classic() +
+  geom_abline(slope=1, intercept=0, linetype="dashed") +
+  #stat_cor(method = "pearson") 
+  stat_cor(inherit.aes = F, aes(x=prop_target_supp, y=prop_targ_lik, 
+               label = paste(..rr.label.., sep = "~`,`~")))
+
+ggpubr::ggarrange(p1, p2, nrow=1, common.legend = T)
 ```
 
 
