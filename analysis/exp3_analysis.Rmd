@@ -220,3 +220,36 @@ p2 <- child_agg %>% ggplot(aes(x=chose_target, y=prop_target_interest, color=rel
 
 ggpubr::ggarrange(p1, p2, nrow=1, common.legend = T)
 ```
+
+
+## Compare Likelihood Ratings to Physics Models
+
+```{r}
+load(here("models/model_data.RData")) # mdat, all_trials_mse, all_trials_mse_r, etc.
+# load(here("models/support_probability_fit_df.RData")) 
+
+
+#mdat %>% select(drop, target, relation, trial, support_probability) %>%
+#  pivot_wider(id_cols=trial, names_from=trial, values_from=support_probability)
+supp_prob <- mdat %>% select(drop, target, relation, support_probability) 
+
+trials <- adult_agg %>% select(drop, target, distractor, relation) %>%
+  left_join(supp_prob, by=c("drop","target","relation")) %>%
+  rename(targ_supp_prob = support_probability) %>%
+  left_join(supp_prob, by=c("drop"="drop", "distractor"="target", "relation"="relation")) %>%
+  rename(dist_supp_prob = support_probability) %>%
+  mutate(prop_target_supp = (targ_supp_prob) / (targ_supp_prob + dist_supp_prob + 1e-5))
+
+adult_agg %>% left_join(trials %>% select(drop, target, distractor, relation, prop_target_supp)) %>%
+  ggplot(aes(x=prop_target_supp, y=prop_target_likelihood, color=relation)) + geom_point(alpha=.8) +
+  xlab("Proportion Target Support in Model") +
+  ylab("Luce choice of Target vs. Distractor Likelihood") +
+  xlim(0,1) + ylim(0,1) + theme_classic() +
+  geom_abline(slope=1, intercept=0, linetype="dashed") +
+  #stat_cor(method = "pearson") 
+  stat_cor(inherit.aes = F, aes(x=prop_target_supp, y=prop_target_likelihood, 
+               label = paste(..rr.label.., sep = "~`,`~")))
+```
+
+
+
