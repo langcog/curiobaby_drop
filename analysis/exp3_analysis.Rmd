@@ -9,11 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+## Load packages
 
 ```{r cars}
 library(png)
@@ -282,7 +278,6 @@ p2 <- adult_agg %>% left_join(trials %>% select(drop, target, distractor, relati
   ylab("Luce choice of Target vs. Distractor Likelihood") +
   xlim(0,1) + ylim(0,1) + theme_classic() +
   geom_abline(slope=1, intercept=0, linetype="dashed") +
-  #stat_cor(method = "pearson") 
   stat_cor(inherit.aes = F, aes(x=prop_target_supp, y=prop_targ_lik, 
                label = paste(..rr.label.., sep = "~`,`~")))
 
@@ -290,4 +285,31 @@ ggpubr::ggarrange(p1, p2, nrow=1, common.legend = T)
 ```
 
 
+## Directly compare ratings to model probs
+
+```{r}
+mdat <- mdat %>% left_join(lik_agg, by=c("drop"="drop", "target"="choice"))
+
+p1 <-mdat %>% ggplot(aes(x=likelihood, y=support_probability, color=relation)) +
+  geom_point(alpha=.7) + theme_classic() + xlab("Adults' Mean Likelihood Rating") +
+  stat_cor(inherit.aes = F, aes(x=likelihood, y=support_probability, 
+               label = paste(..rr.label.., sep = "~`,`~")))
+
+p2 <- mdat %>% ggplot(aes(x=likelihood, y=support_std, color=relation)) +
+  geom_point(alpha=.7) + theme_classic() + xlab("Adults' Mean Likelihood Rating") +
+  stat_cor(inherit.aes = F, aes(x=likelihood, y=support_std, 
+               label = paste(..rr.label.., sep = "~`,`~")))
+
+ggpubr::ggarrange(p1, p2, nrow=1, common.legend = T)
+```
+
+Other feature correlations
+
+```{r}
+with(mdat, cor(likelihood, support_probability)) # r=.75
+with(mdat, cor(likelihood, support_std)) # .77
+with(mdat, cor(likelihood, support_sharpness_accuracy_mean)) # .496
+with(mdat, cor(likelihood, support_response_linearity_r)) # .48
+with(mdat, cor(likelihood, support_response_linearity_pv)) # .53
+```
 
