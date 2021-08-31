@@ -1,0 +1,315 @@
+---
+title: 'Experiment 3: ratings'
+author: "George, Sama, and Mike"
+date: "6/3/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load packages
+
+```{r cars}
+library(png)
+library(grid)
+library(ggplot2)
+library(xtable)
+require(here)
+require(tidyverse)
+require(tidyboot)
+library(apa) # for generating APA-style text to report statistical tests
+library(ggpubr)
+require(gridExtra)
+require(papaja)
+require(kableExtra)
+#require(qualtRics)
+require(lmerTest)
+require(ggpubr)
+require(DT)
+```
+
+## Load Data
+
+```{r pressure, echo=FALSE}
+# Preregistration: https://docs.google.com/document/d/10iQ80L4K9PSa8yINPcjURj7xl10hXxzFHqtsS3DnsII/edit
+load(file=here("paper/processed_data.RData")) 
+
+int_dat <- read_csv(here("analysis/data_exp3/curiodrop V2 data - Intestingness.csv")) %>% 
+  select(-`c1-14a`, -`c2-21a`, -`c3-22a`, -`c4-28a`, -`Q9`, -`Q8_1`)
+lik_dat <- read_csv(here("analysis/data_exp3/curiodrop V2 data - Likelihood.csv")) %>%
+  select(-`c1-14a`, -`c2-21a`, -`c3-22a`, -`c4-28a`, -`Q9`, -`Q8_1`)
+
+new_col_names = unlist(int_dat[1,])
+new_col_names[1:2] = c("Exclusion","SC0")
+new_col_names[length(new_col_names)] = "subjID"
+names(int_dat) = new_col_names
+names(lik_dat) = new_col_names
+
+int_dat = int_dat[2:nrow(int_dat),]
+lik_dat = lik_dat[2:nrow(lik_dat),]
+```
+
+## Clean data
+
+```{r}
+# ToDo: count exclusions
+int_dat <- int_dat %>% filter(is.na(Exclusion))
+
+lik_dat <- lik_dat %>% filter(is.na(Exclusion))
+```
+
+# Pivot
+
+```{r}
+int_long <- int_dat %>% relocate(subjID) %>% # SC0 = score of catch trials
+  pivot_longer(cols=4:ncol(int_dat), names_to="trial", values_to = "rating") %>%
+  separate(col=trial, sep='-', into=c("drop","choice")) %>% select(-Exclusion) %>%
+  rename(catch_trials_correct=`SC0`)
+
+lik_long <- lik_dat %>% relocate(subjID) %>%
+  pivot_longer(cols=4:ncol(int_dat), names_to="trial", values_to = "rating") %>%
+  separate(col=trial, sep='-', into=c("drop","choice")) %>% select(-Exclusion) %>%
+  filter(!is.na(rating))
+```
+
+## Data inspection
+
+```{r}
+table(int_long$subjID)
+table(lik_long$subjID)
+
+sum(is.na(int_long$rating))
+sum(is.na(lik_long$rating))
+
+```
+
+## Summarize Choice Data
+
+```{r}
+#combos = adult_long %>% distinct(drop, choice, target)
+distractors = c("trig prism", "trig prism", "octahedron", "sphere", "octahedron", "pyramid", "pyramid", "sphere", "sphere", "pyramid", "octahedron", "dumbbell", "dumbbell", "sphere", "pentagon", "cone", "octahedron", "dumbbell", "dumbbell", "cone")
+
+adult_agg <- adult_long %>% group_by(drop, target, relation) %>%
+  summarize(chose_target = mean(chose_target))
+
+adult_agg$distractor = distractors
+  # do we want raw counts for chose target vs. foil?
+# for trial 1, 70% chose target (30% chose distractor)
+
+child_agg <- child_long %>% group_by(drop, target, relation) %>%
+  summarize(chose_target = mean(chose_target, na.rm=T)) 
+
+child_agg$distractor = distractors
+```
+
+## Summarize Ratings Data
+
+```{r}
+lik_agg <- lik_long %>% mutate(rating = as.numeric(rating)) %>%
+  group_by(drop, choice) %>%
+  summarise(likelihood = mean(rating) - 1) # shift from 1-6 to 0-5
+
+int_agg <- int_long %>% mutate(rating = as.numeric(rating)) %>%
+  group_by(drop, choice) %>%
+  summarise(interest = mean(rating) - 1) 
+# also want ratings scaled 0-1?
+
+results_table <- lik_agg %>% left_join(int_agg) %>%
+  arrange(desc(likelihood))
+
+datatable(results_table) %>% formatRound(columns=c("likelihood","interest"), digits=3)
+```
+
+## Merge ratings with adults' drop choices
+
+```{r}
+adult_agg <- adult_agg %>% left_join(lik_agg, by=c("drop"="drop", "target"="choice")) %>%
+  rename(targ_lik = likelihood) %>%
+  left_join(lik_agg, by=c("drop"="drop", "distractor"="choice")) %>%
+  rename(dist_lik = likelihood)
+
+adult_agg <- adult_agg %>% left_join(int_agg, by=c("drop"="drop", "target"="choice")) %>%
+  rename(targ_int = interest) %>%
+  left_join(int_agg, by=c("drop"="drop", "distractor"="choice")) %>%
+  rename(dist_int = interest)
+
+adult_agg <- adult_agg %>% 
+  mutate(prop_targ_lik = targ_lik / (targ_lik + dist_lik),
+         prop_targ_int = targ_int / (targ_int + dist_int))
+```
+
+
+## Merge ratings with children's drop choices
+
+```{r}
+child_agg <- child_agg %>% left_join(lik_agg, by=c("drop"="drop", "target"="choice")) %>%
+  rename(targ_lik = likelihood) %>%
+  left_join(lik_agg, by=c("drop"="drop", "distractor"="choice")) %>%
+  rename(dist_lik = likelihood)
+
+child_agg <- child_agg %>% left_join(int_agg, by=c("drop"="drop", "target"="choice")) %>%
+  rename(targ_int = interest) %>%
+  left_join(int_agg, by=c("drop"="drop", "distractor"="choice")) %>%
+  rename(dist_int = interest)
+
+child_agg <- child_agg %>% 
+  mutate(prop_targ_lik = targ_lik / (targ_lik + dist_lik),
+         prop_targ_int = targ_int / (targ_int + dist_int))
+```
+
+## Adult Choices vs. Ratings Table 
+
+```{r}
+adult_agg %>% relocate(relation) %>% 
+  relocate(distractor, .after=target) %>% 
+  relocate(prop_targ_lik, .after=dist_lik) %>%
+  DT::datatable() %>% 
+  formatRound(columns=c("chose_target","targ_lik","dist_lik",
+                        "targ_int","dist_int","prop_targ_lik",
+                        "prop_targ_int"), digits=3)
+```
+
+
+## Compare adult choices to ratings-derived proportions
+
+Regression:
+
+```{r}
+m_lik <- lm(chose_target ~ relation * prop_targ_lik, data=adult_agg)
+m_int <- lm(chose_target ~ relation * prop_targ_int, data=adult_agg)
+summary(m_lik) # Rsq = .63
+summary(m_int) # Rsq = .84
+anova(m_lik, m_int)
+
+
+m3 <- lm(chose_target ~ relation * prop_targ_lik + relation * prop_targ_int, data=adult_agg)
+summary(m3)
+```
+
+
+```{r, fig.width=7.0, fig.height=3.8}
+p1 <- adult_agg %>% ggplot(aes(x=chose_target, y=prop_targ_lik, color=relation)) + geom_point() +
+  xlab("Proportion of Adults Choosing Target") +
+  ylab("Luce choice of Target vs. Distractor Likelihood") +
+  xlim(0,1) + ylim(0,1) + theme_classic() +
+  geom_abline(slope=1, intercept=0, linetype="dashed") +
+  #stat_cor(method = "pearson") 
+  stat_cor(inherit.aes = F, aes(x=chose_target, y=prop_targ_lik, 
+               label = paste(..rr.label.., sep = "~`,`~")))
+
+p2 <- adult_agg %>% ggplot(aes(x=chose_target, y=prop_targ_int, color=relation)) + geom_point() +
+  xlab("Proportion of Adults Choosing Target") +
+  ylab("Luce choice of Target vs. Distractor Interestingness") +
+  xlim(0,1) + ylim(0,1) + theme_classic() +
+  geom_abline(slope=1, intercept=0, linetype="dashed") +
+  #stat_cor(method = "pearson")
+  stat_cor(inherit.aes = F, aes(x=chose_target, y=prop_targ_int, 
+               label = paste(..rr.label.., sep = "~`,`~")))
+
+ggpubr::ggarrange(p1, p2, nrow=1, common.legend = T)
+```
+
+## Compare children's choices to ratings-derived proportions
+
+```{r, fig.width=7.0, fig.height=3.8}
+p1 <- child_agg %>% ggplot(aes(x=chose_target, y=prop_targ_lik, color=relation)) + geom_point() +
+  xlab("Proportion of Children Choosing Target") +
+  ylab("Luce choice of Target vs. Distractor Likelihood") +
+  xlim(0,1) + ylim(0,1) + theme_classic() +
+  geom_abline(slope=1, intercept=0, linetype="dashed") +
+  #stat_cor(method = "pearson") 
+  stat_cor(inherit.aes = F, aes(x=chose_target, y=prop_targ_lik, 
+               label = paste(..rr.label.., sep = "~`,`~")))
+
+p2 <- child_agg %>% ggplot(aes(x=chose_target, y=prop_targ_int, color=relation)) + geom_point() +
+  xlab("Proportion of Children Choosing Target") +
+  ylab("Luce choice of Target vs. Distractor Interestingness") +
+  xlim(0,1) + ylim(0,1) + theme_classic() +
+  geom_abline(slope=1, intercept=0, linetype="dashed") +
+  #stat_cor(method = "pearson")
+  stat_cor(inherit.aes = F, aes(x=chose_target, y=prop_targ_int, 
+               label = paste(..rr.label.., sep = "~`,`~")))
+
+ggpubr::ggarrange(p1, p2, nrow=1, common.legend = T)
+```
+
+
+## Compare Likelihood Ratings to Physics Models
+
+```{r, fig.width=7.0, fig.height=3.8}
+load(here("models/model_data.RData")) # mdat, all_trials_mse, all_trials_mse_r, etc.
+# load(here("models/support_probability_fit_df.RData")) 
+
+# compare to support probability
+supp_prob <- mdat %>% select(drop, target, relation, support_probability) 
+
+trials <- adult_agg %>% select(drop, target, distractor, relation) %>%
+  left_join(supp_prob, by=c("drop","target","relation")) %>%
+  rename(targ_supp_prob = support_probability) %>%
+  left_join(supp_prob, by=c("drop"="drop", "distractor"="target", "relation"="relation")) %>%
+  rename(dist_supp_prob = support_probability) %>%
+  mutate(prop_target_supp = (targ_supp_prob) / (targ_supp_prob + dist_supp_prob + 1e-5))
+
+p1 <- adult_agg %>% left_join(trials %>% select(drop, target, distractor, relation, prop_target_supp)) %>%
+  ggplot(aes(x=prop_target_supp, y=prop_targ_lik, color=relation)) + geom_point(alpha=.8) +
+  xlab("Proportion Target Support in Model") +
+  ylab("Luce choice of Target vs. Distractor Likelihood") +
+  xlim(0,1) + ylim(0,1) + theme_classic() +
+  geom_abline(slope=1, intercept=0, linetype="dashed") +
+  #stat_cor(method = "pearson") 
+  stat_cor(inherit.aes = F, aes(x=prop_target_supp, y=prop_targ_lik, 
+               label = paste(..rr.label.., sep = "~`,`~")))
+
+## compare to support sharpness
+supp_tmp <- mdat %>% select(drop, target, relation, support_std) 
+
+trials <- adult_agg %>% select(drop, target, distractor, relation) %>%
+  left_join(supp_tmp, by=c("drop","target","relation")) %>%
+  rename(targ_supp_std = support_std) %>%
+  left_join(supp_tmp, by=c("drop"="drop", "distractor"="target", "relation"="relation")) %>%
+  rename(dist_supp_std = support_std) %>%
+  mutate(prop_target_supp = (targ_supp_std) / (targ_supp_std + dist_supp_std + 1e-5))
+
+p2 <- adult_agg %>% left_join(trials %>% select(drop, target, distractor, relation, prop_target_supp)) %>%
+  ggplot(aes(x=prop_target_supp, y=prop_targ_lik, color=relation)) + geom_point(alpha=.8) +
+  xlab("Prop. Target Support SD in Model") +
+  ylab("Luce choice of Target vs. Distractor Likelihood") +
+  xlim(0,1) + ylim(0,1) + theme_classic() +
+  geom_abline(slope=1, intercept=0, linetype="dashed") +
+  stat_cor(inherit.aes = F, aes(x=prop_target_supp, y=prop_targ_lik, 
+               label = paste(..rr.label.., sep = "~`,`~")))
+
+ggpubr::ggarrange(p1, p2, nrow=1, common.legend = T)
+```
+
+
+## Directly compare ratings to model probs
+
+```{r}
+mdat <- mdat %>% left_join(lik_agg, by=c("drop"="drop", "target"="choice"))
+
+p1 <-mdat %>% ggplot(aes(x=likelihood, y=support_probability, color=relation)) +
+  geom_point(alpha=.7) + theme_classic() + xlab("Adults' Mean Likelihood Rating") +
+  stat_cor(inherit.aes = F, aes(x=likelihood, y=support_probability, 
+               label = paste(..rr.label.., sep = "~`,`~")))
+
+p2 <- mdat %>% ggplot(aes(x=likelihood, y=support_std, color=relation)) +
+  geom_point(alpha=.7) + theme_classic() + xlab("Adults' Mean Likelihood Rating") +
+  stat_cor(inherit.aes = F, aes(x=likelihood, y=support_std, 
+               label = paste(..rr.label.., sep = "~`,`~")))
+
+ggpubr::ggarrange(p1, p2, nrow=1, common.legend = T)
+```
+
+Other feature correlations
+
+```{r}
+with(mdat, cor(likelihood, support_probability)) # r=.75
+with(mdat, cor(likelihood, support_std)) # .77
+with(mdat, cor(likelihood, support_sharpness_accuracy_mean)) # .496
+with(mdat, cor(likelihood, support_response_linearity_r)) # .48
+with(mdat, cor(likelihood, support_response_linearity_pv)) # .53
+```
+
